@@ -170,9 +170,9 @@ public class KVSClient implements KVS {
     }
     Collections.sort(workers);
 
-System.out.println("Workers:");
+// System.out.println("Workers:");
 for (WorkerEntry w : workers)
-  System.out.println(w.id);
+  // System.out.println(w.id);
 
     haveWorkers = true;
   }
@@ -212,7 +212,7 @@ for (WorkerEntry w : workers)
       downloadWorkers();
 
     try {
-      System.out.println("PUT "+tableName+" "+row+" "+column+" (at "+workers.elementAt(workerIndexForKey(row)).address+")");
+      // System.out.println("PUT "+tableName+" "+row+" "+column+" (at "+workers.elementAt(workerIndexForKey(row)).address+")");
       byte[] response = HTTP.doRequest("PUT", "http://"+workers.elementAt(workerIndexForKey(row)).address+"/data/"+tableName+"/"+java.net.URLEncoder.encode(row, "UTF-8")+"/"+java.net.URLEncoder.encode(column, "UTF-8"), value).body();
       String result = new String(response);
       if (!result.equals("OK")) 

@@ -262,6 +262,8 @@ public class Crawler {
           return ret;
       });
       System.out.println("Finished a round");
+      System.out.println("new table name: " + urlQueue.getTableName());
+      System.out.println("new table count: " + urlQueue.count());
       Thread.sleep(1000);
     }
     Iterator<Row> iter = FlameContext.getKVS().scan("anchorEC", null, null);

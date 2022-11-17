@@ -631,11 +631,11 @@ public class Server implements Runnable {
                         String name = URLDecoder.decode(pairSplit[0], "UTF-8");
                         String value = URLDecoder.decode(pairSplit[1], "UTF-8");
                         // Ed post #180
-                        if (qparams.containsKey(name)){
-                            qparams.put(name, qparams.get(name) + ", " + value);
-                        } else {
+                        // if (qparams.containsKey(name)){
+                        //     qparams.put(name, qparams.get(name) + ", " + value);
+                        // } else {
                             qparams.put(name, value);
-                        }
+                        // }
                     }
                     catch (Exception e){
                         // System.out.println("Failed to parse query parameter, invalid input!");

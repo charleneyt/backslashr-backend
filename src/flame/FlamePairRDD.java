@@ -1,7 +1,6 @@
 package flame;
 
 import java.util.List;
-import java.util.Iterator;
 import java.io.Serializable;
 
 public interface FlamePairRDD {
