@@ -6,6 +6,7 @@ import tools.*;
 import tools.HTTP.*;
 import java.net.*;
 import java.util.regex.*;
+
 import java.util.*;
 
 
@@ -22,35 +23,41 @@ public class Crawler {
         return;
     }
 
-    String[] parsedSeedUrl = parseURL(args[0]);
-    if (parsedSeedUrl[0] == null && parsedSeedUrl[1] == null && parsedSeedUrl[2] == null){
-      if (parsedSeedUrl[3].length() > 0 && !parsedSeedUrl[3].startsWith("/")){
-        // default protocol to http if given link is not a relative one
-        parsedSeedUrl[0] = "http";
-        parsedSeedUrl[1] = parsedSeedUrl[3];
-        parsedSeedUrl[3] = "/";
-      } else {
-        ctx.output("Invalid seed URL: missing protocol and host name");
-        return;
-      }
+FlameRDD urlQueue;
+    
+    if (args[0].startsWith("http")) {
+        String[] parsedSeedUrl = parseURL(args[0]);
+        if (parsedSeedUrl[0] == null && parsedSeedUrl[1] == null && parsedSeedUrl[2] == null){
+          if (parsedSeedUrl[3].length() > 0 && !parsedSeedUrl[3].startsWith("/")){
+            // default protocol to http if given link is not a relative one
+            parsedSeedUrl[0] = "http";
+            parsedSeedUrl[1] = parsedSeedUrl[3];
+            parsedSeedUrl[3] = "/";
+          } else {
+            ctx.output("Invalid seed URL: missing protocol and host name");
+            return;
+          }
+        }
+
+        if (parsedSeedUrl[2] == null || parsedSeedUrl[2].length() == 0){
+          parsedSeedUrl[2] = parsedSeedUrl[0].equals("http") ? "80" : "443";
+        }
+        if (parsedSeedUrl[3] == null){
+          parsedSeedUrl[3] = "/";
+        }
+
+        String seedURL = parsedSeedUrl[0] + "://" + parsedSeedUrl[1] + ":" + parsedSeedUrl[2] + parsedSeedUrl[3];
+
+        // for (String something : normalizeUrl(findUrl("<A  HREF=#abc></A> <a ref=lala hRef=\"blah.html#test\"></a><a HREF=\'../blubb/123.html\'>   \n<a href=/one/two.html></a><a></a><h1></h1><a href=http://elsewhere.com/some.html></a><a href=/SL7sCi.html>felt</a> <a href=https://foo.com/bar/xyz.html"), "https://foo.com:8000/bar/xyz.html")){
+        //     System.out.println(something);
+        // } 
+
+        // if everything's OK, create an initial FlameRDD (perhaps called urlQueue) by parallelizing the seed URL
+        urlQueue = ctx.parallelize(Arrays.asList(seedURL));
+        // FlameRDD urlQueue = ctx.parallelize(Arrays.asList(args[0]));
+    } else {
+        urlQueue = ctx.fromTable(args[0], r -> r.get("value"));
     }
-
-    if (parsedSeedUrl[2] == null || parsedSeedUrl[2].length() == 0){
-      parsedSeedUrl[2] = parsedSeedUrl[0].equals("http") ? "80" : "443";
-    }
-    if (parsedSeedUrl[3] == null){
-      parsedSeedUrl[3] = "/";
-    }
-
-    String seedURL = parsedSeedUrl[0] + "://" + parsedSeedUrl[1] + ":" + parsedSeedUrl[2] + parsedSeedUrl[3];
-
-    // for (String something : normalizeUrl(findUrl("<A  HREF=#abc></A> <a ref=lala hRef=\"blah.html#test\"></a><a HREF=\'../blubb/123.html\'>   \n<a href=/one/two.html></a><a></a><h1></h1><a href=http://elsewhere.com/some.html></a><a href=/SL7sCi.html>felt</a> <a href=https://foo.com/bar/xyz.html"), "https://foo.com:8000/bar/xyz.html")){
-    //     System.out.println(something);
-    // } 
-
-    // if everything's OK, create an initial FlameRDD (perhaps called urlQueue) by parallelizing the seed URL
-    FlameRDD urlQueue = ctx.parallelize(Arrays.asList(seedURL));
-    // FlameRDD urlQueue = ctx.parallelize(Arrays.asList(args[0]));
 
     // and then set up a while loop that runs until urlQueue.count() is zero
     while (urlQueue.count() > 0){

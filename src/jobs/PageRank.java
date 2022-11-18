@@ -153,7 +153,7 @@ public class PageRank {
         System.out.println("Total iteration: " + count);
         state.saveAsTable("state");
         state = state.flatMapToPair(pair -> {
-                        KVSClient kvs = FlameContext.getKVS();
+        				KVSClient kvs = new KVSClient("localhost:8000");
                         List<FlamePair> ret = new ArrayList<>();
                         if (!"".equals(pair._1())){
                             String str = pair._2();
@@ -175,6 +175,7 @@ public class PageRank {
         Matcher m = Pattern.compile("<[Aa][\\s\\S&&[^>]]*[Hh][Rr][Ee][Ff]=[\"\']?([\\S&&[^\"\'<>]]+)[\"\']?[\\s\\S&&[^>]]*>([\\s\\S&&[^<]]*)</[Aa]>")
                            .matcher(s);
         StringBuilder sb = new StringBuilder();
+        Set<String> seen = new HashSet<>();
         while (m.find()){
           if (m.group(1) == null){
             continue;
@@ -205,10 +206,13 @@ public class PageRank {
           }
           String copy = originalUrl;
           String normalizedUrl = normalizeImpl(url, copy, sb);
-          if (urls.length() > 0){
-            urls += ",";
+          if (!seen.contains(normalizedUrl)){
+            seen.add(normalizedUrl);
+            if (urls.length() > 0){
+              urls += ",";
+            }
+            urls += normalizedUrl;
           }
-          urls += normalizedUrl;
         }
         return urls;
     }

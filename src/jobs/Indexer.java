@@ -23,7 +23,7 @@ public class Indexer {
                                     // use flatMapToPair to create Iterable<FlamePair>
         
         FlamePairRDD urlsTable = imm.flatMapToPair(pair -> {
-                                        KVSClient kvs = FlameContext.getKVS();
+        								KVSClient kvs = new KVSClient("localhost:8000");
                                         List<FlamePair> ret = new ArrayList<FlamePair>();
                                         if (!"".equals(pair._1())){
                                             String url = pair._1();
