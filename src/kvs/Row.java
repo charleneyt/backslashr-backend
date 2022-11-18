@@ -6,18 +6,25 @@ import java.io.*;
 public class Row implements Serializable {
 
   protected String key;
-  protected TreeMap<String,byte[]> values;
+  protected HashMap<String,byte[]> values;
 
   public Row(String keyArg) {
     key = keyArg;
-    values = new TreeMap<String,byte[]>();
+    values = new HashMap<String,byte[]>();
   }
 
-  public String key() {
+  public synchronized String key() {
     return key;
   }
 
-  public Set<String> columns() {
+  public synchronized Row clone() {
+    Row theClone = new Row(key);
+    for (String s : values.keySet())
+      theClone.values.put(s, values.get(s));
+    return theClone;
+  }
+
+  public synchronized Set<String> columns() {
     return values.keySet();
   }
 
@@ -29,23 +36,13 @@ public class Row implements Serializable {
     values.put(key, value);
   }
 
-  @Override
-  public int hashCode() {
-    int hashCode = 0;
-    for (String key : values.keySet()) {
-      hashCode = (hashCode * 31) + key.hashCode();
-      hashCode = (hashCode * 31) + new String(values.get(key)).hashCode();
-    }
-    return hashCode;
-  }
-
-  public String get(String key) {
+  public synchronized String get(String key) {
     if (values.get(key) == null)
       return null;
   	return new String(values.get(key));
   }
 
-  public byte[] getBytes(String key) {
+  public synchronized byte[] getBytes(String key) {
     return values.get(key);
   }
 
@@ -65,7 +62,7 @@ public class Row implements Serializable {
     }
   }
 
-  static Row readFrom(InputStream in) throws Exception {
+  public static Row readFrom(InputStream in) throws Exception {
     String theKey = readStringSpace(in);
     if (theKey == null) 
       return null;
@@ -94,7 +91,7 @@ public class Row implements Serializable {
     }
   }
 
-  public String toString() {
+  public synchronized String toString() {
     String s = key+" {";
     boolean isFirst = true;
     for (String k : values.keySet()) {
@@ -104,7 +101,7 @@ public class Row implements Serializable {
     return s + " }";
   }
 
-  synchronized byte[] toByteArray()  {
+  public synchronized byte[] toByteArray()  {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
     try {

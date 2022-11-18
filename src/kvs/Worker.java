@@ -45,14 +45,14 @@ public class Worker extends generic.Worker {
 		new Thread(new Flusher()).start();
 
 		// EC 1
-//		new Thread(new GarbageCollector()).start();
+		new Thread(new GarbageCollector()).start();
 
 		// EC 2
-//		new Thread(new Replicator()).start();
+		new Thread(new Replicator()).start();
 
 		// EC 3
-//		new Thread(new Checker(1)).start();
-//		new Thread(new Checker(2)).start();
+		new Thread(new Checker(1)).start();
+		new Thread(new Checker(2)).start();
 	}
 
 	private void initializeTables(){

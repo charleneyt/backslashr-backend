@@ -19,5 +19,4 @@
 
 ### TODO
 
-- currently, the kvs needs to be hardcoded in the crawler's flatmap lambda (we can use the table name where it stopped to continue running the crawler)
-- not yet enabled the garbage collector, replica and replica maintanence
+- columns needed for crawler, and rank calculation method?

@@ -32,6 +32,10 @@ public class KVSClient implements KVS {
     return workers.size();
   }
 
+  public static String getVersion() {
+    return "v1.3 Oct 28 2022";
+  }
+
   public String getMaster() {
     return master;
   }
@@ -66,14 +70,17 @@ public class KVSClient implements KVS {
       tableName = tableNameArg;
       startRow = startRowArg;
       ranges = new Vector<String>();
-      if ((startRowArg == null) || (startRowArg.compareTo(getWorkerID(0)) < 0)) 
-        ranges.add(getURL(tableNameArg, numWorkers()-1, startRowArg, ((endRowExclusiveArg != null) && (endRowExclusiveArg.compareTo(getWorkerID(0))<0)) ? endRowExclusiveArg : getWorkerID(0)));
+      if ((startRowArg == null) || (startRowArg.compareTo(getWorkerID(0)) < 0)) {
+        String url = getURL(tableNameArg, numWorkers()-1, startRowArg, ((endRowExclusiveArg != null) && (endRowExclusiveArg.compareTo(getWorkerID(0))<0)) ? endRowExclusiveArg : getWorkerID(0));
+        ranges.add(url);
+      }
       for (int i=0; i<numWorkers(); i++) {
         if ((startRowArg == null) || (i == numWorkers()-1) || (startRowArg.compareTo(getWorkerID(i+1))<0)) {
           if ((endRowExclusiveArg == null) || (endRowExclusiveArg.compareTo(getWorkerID(i)) > 0)) {
             boolean useActualStartRow = (startRowArg != null) && (startRowArg.compareTo(getWorkerID(i))>0);
             boolean useActualEndRow = (endRowExclusiveArg != null) && ((i==(numWorkers()-1)) || (endRowExclusiveArg.compareTo(getWorkerID(i+1))<0));
-            ranges.add(getURL(tableNameArg, i, useActualStartRow ? startRowArg : getWorkerID(i), useActualEndRow ? endRowExclusiveArg : ((i<numWorkers()-1) ? getWorkerID(i+1) : null)));
+            String url = getURL(tableNameArg, i, useActualStartRow ? startRowArg : getWorkerID(i), useActualEndRow ? endRowExclusiveArg : ((i<numWorkers()-1) ? getWorkerID(i+1) : null));
+            ranges.add(url);
           }
         }
       }
@@ -106,15 +113,18 @@ public class KVSClient implements KVS {
             return;
           } 
 
-          URL url = new URL(ranges.elementAt(currentRangeIndex));
-          HttpURLConnection con = (HttpURLConnection)url.openConnection();
-          con.setRequestMethod("GET");
-          con.connect();
-          in = con.getInputStream();
-          Row r = fill();
-          if (r != null) {
-            nextRow = r;
-            break;
+          try {
+            URL url = new URL(ranges.elementAt(currentRangeIndex));
+            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            con.setRequestMethod("GET");
+            con.connect();
+            in = con.getInputStream();
+            Row r = fill();
+            if (r != null) {
+              nextRow = r;
+              break;
+            }
+          } catch (FileNotFoundException fnfe) {
           }
 
           currentRangeIndex ++;
@@ -155,7 +165,7 @@ public class KVSClient implements KVS {
     }
   }
 
-  void downloadWorkers() throws IOException {
+  synchronized void downloadWorkers() throws IOException {
     String result = new String(HTTP.doRequest("GET", "http://"+master+"/workers", null).body());
     String[] pieces = result.split("\n");
     int numWorkers = Integer.parseInt(pieces[0]);
@@ -169,10 +179,6 @@ public class KVSClient implements KVS {
       workers.add(new WorkerEntry(pcs[1], pcs[0]));
     }
     Collections.sort(workers);
-
-// System.out.println("Workers:");
-for (WorkerEntry w : workers)
-  // System.out.println(w.id);
 
     haveWorkers = true;
   }
@@ -200,10 +206,10 @@ for (WorkerEntry w : workers)
       downloadWorkers();
 
     for (WorkerEntry w : workers) {
-      byte[] response = HTTP.doRequest("PUT", "http://"+w.address+"/rename/"+java.net.URLEncoder.encode(oldTableName, "UTF-8")+"/", newTableName.getBytes()).body();
-      String result = new String(response);
-      if (!result.equals("OK")) 
-        throw new RuntimeException("RENAME returned something other than OK: "+result);
+      try {
+        byte[] response = HTTP.doRequest("PUT", "http://"+w.address+"/rename/"+java.net.URLEncoder.encode(oldTableName, "UTF-8")+"/", newTableName.getBytes()).body();
+        String result = new String(response);
+      } catch (Exception e) {}
     }
   }
 
@@ -212,11 +218,11 @@ for (WorkerEntry w : workers)
       downloadWorkers();
 
     try {
-      // System.out.println("PUT "+tableName+" "+row+" "+column+" (at "+workers.elementAt(workerIndexForKey(row)).address+")");
-      byte[] response = HTTP.doRequest("PUT", "http://"+workers.elementAt(workerIndexForKey(row)).address+"/data/"+tableName+"/"+java.net.URLEncoder.encode(row, "UTF-8")+"/"+java.net.URLEncoder.encode(column, "UTF-8"), value).body();
+      String target = "http://"+workers.elementAt(workerIndexForKey(row)).address+"/data/"+tableName+"/"+java.net.URLEncoder.encode(row, "UTF-8")+"/"+java.net.URLEncoder.encode(column, "UTF-8");
+      byte[] response = HTTP.doRequest("PUT", target, value).body();
       String result = new String(response);
       if (!result.equals("OK")) 
-      	throw new RuntimeException("PUT returned something other than OK: "+result);
+      	throw new RuntimeException("PUT returned something other than OK: "+result+ "("+target+")");
     } catch (UnsupportedEncodingException uee) {
       throw new RuntimeException("UTF-8 encoding not supported?!?");
     } 
@@ -236,13 +242,13 @@ for (WorkerEntry w : workers)
       throw new RuntimeException("PUT returned something other than OK: "+result);
   }
 
-  public Row getRow(String tableName, String row) throws FileNotFoundException, IOException {
+  public Row getRow(String tableName, String row) throws IOException {
     if (!haveWorkers)
       downloadWorkers();
 
     HTTP.Response resp = HTTP.doRequest("GET", "http://"+workers.elementAt(workerIndexForKey(row)).address+"/data/"+tableName+"/"+java.net.URLEncoder.encode(row, "UTF-8"), null);
     if (resp.statusCode() == 404)
-      throw new FileNotFoundException(new String(resp.body()));
+      return null;
 
     byte[] result = resp.body();
     try {
@@ -257,7 +263,7 @@ for (WorkerEntry w : workers)
       downloadWorkers();
 
     HTTP.Response res = HTTP.doRequest("GET", "http://"+workers.elementAt(workerIndexForKey(row)).address+"/data/"+tableName+"/"+java.net.URLEncoder.encode(row, "UTF-8")+"/"+java.net.URLEncoder.encode(column, "UTF-8"), null);
-    return (res != null) ? res.body() : null;
+    return ((res != null) && (res.statusCode() == 200)) ? res.body() : null;
   }
 
   public boolean existsRow(String tableName, String row) throws FileNotFoundException, IOException {
@@ -275,14 +281,17 @@ for (WorkerEntry w : workers)
     int total = 0;
     for (WorkerEntry w : workers) {
       HTTP.Response r = HTTP.doRequest("GET", "http://"+w.address+"/count/"+tableName, null);
-      if ((r == null) || (r.statusCode() != 200))
-        return 0;
-
-      String result = new String(r.body());
+      if ((r != null) && (r.statusCode() == 200)) {
+        String result = new String(r.body());
 //      System.out.println("Total for "+w+": "+result);
-      total += Integer.valueOf(result).intValue();
+        total += Integer.valueOf(result).intValue();
+      }
     } 
     return total;
+  }
+
+  public Iterator<Row> scan(String tableName) throws FileNotFoundException, IOException {
+    return scan(tableName, null, null);
   }
 
   public Iterator<Row> scan(String tableName, String startRow, String endRowExclusive) throws FileNotFoundException, IOException {
