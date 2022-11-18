@@ -59,6 +59,7 @@ public class Crawler {
       urlQueue = urlQueue.flatMap(url -> {
 //        KVSClient kvs = FlameContext.getKVS();
         KVSClient kvs = new KVSClient("localhost:8000");
+        System.out.println(url);
         
         // process blacklist if given argument is not null
         if (!parsedBlackList && args.length == 2){
@@ -170,25 +171,6 @@ public class Crawler {
                   }
                 }
                 break;
-            }
-            
-            if (code == 301 || code == 302 || code == 303 || code == 307 || code == 308){
-              String redirect = con.getHeaderField("Location");
-              if (redirect != null){
-                redirect = normalizeImpl(URLDecoder.decode(redirect, "UTF-8"), normalizedOriginal, new StringBuilder());
-                // if we have redirect from HEAD response, save the status code in crawl table and return the url from Location header
-                con.disconnect();
-                
-                if (!kvs.existsRow("crawl", urlHash)){
-                  kvs.putRow("crawl", tempRow);
-                }
-
-                if (redirect != null && redirect.length() != 0){
-                  return Arrays.asList(redirect);
-                } else {
-                  return ret;
-                }
-              }
             }
           }
 
