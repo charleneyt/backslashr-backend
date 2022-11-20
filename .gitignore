@@ -1,3 +1,4 @@
 /worker*
 __worker*
 job*
+.DS_Store
