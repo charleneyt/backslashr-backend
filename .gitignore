@@ -2,3 +2,5 @@
 __worker*
 job*
 .DS_Store
+**/.DS_Store
+**./gitignore
