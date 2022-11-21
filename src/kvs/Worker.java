@@ -34,6 +34,7 @@ public class Worker extends generic.Worker {
 
 	public Worker(String id, int port, String masterAddr, String directory) {
 		super(id, port);
+		System.out.println("KVS Worker listening on " + port + " ... ");
 		lastRequestReceived = System.currentTimeMillis();
 		this.updateMasterIpAndPort(masterAddr);
 		this.directory = directory;
@@ -597,8 +598,7 @@ public class Worker extends generic.Worker {
 			}
 			sb.append("</table>");
 			return "<!doctype html><html><head><title>KVS Client - List of All Tables</title></head><body><div>KVS Client - List of All Tables</div>"
-					+ sb.toString()
-					+ "</body></html>";
+					+ sb.toString() + "</body></html>";
 		});
 
 		// return a HTML page with 10 rows of data; it should have one HTML row for each
@@ -623,10 +623,8 @@ public class Worker extends generic.Worker {
 				if (currTable.size() < 1) {
 					res.type("text/html");
 					return "<!doctype html><html><head><title>KVS Client - Table " + tableName
-							+ "</title></head><body><div>KVS Client - Table " + tableName
-							+ "</div>"
-							+ "<table>Table is empty!</table>"
-							+ "</body></html>";
+							+ "</title></head><body><div>KVS Client - Table " + tableName + "</div>"
+							+ "<table>Table is empty!</table>" + "</body></html>";
 				}
 
 				// get the sorted key in list
@@ -691,9 +689,7 @@ public class Worker extends generic.Worker {
 
 				res.type("text/html");
 				return "<!doctype html><html><head><title>KVS Client - Table " + tableName
-						+ "</title></head><body><div>KVS Client - Table " + tableName
-						+ "</div>"
-						+ sb.toString()
+						+ "</title></head><body><div>KVS Client - Table " + tableName + "</div>" + sb.toString()
 						+ "</body></html>";
 			}
 			res.status(404, "Not Found");
