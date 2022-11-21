@@ -255,20 +255,20 @@ FlameRDD urlQueue;
       System.out.println("new table count: " + urlQueue.count());
       Thread.sleep(1000);
     }
-    Iterator<Row> iter = FlameContext.getKVS().scan("anchorEC", null, null);
-    if (iter != null){
-      while (iter.hasNext()){
-        Row row = iter.next();
-        if (row == null){
-          break;
-        }
-        // if (FlameContext.getKVS().existsRow("crawl", row.key())){
-          for (String colName : row.columns()) {
-            FlameContext.getKVS().put("crawl", Hasher.hash(row.key()), colName, row.get(colName));
-          }
-        // }
-      }
-    }
+    // Iterator<Row> iter = FlameContext.getKVS().scan("anchorEC", null, null);
+    // if (iter != null){
+    //   while (iter.hasNext()){
+    //     Row row = iter.next();
+    //     if (row == null){
+    //       break;
+    //     }
+    //     // if (FlameContext.getKVS().existsRow("crawl", row.key())){
+    //       for (String colName : row.columns()) {
+    //         FlameContext.getKVS().put("crawl", Hasher.hash(row.key()), colName, row.get(colName));
+    //       }
+    //     // }
+    //   }
+    // }
     ctx.output("OK");
   }
 
