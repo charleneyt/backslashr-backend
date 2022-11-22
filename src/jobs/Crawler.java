@@ -77,6 +77,7 @@ public class Crawler {
 			// the KVS. For now, return an empty list from the flatMap, so that the loop
 			// will terminate after a single iteration.
 			urlQueue = urlQueue.flatMap(url -> {
+				System.out.println("crawling: " + url);
 //        KVSClient kvs = FlameContext.getKVS();
 				KVSClient kvs = new KVSClient("localhost:8000");
 
@@ -120,13 +121,15 @@ public class Crawler {
           con.setInstanceFollowRedirects(false); // must set redirects to false!
           con.connect();
           int robotsCode = con.getResponseCode();
-          byte[] robotsResponse = con.getInputStream().readAllBytes();
 
 //          Response r = HTTP.doRequest("GET", robotsUrl, null);
           kvs.put("hosts", hostHash, "robotsReq", String.valueOf(robotsCode).getBytes());
-          if (robotsCode == 200 && robotsResponse != null){
-            kvs.put("hosts", hostHash, "robots", robotsResponse);
-            robotReq = true;
+          if (robotsCode == 200){
+            byte[] robotsResponse = con.getInputStream().readAllBytes();
+            if (robotsResponse != null) {
+	          kvs.put("hosts", hostHash, "robots", robotsResponse);
+	          robotReq = true;
+            }
           }
         }
         // if robotsReq exists, we already made requests before, no matter what status it returned
@@ -212,6 +215,9 @@ public class Crawler {
 					if (length != -1) {
 						tempRow.put("length", String.valueOf(length).getBytes());
 					}
+					if (!kvs.existsRow("crawl", urlHash)) {
+						kvs.putRow("crawl", tempRow);
+					}
 
 					con.disconnect();
 
@@ -228,63 +234,72 @@ public class Crawler {
             // update the hosts table's access time if it's last called more than 1 second ago
             kvs.put("hosts", hostHash, "time", String.valueOf(System.currentTimeMillis()).getBytes());
 
-						// new GET connection only if responseCode is 200 and type is text/html
-						con = (HttpURLConnection) (new URL(url)).openConnection();
-						con.setRequestMethod("GET");
-						con.setRequestProperty("User-Agent", "cis5550-crawler");
-						con.setDoInput(true);
-						con.connect();
-						code = con.getResponseCode();
-						tempRow.put("responseCode", String.valueOf(code).getBytes());
+			// new GET connection only if responseCode is 200 and type is text/html
+			con = (HttpURLConnection) (new URL(url)).openConnection();
+			con.setRequestMethod("GET");
+			con.setRequestProperty("User-Agent", "cis5550-crawler");
+			con.setDoInput(true);
+			con.connect();
+			code = con.getResponseCode();
+			// tempRow.put("responseCode", String.valueOf(code).getBytes());
+			kvs.put("crawl", urlHash, "responseCode", String.valueOf(code));
 
-						byte[] response = con.getInputStream().readAllBytes();
-						if (response != null) {
-							// EC 1 check if the content is duplicate with other crawled pages
-							// use a table "ec1", where hash value of the String of content is row key, hash
-							// value of url is column key, and url is value
-							String responseStr = new String(response);
-							String responseHash = Hasher.hash(responseStr);
-							boolean isDuplicate = false;
-							if (kvs.existsRow("ec1", responseHash)) {
-								Row contentRow = kvs.getRow("ec1", responseHash);
-								for (String contentUrl : contentRow.columns()) {
-									String contentUrlHash = contentRow.get(contentUrl);
-									byte[] otherContent = kvs.get("crawl", contentUrlHash, "page");
-									if (contentUrl != null && otherContent != null
-											&& Arrays.equals(otherContent, response)) {
-										tempRow.put("canonicalURL", contentUrl.getBytes());
-										isDuplicate = true;
-										break;
-									}
-								}
-							}
-
-							if (!isDuplicate && response != null) {
-								tempRow.put("page", response); // only add "page" if the current page is not a
-																// duplicate!
-								kvs.put("ec1", responseHash, url, urlHash.getBytes()); // if not a duplicate, save the
-																						// current url's content hash to
-																						// ec1 table
-								for (String newUrl : findUrl(kvs, responseStr, normalizedOriginal, rules)) {
-									ret.add(newUrl);
-								}
-							}
-						}
-						con.disconnect();
-					}
-
-					if (!kvs.existsRow("crawl", urlHash)) {
-						kvs.putRow("crawl", tempRow);
-					}
+			byte[] response = con.getInputStream().readAllBytes();
+			if (response != null) {
+				// EC 1 check if the content is duplicate with other crawled pages
+				// use a table "canonicalURL", where hash value of the String of content is row key, hash
+				// value of url is column key, and url is value
+				String responseStr = new String(response);
+				kvs.put("crawl", urlHash, "page", response);
+				for (String newUrl : findUrl(kvs, responseStr, normalizedOriginal, rules)) {
+					ret.add(newUrl);
 				}
-				// System.out.println(ret);
-				return ret;
-			});
-//			System.out.println("Finished a round");
-//			System.out.println("New table name: " + urlQueue.getTableName());
-//			System.out.println("New table count: " + urlQueue.count());
-			Thread.sleep(1000);
+				
+//				String responseHash = Hasher.hash(responseStr);
+//				boolean isDuplicate = false;
+//				int colCount = 0;
+//				if (kvs.existsRow("canonicalURL", responseHash)) {
+//					Row contentRow = kvs.getRow("canonicalURL", responseHash);
+//					for (String contentUrlHash : contentRow.columns()) {
+//						colCount++;
+//						String contentUrl = contentRow.get(contentUrlHash);
+//						if (contentUrl != null && contentUrl.length() > 0){
+//							byte[] otherContent = kvs.get("crawl", Hasher.hash(contentUrl), "page");
+//							if (otherContent != null && Arrays.equals(otherContent, response)) {
+//								kvs.put("crawl", urlHash, "canonicalURL", contentUrl);
+//								// tempRow.put("canonicalURL", contentUrl.getBytes());
+//								isDuplicate = true;
+//								break;
+//							}
+//						}
+//					}
+//				}
+//
+//				if (!isDuplicate && response != null) {
+//					kvs.put("crawl", urlHash, "page", response);
+//					// tempRow.put("page", response); // only add "page" if the current page is not duplicate!
+//					// if not a duplicate, save the current url's content hash to ec1 table
+//					kvs.put("canonicalURL", responseHash, String.valueOf(colCount), url.getBytes()); 
+//					for (String newUrl : findUrl(kvs, responseStr, normalizedOriginal, rules)) {
+//						ret.add(newUrl);
+//					}
+//				}
+			}
+			con.disconnect();
+			}
+
+			// if (!kvs.existsRow("crawl", urlHash)) {
+			// 	kvs.putRow("crawl", tempRow);
+			// }
 		}
+		// System.out.println(ret);
+		return ret;
+	});
+		System.out.println("Finished a round");
+		System.out.println("New table name: " + urlQueue.getTableName());
+		System.out.println("New table count: " + urlQueue.count());
+		Thread.sleep(1000);
+	}
 		// Iterator<Row> iter = FlameContext.getKVS().scan("anchorEC", null, null);
 		// if (iter != null){
 		// while (iter.hasNext()){
@@ -360,47 +375,12 @@ public class Crawler {
 					} else {
 						seen.put(normalizedUrl, anchorTxt);
 					}
-
-					// if (kvs.existsRow("crawl", rowHash)){
-					// Row currRow = kvs.getRow("crawl", rowHash);
-					// if (currRow.columns().contains("anchor-" + normalizedUrl)){
-					// String existingAnchor = currRow.get(normalizedUrl);
-					// if (existingAnchor != null && existingAnchor.length() > 0){
-					// for (String a : existingAnchor.split(" ")){
-					// if (a.equals(anchorTxt)){
-					// anchorExists = true;
-					// break;
-					// }
-					// }
-					// }
-					// if (!anchorExists){
-					// anchorSb.append(existingAnchor);
-					// }
-					// }
-					// }
-
-					// if (!anchorExists){
-					// if (anchorSb.length() > 0){
-					// anchorSb.append(" " + anchorTxt);
-					// } else {
-					// anchorSb.append(anchorTxt);
-					// }
-					// // put the anchor text in crawl table under the found link, with column name
-					// anchor-url
-					// kvs.put("crawl", rowHash, "anchor-" + normalizedUrl,
-					// anchorSb.toString().getBytes());
-					// // if the crawl table has url now, update the anchor text
-					// // if (kvs.existsRow("crawl", rowHash)){
-					// // System.out.println("putting anchor to crawl " + originalUrl);
-					// // kvs.put("crawl", rowHash, "anchor", anchorSb.toString().getBytes());
-					// // }
-					// }
 				}
 			}
 		}
-		for (String url : seen.keySet()) {
-			kvs.put("anchorEC", url, "anchor-" + originalUrl, seen.get(url).getBytes());
-		}
+//		for (String url : seen.keySet()) {
+//			kvs.put("anchorEC", url, "anchor-" + originalUrl, seen.get(url).getBytes());
+//		}
 		return urls;
 	}
 
@@ -421,9 +401,13 @@ public class Crawler {
           int slash = url.indexOf("/");
           sb.append(url.substring(0, slash));
           sb.append(":80");
-          sb.append(url.substring(slash));
+		  if (url.substring(slash).contains("/")){
+			sb.append(url.substring(slash));
+		  } else {
+			sb.append(url.substring(slash) + "/");
+		  }
         } else {
-          sb.append(url + ":80");
+          sb.append(url + ":80/");
         }
       }
     } else if (url.startsWith("https://")) {
@@ -437,9 +421,13 @@ public class Crawler {
           int slash = url.indexOf("/");
           sb.append(url.substring(0, slash));
           sb.append(":443");
-          sb.append(url.substring(slash));
+          if (url.substring(slash).contains("/")){
+			sb.append(url.substring(slash));
+		  } else {
+			sb.append(url.substring(slash) + "/");
+		  }
         } else {
-          sb.append(url + ":443");
+          sb.append(url + ":443/");
         }
       }
     } else if (!url.contains("://")) {
@@ -450,6 +438,9 @@ public class Crawler {
         sb.append(originalUrl.substring(0, 8));
         originalUrl = originalUrl.substring(8);
       }
+	  if (!originalUrl.contains("/")) {
+		originalUrl += "/";
+	  }
       if (url.startsWith("/")) {
         sb.append(originalUrl.substring(0, originalUrl.indexOf("/")));
         sb.append(url);
@@ -460,31 +451,31 @@ public class Crawler {
         }
         originalUrl = originalUrl.substring(0, lastSlash);
 
-				while (url.startsWith("../")) {
-					lastSlash = originalUrl.lastIndexOf("/");
-					if (lastSlash == -1) {
-						return null;
-					}
-					if (url.length() == 3) {
-						url = url.substring(2);
-					} else {
-						url = url.substring(3);
-					}
-					originalUrl = originalUrl.substring(0, lastSlash);
-				}
-				if ("..".equals(url)) {
-					return null;
-				}
-
-				sb.append(originalUrl);
-				if (url.startsWith("/")) {
-					sb.append(url);
-				} else {
-					sb.append("/" + url);
-				}
+		while (url.startsWith("../")) {
+			lastSlash = originalUrl.lastIndexOf("/");
+			if (lastSlash == -1) {
+				return null;
 			}
+			if (url.length() == 3) {
+				url = url.substring(2);
+			} else {
+				url = url.substring(3);
+			}
+			originalUrl = originalUrl.substring(0, lastSlash);
 		}
-		return sb.toString();
+		if ("..".equals(url)) {
+			return null;
+		}
+
+		sb.append(originalUrl);
+		if (url.startsWith("/")) {
+			sb.append(url);
+		} else {
+			sb.append("/" + url);
+		}
+	  }
+	}
+	  return sb.toString();
 	}
 
 	static String[] parseURL(String url) {

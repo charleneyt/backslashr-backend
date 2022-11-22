@@ -33,7 +33,7 @@ public class Server implements Runnable {
     static Map<String, SessionImpl> sessions = new HashMap<>();
     public static Map<String, HostRecord> hostTable = new HashMap<>();
 	
-	public static int NUM_WORKERS = 10;
+	public static int NUM_WORKERS = 20;
     static String CRLF = "\r\n";
     static String BOUNDARY = "A_FANCY_SEPARATOR_MADE_BY_CHARLENE_TAM";
     static String DELIMITER = "--";
