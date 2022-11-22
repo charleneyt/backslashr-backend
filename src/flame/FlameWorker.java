@@ -65,6 +65,7 @@ class FlameWorker extends Worker {
 						if (it != null) {
 							int seq = 0;
 							for (String s : it) {
+								System.out.println("put val is: " + s);
 								kvs.put(qParamsStrings[1], Hasher.hash(row.key() + String.valueOf(seq++)),
 										FlameWorker.VALUE_STRING, s.getBytes());
 							}

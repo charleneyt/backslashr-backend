@@ -112,6 +112,7 @@ public class HTTP {
       if (uploadOrNull != null)
           request = request + "Content-Length: "+uploadOrNull.length+"\r\n";
         request = request + "Connection: keep-alive\r\n\r\n";
+        System.out.println("from HTTP class, request is: " + request);
         out.write(request.getBytes());
         if (uploadOrNull != null)
           out.write(uploadOrNull);
@@ -130,7 +131,7 @@ public class HTTP {
       boolean readingHeaders = true;
       int contentLength = -1;
       Map<String,String> headers = new HashMap<String,String>();
-      byte buf[] = new byte[100000];
+      byte buf[] = new byte[10000000];
       int inBuf = 0;
       int statusCode = -1;
 
@@ -201,7 +202,9 @@ public class HTTP {
           cachedConnections.put(serverID, new Vector<Socket>());
         cachedConnections.get(serverID).add(sock);
       }
-
+      System.out.println("buffer is: " + buffer);
+      System.out.println("headers are: " + headers);
+      System.out.println("status code is: " + statusCode);
       return new Response(buffer.toByteArray(), headers, statusCode);
     }
   }

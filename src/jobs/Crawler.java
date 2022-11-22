@@ -3,7 +3,11 @@ package jobs;
 import flame.*;
 import kvs.*;
 import tools.*;
+
+import java.io.File;
+import java.io.FileWriter;
 import java.net.*;
+import java.nio.file.Files;
 import java.util.regex.*;
 
 import java.util.*;
@@ -11,6 +15,8 @@ import java.util.*;
 public class Crawler {
 	static boolean parsedBlackList = false;
 	static List<String> blacklist = new ArrayList<>();
+	static boolean restartLog1 = true;
+	static boolean restartLog2 = true;
 
 	public static void run(FlameContext ctx, String[] args) throws Exception {
 		// Check whether the latter contains a single element (the seed URL), and output
@@ -24,6 +30,19 @@ public class Crawler {
 		}
 
 		FlameRDD urlQueue;
+		if (restartLog1) {
+			File file = new File("./crawler_log_inside_lambda");
+			Files.deleteIfExists(file.toPath());
+			restartLog1 = false;
+		}
+		
+		if (restartLog2) {
+			File file = new File("./crawler_log_outside_lambda");
+			Files.deleteIfExists(file.toPath());
+			restartLog2 = false;
+		}
+		
+		FileWriter fw2 = new FileWriter("./crawler_log_outside_lambda", true);
 
 		if (args[0].startsWith("http")) {
 			String[] parsedSeedUrl = parseURL(args[0]);
@@ -78,6 +97,9 @@ public class Crawler {
 			// will terminate after a single iteration.
 			urlQueue = urlQueue.flatMap(url -> {
 				System.out.println("crawling: " + url);
+				FileWriter fw = new FileWriter("./crawler_log_inside_lambda", true);
+				fw.write("crawling: " + url + "\n");
+				fw.flush();
 //        KVSClient kvs = FlameContext.getKVS();
 				KVSClient kvs = new KVSClient("localhost:8000");
 
@@ -97,7 +119,7 @@ public class Crawler {
 				}
 
 				String[] parsedUrl = parseURL(url);
-				String hostHash = Hasher.hash(parsedUrl[1]);
+				String hostHash = parsedUrl[1];
 
 				boolean robotReq = false;
 				Row robotrow = null;
@@ -119,7 +141,13 @@ public class Crawler {
           con.setDoInput(true);
           con.setRequestProperty("User-Agent", "cis5550-crawler");
           con.setInstanceFollowRedirects(false); // must set redirects to false!
-          con.connect();
+          try {
+        	  con.connect();
+          } catch (Exception e) {
+        	  e.printStackTrace();
+        	  return null;
+          }
+          
           int robotsCode = con.getResponseCode();
 
 //          Response r = HTTP.doRequest("GET", robotsUrl, null);
@@ -165,7 +193,14 @@ public class Crawler {
 			con.setRequestMethod("HEAD");
 			con.setRequestProperty("User-Agent", "cis5550-crawler");
 			con.setInstanceFollowRedirects(false); // must set redirects to false!
-			con.connect();
+			try {
+				con.connect();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+			
 			int code = con.getResponseCode();
 			String type = con.getContentType();
 			int length = con.getContentLength();
@@ -243,7 +278,13 @@ public class Crawler {
 			con.setRequestMethod("GET");
 			con.setRequestProperty("User-Agent", "cis5550-crawler");
 			con.setDoInput(true);
-			con.connect();
+			try {
+				con.connect();				
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
 			code = con.getResponseCode();
 			// tempRow.put("responseCode", String.valueOf(code).getBytes());
 			kvs.put("crawl", urlHash, "responseCode", String.valueOf(code));
@@ -255,6 +296,8 @@ public class Crawler {
 				// value of url is column key, and url is value
 				String responseStr = new String(response);
 				kvs.put("crawl", urlHash, "page", response);
+				fw.write("downlaoded page for " + url + "\n");
+				fw.flush();
 				for (String newUrl : findUrl(kvs, responseStr, normalizedOriginal, rules)) {
 					ret.add(newUrl);
 				}
@@ -302,6 +345,10 @@ public class Crawler {
 		System.out.println("Finished a round");
 		System.out.println("New table name: " + urlQueue.getTableName());
 		System.out.println("New table count: " + urlQueue.count());
+		fw2.write("Finished a round\n");
+		fw2.write("New table name: " + urlQueue.getTableName() + "\n");
+		fw2.write("New table count: " + urlQueue.count() + "\n");
+		fw2.flush();
 		Thread.sleep(1000);
 	}
 		// Iterator<Row> iter = FlameContext.getKVS().scan("anchorEC", null, null);

@@ -391,7 +391,10 @@ public class Server implements Runnable {
 
                 // start process request when received double CRLF
                 requestString = sb.toString();
-                // System.out.print(requestString);
+                FileWriter fw = new FileWriter("./server_log", true);
+                fw.write("request string is: " + requestString);
+                fw.flush();
+                 System.out.print("request string is: " + requestString);
                 
                 parseRequest();
                 
@@ -426,6 +429,23 @@ public class Server implements Runnable {
         private void parseRequest() throws IOException {
             
             headers = new HashMap<>();
+            
+            int startIdx = -1;
+            if (requestString.contains("PUT")) {
+            	startIdx = requestString.indexOf("PUT");
+            }
+            else if (requestString.contains("GET")) {
+            	startIdx = requestString.indexOf("GET");
+            }
+            else if (requestString.contains("POST")) {
+            	startIdx = requestString.indexOf("POST");
+            }
+            else {
+            	System.out.println("NOT a valid reqeust");
+            	return;
+            }
+            
+            requestString = requestString.substring(startIdx);
 
             // parse the request
             String[] headerInLines = requestString.split(CRLF);
@@ -434,6 +454,8 @@ public class Server implements Runnable {
             // Completeness check
             // 400 Bad Request if the method, URL, protocol header are missing from the request;
             if (headerInLines.length <= 1 || headerParts.length != 3){
+            	System.out.println("400 triggered, v1");
+//            	System.out.println("request string is: " + requestString);
                 statusCode = 400;
                 reasonPhrase = "400 Bad Request";
                 return;
@@ -452,6 +474,7 @@ public class Server implements Runnable {
             
             // 400 Bad Request if the Host: header are missing from the request;
             if (!headers.containsKey("host")){
+            	System.out.println("400 triggered, no host");
                 statusCode = 400;
                 reasonPhrase = "400 Bad Request";
                 return;

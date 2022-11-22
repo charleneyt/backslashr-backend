@@ -238,8 +238,12 @@ public class KVSClient implements KVS {
 					+ java.net.URLEncoder.encode(row, "UTF-8") + "/" + java.net.URLEncoder.encode(column, "UTF-8");
 			byte[] response = HTTP.doRequest("PUT", target, value).body();
 			String result = new String(response);
-			if (!result.equals("OK"))
-				throw new RuntimeException("PUT returned something other than OK: " + result + "(" + target + ")");
+			if (!result.equals("OK")) {
+				FileWriter fw =  new FileWriter("./KVSClient_log", true);
+				fw.write("PUT returned something other than OK: " + result + "(" + target + ")");
+				fw.close();
+//				throw new RuntimeException("PUT returned something other than OK: " + result + "(" + target + ")");	
+			}
 		} catch (UnsupportedEncodingException uee) {
 			throw new RuntimeException("UTF-8 encoding not supported?!?");
 		}
