@@ -3,7 +3,6 @@ package jobs;
 import flame.*;
 import kvs.*;
 import tools.*;
-import tools.HTTP.*;
 import java.net.*;
 import java.util.regex.*;
 
@@ -110,24 +109,32 @@ public class Crawler {
 					}
 				}
 
-				// if there's no robots column in hosts table with current host, make a GET
-				// request
-				if (!robotReq) {
-					String robotsUrl = makeRobotsUrl(parsedUrl);
-					Response r = HTTP.doRequest("GET", robotsUrl, null);
-					kvs.put("hosts", hostHash, "robotsReq", String.valueOf(r.statusCode()).getBytes());
-					if (r.statusCode() == 200 && r.body() != null) {
-						kvs.put("hosts", hostHash, "robots", r.body());
-						robotReq = true;
-					}
-				}
-				// if robotsReq exists, we already made requests before, no matter what status
-				// it returned
-				// only when the req returns 200 do we put the body into robots column
-				String robotTxt = "";
-				if (robotReq && "200".equals(new String(kvs.get("hosts", hostHash, "robotsReq")))) {
-					robotTxt = new String(kvs.get("hosts", hostHash, "robots"));
-				}
+        // if there's no robots column in hosts table with current host, make a GET request
+        if (!robotReq){
+          String robotsUrl = makeRobotsUrl(parsedUrl);
+          HttpURLConnection.setFollowRedirects(false);
+          HttpURLConnection con = (HttpURLConnection)(new URL(robotsUrl)).openConnection();
+          con.setRequestMethod("GET");
+          con.setDoInput(true);
+          con.setRequestProperty("User-Agent", "cis5550-crawler");
+          con.setInstanceFollowRedirects(false); // must set redirects to false!
+          con.connect();
+          int robotsCode = con.getResponseCode();
+          byte[] robotsResponse = con.getInputStream().readAllBytes();
+
+//          Response r = HTTP.doRequest("GET", robotsUrl, null);
+          kvs.put("hosts", hostHash, "robotsReq", String.valueOf(robotsCode).getBytes());
+          if (robotsCode == 200 && robotsResponse != null){
+            kvs.put("hosts", hostHash, "robots", robotsResponse);
+            robotReq = true;
+          }
+        }
+        // if robotsReq exists, we already made requests before, no matter what status it returned
+        // only when the req returns 200 do we put the body into robots column
+        String robotTxt = "";
+        if (robotReq && "200".equals(new String(kvs.get("hosts", hostHash, "robotsReq")))){
+          robotTxt = new String(kvs.get("hosts", hostHash, "robots"));
+        }
 
 				// initialize rules and return list
 				List<String> rules = parseRules(robotTxt);
@@ -208,20 +215,18 @@ public class Crawler {
 
 					con.disconnect();
 
-					// only issue GET if the HEAD response is 200 and type is text/html
-					if (code == 200 && "text/html".equals(type)) {
-						// check if host has been called before, and if so, whether that was more than 1
-						// second ago
-						if (kvs.existsRow("hosts", hostHash)) {
-							Row hostRow = kvs.getRow("hosts", hostHash);
-							if (hostRow != null && hostRow.columns().contains("time")
-									&& Long.valueOf(hostRow.get("time")) + 1000 >= System.currentTimeMillis()) {
-								return Arrays.asList(url);
-							}
-						}
-						// update the hosts table's access time if it's last called more than 1 second
-						// ago
-						kvs.put("hosts", hostHash, "time", String.valueOf(System.currentTimeMillis()).getBytes());
+
+          // only issue GET if the HEAD response is 200 and type is text/html
+          if (code == 200 && type != null && type.contains("text/html")){
+            // check if host has been called before, and if so, whether that was more than 1 second ago
+            if (kvs.existsRow("hosts", hostHash)){
+              Row hostRow = kvs.getRow("hosts", hostHash);
+              if (hostRow != null && hostRow.columns().contains("time") && Long.valueOf(hostRow.get("time")) + 1000 >= System.currentTimeMillis()){
+                return Arrays.asList(url);
+              }
+            }
+            // update the hosts table's access time if it's last called more than 1 second ago
+            kvs.put("hosts", hostHash, "time", String.valueOf(System.currentTimeMillis()).getBytes());
 
 						// new GET connection only if responseCode is 200 and type is text/html
 						con = (HttpURLConnection) (new URL(url)).openConnection();
@@ -399,61 +404,61 @@ public class Crawler {
 		return urls;
 	}
 
-	static String normalizeImpl(String url, String originalUrl, StringBuilder sb) {
-		sb.setLength(0);
-		if (url == null || url.length() == 0) {
-			return null;
-		}
-
-		if (url.startsWith("http://")) {
-			sb.append(url.substring(0, 7));
-			url = url.substring(7);
-			int col = url.indexOf(":");
-			if (col != -1 && col + 1 < url.length() && Character.isDigit(url.charAt(col + 1))) {
-				sb.append(url);
-			} else {
-				if (url.contains("/")) {
-					int slash = url.indexOf("/");
-					sb.append(url.substring(0, slash));
-					sb.append(":80");
-					sb.append(url.substring(slash));
-				} else {
-					sb.append(url + ":80");
-				}
-			}
-		} else if (url.startsWith("https://")) {
-			sb.append(url.substring(0, 7));
-			url = url.substring(8);
-			int col = url.indexOf(":");
-			if (col != -1 && col + 1 < url.length() && Character.isDigit(url.charAt(col + 1))) {
-				sb.append(url);
-			} else {
-				if (url.contains("/")) {
-					int slash = url.indexOf("/");
-					sb.append(url.substring(0, slash));
-					sb.append(":443");
-					sb.append(url.substring(slash));
-				} else {
-					sb.append(url + ":443");
-				}
-			}
-		} else if (!url.contains("://")) {
-			if (originalUrl.startsWith("http://")) {
-				sb.append(originalUrl.substring(0, 7));
-				originalUrl = originalUrl.substring(7);
-			} else {
-				sb.append(originalUrl.substring(0, 8));
-				originalUrl = originalUrl.substring(8);
-			}
-			if (url.startsWith("/")) {
-				sb.append(originalUrl.substring(0, originalUrl.indexOf("/")));
-				sb.append(url);
-			} else {
-				int lastSlash = originalUrl.lastIndexOf("/");
-				if (lastSlash == -1) {
-					return null;
-				}
-				originalUrl = originalUrl.substring(0, lastSlash);
+  static String normalizeImpl(String url, String originalUrl, StringBuilder sb){
+    sb.setLength(0);
+    if (url == null || url.length() == 0){
+      return null;
+    }
+    
+    if (url.startsWith("http://")) {
+      sb.append(url.substring(0, 7));
+      url = url.substring(7);
+      int col = url.indexOf(":");
+      if (col != -1 && col+1 < url.length() && Character.isDigit(url.charAt(col+1))) {
+        sb.append(url);
+      } else {
+        if (url.contains("/")) {
+          int slash = url.indexOf("/");
+          sb.append(url.substring(0, slash));
+          sb.append(":80");
+          sb.append(url.substring(slash));
+        } else {
+          sb.append(url + ":80");
+        }
+      }
+    } else if (url.startsWith("https://")) {
+      sb.append(url.substring(0, 8));
+      url = url.substring(8);
+      int col = url.indexOf(":");
+      if (col != -1 && col+1 < url.length() && Character.isDigit(url.charAt(col+1))) {
+        sb.append(url);
+      } else {
+        if (url.contains("/")) {
+          int slash = url.indexOf("/");
+          sb.append(url.substring(0, slash));
+          sb.append(":443");
+          sb.append(url.substring(slash));
+        } else {
+          sb.append(url + ":443");
+        }
+      }
+    } else if (!url.contains("://")) {
+      if (originalUrl.startsWith("http://")) {
+        sb.append(originalUrl.substring(0, 7));
+        originalUrl = originalUrl.substring(7);
+      } else {
+        sb.append(originalUrl.substring(0, 8));
+        originalUrl = originalUrl.substring(8);
+      }
+      if (url.startsWith("/")) {
+        sb.append(originalUrl.substring(0, originalUrl.indexOf("/")));
+        sb.append(url);
+      } else {
+        int lastSlash = originalUrl.lastIndexOf("/");
+        if (lastSlash == -1){
+          return null;
+        }
+        originalUrl = originalUrl.substring(0, lastSlash);
 
 				while (url.startsWith("../")) {
 					lastSlash = originalUrl.lastIndexOf("/");
