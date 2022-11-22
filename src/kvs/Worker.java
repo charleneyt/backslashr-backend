@@ -47,7 +47,7 @@ public class Worker extends generic.Worker {
 		new Thread(new Flusher()).start();
 
 		// EC 1
-//		new Thread(new GarbageCollector()).start();
+		new Thread(new GarbageCollector()).start();
 
 		// EC 2
 		new Thread(new Replicator()).start();

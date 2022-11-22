@@ -139,87 +139,91 @@ public class Crawler {
           robotTxt = new String(kvs.get("hosts", hostHash, "robots"));
         }
 
-				// initialize rules and return list
-				List<String> rules = parseRules(robotTxt);
-				List<String> ret = new LinkedList<>();
+		// initialize rules and return list
+		List<String> rules = parseRules(robotTxt);
+		List<String> ret = new LinkedList<>();
 
-				// only crawl data if passed the rule check
-				if (checkRules(parsedUrl[3], rules)) {
-					String normalizedOriginal = normalizeImpl(url, null, new StringBuilder());
-					if (normalizedOriginal == null || normalizedOriginal.length() == 0) {
-						return ret;
-					}
-					String urlHash = Hasher.hash(normalizedOriginal);
-					// if already crawled (check url matches, and use responseCode as indicator)
-					if (kvs.existsRow("crawl", urlHash)) {
-						Row r = kvs.getRow("crawl", urlHash);
-						if (r.columns().contains("url") && r.get("url").equals(normalizedOriginal)
-								&& r.columns().contains("responseCode")) {
+		// only crawl data if passed the rule check
+		if (checkRules(parsedUrl[3], rules)) {
+			String normalizedOriginal = normalizeImpl(url, null, new StringBuilder());
+			if (normalizedOriginal == null || normalizedOriginal.length() == 0) {
+				return ret;
+			}
+			String urlHash = Hasher.hash(normalizedOriginal);
+			// if already crawled (check url matches, and use responseCode as indicator)
+			if (kvs.existsRow("crawl", urlHash)) {
+				Row r = kvs.getRow("crawl", urlHash);
+				if (r.columns().contains("url") && r.get("url").equals(normalizedOriginal)
+						&& r.columns().contains("responseCode")) {
+					return ret;
+				}
+			}
+
+			// sending HEAD request
+			HttpURLConnection.setFollowRedirects(false);
+			HttpURLConnection con = (HttpURLConnection) (new URL(url)).openConnection();
+			con.setRequestMethod("HEAD");
+			con.setRequestProperty("User-Agent", "cis5550-crawler");
+			con.setInstanceFollowRedirects(false); // must set redirects to false!
+			con.connect();
+			int code = con.getResponseCode();
+			String type = con.getContentType();
+			int length = con.getContentLength();
+
+			if (url != null) {
+				kvs.put("crawl", urlHash, "url", url.getBytes());
+				// tempRow.put("url", url.getBytes());
+			}
+
+			if (code != 200) {
+				kvs.put("crawl", urlHash, "responseCode", String.valueOf(code));
+				// tempRow.put("responseCode", String.valueOf(code));
+
+				switch (code) {
+				case 301:
+				case 302:
+				case 303:
+				case 307:
+				case 308:
+					String redirect = con.getHeaderField("Location");
+					if (redirect != null) {
+						redirect = normalizeImpl(URLDecoder.decode(redirect, "UTF-8"), normalizedOriginal,
+								new StringBuilder());
+						// if we have redirect from HEAD response, save the status code in crawl table
+						// and return the url from Location header
+						con.disconnect();
+
+						if (redirect != null && redirect.length() != 0) {
+							kvs.put("crawl", urlHash, "redirectURL", redirect);
+							// tempRow.put("redirectURL", redirect);
+							// if (!kvs.existsRow("crawl", urlHash)) {
+							// 	kvs.putRow("crawl", tempRow);
+							// }
+							return Arrays.asList(redirect);
+						} else {
+							// if (!kvs.existsRow("crawl", urlHash)) {
+							// 	kvs.putRow("crawl", tempRow);
+							// }
 							return ret;
 						}
 					}
+					break;
+				}
+			}
 
-					// sending HEAD request
-					HttpURLConnection.setFollowRedirects(false);
-					HttpURLConnection con = (HttpURLConnection) (new URL(url)).openConnection();
-					con.setRequestMethod("HEAD");
-					con.setRequestProperty("User-Agent", "cis5550-crawler");
-					con.setInstanceFollowRedirects(false); // must set redirects to false!
-					con.connect();
-					int code = con.getResponseCode();
-					String type = con.getContentType();
-					int length = con.getContentLength();
+			if (type != null) {
+				kvs.put("crawl", urlHash, "contentType", type);
+				// tempRow.put("contentType", type.getBytes());
+			}
+			if (length != -1) {
+				kvs.put("crawl", urlHash, "length", String.valueOf(length));
+				// tempRow.put("length", String.valueOf(length).getBytes());
+			}
+			// if (!kvs.existsRow("crawl", urlHash)) {
+			// 	kvs.putRow("crawl", tempRow);
+			// }
 
-					Row tempRow = new Row(urlHash);
-					if (url != null) {
-						tempRow.put("url", url.getBytes());
-					}
-
-					if (code != 200) {
-						tempRow.put("responseCode", String.valueOf(code));
-
-						switch (code) {
-						case 301:
-						case 302:
-						case 303:
-						case 307:
-						case 308:
-							String redirect = con.getHeaderField("Location");
-							if (redirect != null) {
-								redirect = normalizeImpl(URLDecoder.decode(redirect, "UTF-8"), normalizedOriginal,
-										new StringBuilder());
-								// if we have redirect from HEAD response, save the status code in crawl table
-								// and return the url from Location header
-								con.disconnect();
-
-								if (redirect != null && redirect.length() != 0) {
-									tempRow.put("redirectURL", redirect);
-									if (!kvs.existsRow("crawl", urlHash)) {
-										kvs.putRow("crawl", tempRow);
-									}
-									return Arrays.asList(redirect);
-								} else {
-									if (!kvs.existsRow("crawl", urlHash)) {
-										kvs.putRow("crawl", tempRow);
-									}
-									return ret;
-								}
-							}
-							break;
-						}
-					}
-
-					if (type != null) {
-						tempRow.put("contentType", type.getBytes());
-					}
-					if (length != -1) {
-						tempRow.put("length", String.valueOf(length).getBytes());
-					}
-					if (!kvs.existsRow("crawl", urlHash)) {
-						kvs.putRow("crawl", tempRow);
-					}
-
-					con.disconnect();
+			con.disconnect();
 
 
           // only issue GET if the HEAD response is 200 and type is text/html
