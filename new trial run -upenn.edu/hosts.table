@@ -1,4 +1,5 @@
-bglqbcjkugserkkosavifgxcyiralsakkcasqsfe robotsReq 3 200 robots 1586 #
+www.upenn.edu robotsReq 3 200 
+www.upenn.edu robotsReq 3 200 robots 1586 #
 # robots.txt
 #
 # This file is to prevent the crawling and indexing of certain parts
@@ -59,15 +60,8 @@ Disallow: /index.php/user/password
 Disallow: /index.php/user/register
 Disallow: /index.php/user/login
 Disallow: /index.php/user/logout
- time 13 1669127431219 
-bgmcykaksqykciwaiefizafafssqqavewqgassnk robotsReq 3 200 robots 67 User-agent: *
-Disallow: /wp-admin/
-Allow: /wp-admin/admin-ajax.php
  
-daumrcuqrspeucleakueamukmcvgucdklkqmdinm robotsReq 3 302 
-dikcrmdoesjasgioimuoyaimjmggpshagsymzeqc robotsReq 3 301 
-emwcxcjomikagcikfswemeucpsmmmgyqkiygusei robotsReq 3 404 time 13 1669127446592 
-golqwkpqsiyotmwqdsaqfolcmaeobmzcfkpsuerq robotsReq 3 200 robots 1586 #
+www.upenn.edu robotsReq 3 200 robots 1586 #
 # robots.txt
 #
 # This file is to prevent the crawling and indexing of certain parts
@@ -128,9 +122,943 @@ Disallow: /index.php/user/password
 Disallow: /index.php/user/register
 Disallow: /index.php/user/login
 Disallow: /index.php/user/logout
- time 13 1669128097305 
-hgrincrclookpozosknooeukmanovorgiehencni robotsReq 3 301 
-hisicgkchonioadagsvslmgckcqmeazijscizqia robotsReq 3 200 robots 2189 #
+ time 13 1669203282889 
+penntoday.upenn.edu robotsReq 3 200 
+penntoday.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ 
+penntoday.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203285031 
+www.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203285895 
+penntoday.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203287142 
+www.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203287931 
+www.onlinelearning.upenn.edu robotsReq 3 200 
+www.onlinelearning.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ 
+www.onlinelearning.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203288744 
+penntoday.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203289451 
+portal.apps.upenn.edu robotsReq 3 404 
+portal.apps.upenn.edu robotsReq 3 404 time 13 1669203293013 
+penntoday.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203294772 
+www.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203295737 
+www.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203297160 
+penntoday.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203297757 
+penntoday.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203299453 
+penntoday.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203301294 
+www.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203302399 
+diversity.upenn.edu robotsReq 3 200 
+diversity.upenn.edu robotsReq 3 200 robots 2189 #
 # robots.txt
 #
 # This file is to prevent the crawling and indexing of certain parts
@@ -220,9 +1148,8 @@ Disallow: /?q=user/password/
 Disallow: /?q=user/register/
 Disallow: /?q=user/login/
 Disallow: /?q=user/logout/
- time 13 1669127450258 
-hklgjmgilqwcgsuikmgommtsdqxgisjmaqkqhcwa robotsReq 3 200 robots 0  time 13 1669128103743 
-imuktqamqgaqksampiwkpsckgetkpkxcvkqaqgcs robotsReq 3 200 robots 2189 #
+ 
+diversity.upenn.edu robotsReq 3 200 robots 2189 #
 # robots.txt
 #
 # This file is to prevent the crawling and indexing of certain parts
@@ -312,8 +1239,8 @@ Disallow: /?q=user/password/
 Disallow: /?q=user/register/
 Disallow: /?q=user/login/
 Disallow: /?q=user/logout/
- time 13 1669128131001 
-jkomxcvgesasgsfskikcxiyksgomwkhkeabeqiek robotsReq 3 200 robots 1586 #
+ time 13 1669203303348 
+www.upenn.edu robotsReq 3 200 robots 1586 #
 # robots.txt
 #
 # This file is to prevent the crawling and indexing of certain parts
@@ -374,161 +1301,8 @@ Disallow: /index.php/user/password
 Disallow: /index.php/user/register
 Disallow: /index.php/user/login
 Disallow: /index.php/user/logout
- time 13 1669128164321 
-jorgxieemahiychekgggjqfmeiomaceofijgmqpq robotsReq 3 200 robots 1086 Sitemap: http://cms.business-services.upenn.edu/sitemap.xml
-
-User-agent: *
-Disallow: /*?
-Disallow: /*calendar*
-Disallow: /*component*
-Disallow: /*cache*
-Disallow: /*images*
-Disallow: /*/libraries/
-Disallow: /*/glossary/
-Disallow: /*/quadrooms/
-Disallow: /*/media/
-Disallow: /*/modules/
-Disallow: /*/plugins/
-Disallow: /*/templates/
-Disallow: /*/tmp/
-Disallow: /*/xmlrpc/
-Disallow: /*/includes/
-Disallow: /*/logs/
-Disallow: /*/administrator/
-Allow: /*.html$
-Allow: /$
-Allow: /publications/$
-Allow: /purchasing/$
-Allow: /hospitality-services/$
-Allow: /childcare/$
-Allow: /icerink/$
-Allow: /transportation/$
-Allow: /universityclub/$
-Allow: /penntravel/$
-Allow: /sansom-place/$
-Allow: /homeownership/$
-Allow: /offcampusservices/$
-Allow: /dining/$
-Allow: /dining/penn/$
-Allow: /mail/$
-Allow: /residential-services/$
-Allow: /residential-services-handbook/$
-Allow: /penncard/$
-Allow: /softwarelicenses/$
-Allow: /computerstore/$
-Allow: /parking/$
-Allow: /ecard2/$
-Allow: /ecard2/welcome$
-Allow: /morrisarboretum-blog/$
-Allow: /sitemap.xml
-Disallow: /
-
-User-agent: Googlebot-Image
-Disallow: /
-
-
- 
-marolcgiakfirgjkeqwcwimsniaohmdcyabmjqvc robotsReq 3 301 
-mmikmeqqoeeqvkeesqxouqoqjqqmjiwqcirqdodm robotsReq 3 200 robots 1255 User-agent: *
-Disallow: /wp-admin/
-Allow: /wp-admin/admin-ajax.php
-
-Sitemap: https://web.sas.upenn.edu/wp-sitemap.xml
-Crawl-delay: 30
-
-User-agent: Yandex
-Disallow: /
-
-User-agent: moget
-Disallow: /
-
-User-agent: ichiro
-Disallow: /
-
-User-agent: NaverBot
-Disallow: /
-
-User-agent: Yeti
-Disallow: /
-
-User-agent: Baiduspider
-Disallow: /
-
-User-agent: Baiduspider-video
-Disallow: /
-
-User-agent: Baiduspider-image
-Disallow: /
-
-User-agent: Baiduspider+
-Disallow: /
-
-User-agent: Baiduspider+(+http://www.baidu.com/search/spider.htm)
-Disallow: /
-
-User-agent: Baiduspider/2.0;+http://www.baidu.com/search/spider.html
-Disallow: /
-
-User-agent: Baiduspider/2.0
-Disallow: /
-
-User-agent: +Baiduspider
-Disallow: /
-
-User-agent: +Baiduspider/2.0
-Disallow: /
-
-User-agent: +Baiduspider/2.0;++http://www.baidu.com/search/spider.html
-Disallow: /
-
-User-agent: Mozilla/5.0(compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)
-Disallow: /
-
-User-agent: sogou spider
-Disallow: /
-
-User-agent: sogou web spider
-Disallow: /
-
-User-agent: YoudaoBot
-Disallow: /
-
-User-agent: Sosospider
-Disallow: /
-
-User-agent: Sosospider/2.0
-Disallow: /
-
-User-agent: Sosospider+
-Disallow: /
-
-User-agent: YisouSpider
-Disallow: /
-
-User-agent: Googlebot-Image
-Disallow: /wp-content/mu-plugins/ time 13 1669128163085 
-mmpspenecormpcfstaiaygngzaminooakkdkwqoc robotsReq 3 200 robots 31 # robotstxt.org
-
-User-agent: *
- time 13 1669127688563 
-oodkksciqmxmekbgkogilsdasmeklebemgjsmchc robotsReq 3 200 robots 176 # START YOAST BLOCK
-# ---------------------------
-User-agent: *
-Disallow:
-
-Sitemap: https://archives.upenn.edu/sitemap_index.xml
-# ---------------------------
-# END YOAST BLOCK 
-osykzmgqxmrstawmtackgimgeoxqdsmkxmhqtebk robotsReq 3 301 
-pkvofctggaxebcuaceeiokyquqummqrapciaksci robotsReq 3 200 robots 212 <html>
-<head>
-<META NAME="robots" CONTENT="noindex,nofollow">
-<script src="/_Incapsula_Resource?SWJIYLWA=5074a744e2e3d891814e9a2dace20bd4,719d34d31c8e3a6e6fffd425f7e032f3">
-</script>
-<body>
-</body></html>
- time 13 1669127963517 
-qcdozaykymjqssuskirkiihsbegaleogdctqfqrc robotsReq 3 200 robots 1586 #
+ time 13 1669203305150 
+penntoday.upenn.edu robotsReq 3 200 robots 1586 #
 # robots.txt
 #
 # This file is to prevent the crawling and indexing of certain parts
@@ -589,71 +1363,9 @@ Disallow: /index.php/user/password
 Disallow: /index.php/user/register
 Disallow: /index.php/user/login
 Disallow: /index.php/user/logout
- time 13 1669127735928 
-qovkimxmpezmregogmokjmqgegpcletoacwglowq robotsReq 3 200 robots 1586 #
-# robots.txt
-#
-# This file is to prevent the crawling and indexing of certain parts
-# of your site by web crawlers and spiders run by sites like Yahoo!
-# and Google. By telling these "robots" where not to go on your site,
-# you save bandwidth and server resources.
-#
-# This file will be ignored unless it is at the root of your host:
-# Used:    http://example.com/robots.txt
-# Ignored: http://example.com/site/robots.txt
-#
-# For more information about the robots.txt standard, see:
-# http://www.robotstxt.org/robotstxt.html
-
-User-agent: *
-# CSS, JS, Images
-Allow: /core/*.css$
-Allow: /core/*.css?
-Allow: /core/*.js$
-Allow: /core/*.js?
-Allow: /core/*.gif
-Allow: /core/*.jpg
-Allow: /core/*.jpeg
-Allow: /core/*.png
-Allow: /core/*.svg
-Allow: /profiles/*.css$
-Allow: /profiles/*.css?
-Allow: /profiles/*.js$
-Allow: /profiles/*.js?
-Allow: /profiles/*.gif
-Allow: /profiles/*.jpg
-Allow: /profiles/*.jpeg
-Allow: /profiles/*.png
-Allow: /profiles/*.svg
-# Directories
-Disallow: /core/
-Disallow: /profiles/
-# Files
-Disallow: /README.txt
-Disallow: /web.config
-# Paths (clean URLs)
-Disallow: /admin/
-Disallow: /comment/reply/
-Disallow: /filter/tips
-Disallow: /node/add/
-Disallow: /search/
-Disallow: /user/register
-Disallow: /user/password
-Disallow: /user/login
-Disallow: /user/logout
-# Paths (no clean URLs)
-Disallow: /index.php/admin/
-Disallow: /index.php/comment/reply/
-Disallow: /index.php/filter/tips
-Disallow: /index.php/node/add/
-Disallow: /index.php/search/
-Disallow: /index.php/user/password
-Disallow: /index.php/user/register
-Disallow: /index.php/user/login
-Disallow: /index.php/user/logout
- time 13 1669127942899 
-rmjssiymgsxkbeaivqjgpmzotahslobegaqoyoqc robotsReq 3 404 time 13 1669127855504 
-rqkazegidgwihkgcgkpgcacsqsrkroyqooaqnefc robotsReq 3 200 robots 1664 #
+ time 13 1669203305529 
+www.library.upenn.edu robotsReq 3 200 
+www.library.upenn.edu robotsReq 3 200 robots 1664 #
 # robots.txt
 #
 # This file is to prevent the crawling and indexing of certain parts
@@ -716,85 +1428,8 @@ Disallow: /index.php/user/login
 Disallow: /index.php/user/logout
 
 # Custom directives here will be placed below the defaults from Drupal Core.
- time 13 1669127890936 
-rsvseaiiumqcmspsciredkcqyeteksdmhivknmvo robotsReq 3 301 time 13 1669127930961 
-saoakgmeaoxohcuqmeukhsnifineuoymtiksaszo robotsReq 3 200 robots 1586 #
-# robots.txt
-#
-# This file is to prevent the crawling and indexing of certain parts
-# of your site by web crawlers and spiders run by sites like Yahoo!
-# and Google. By telling these "robots" where not to go on your site,
-# you save bandwidth and server resources.
-#
-# This file will be ignored unless it is at the root of your host:
-# Used:    http://example.com/robots.txt
-# Ignored: http://example.com/site/robots.txt
-#
-# For more information about the robots.txt standard, see:
-# http://www.robotstxt.org/robotstxt.html
-
-User-agent: *
-# CSS, JS, Images
-Allow: /core/*.css$
-Allow: /core/*.css?
-Allow: /core/*.js$
-Allow: /core/*.js?
-Allow: /core/*.gif
-Allow: /core/*.jpg
-Allow: /core/*.jpeg
-Allow: /core/*.png
-Allow: /core/*.svg
-Allow: /profiles/*.css$
-Allow: /profiles/*.css?
-Allow: /profiles/*.js$
-Allow: /profiles/*.js?
-Allow: /profiles/*.gif
-Allow: /profiles/*.jpg
-Allow: /profiles/*.jpeg
-Allow: /profiles/*.png
-Allow: /profiles/*.svg
-# Directories
-Disallow: /core/
-Disallow: /profiles/
-# Files
-Disallow: /README.txt
-Disallow: /web.config
-# Paths (clean URLs)
-Disallow: /admin/
-Disallow: /comment/reply/
-Disallow: /filter/tips
-Disallow: /node/add/
-Disallow: /search/
-Disallow: /user/register
-Disallow: /user/password
-Disallow: /user/login
-Disallow: /user/logout
-# Paths (no clean URLs)
-Disallow: /index.php/admin/
-Disallow: /index.php/comment/reply/
-Disallow: /index.php/filter/tips
-Disallow: /index.php/node/add/
-Disallow: /index.php/search/
-Disallow: /index.php/user/password
-Disallow: /index.php/user/register
-Disallow: /index.php/user/login
-Disallow: /index.php/user/logout
- time 13 1669127850844 
-sqwqfmlaxgcszolcligqmsosyopqkqfeagickgwk robotsReq 3 200 robots 310 User-agent: * 
-Disallow: /wp-admin/
-Allow: /wp-admin/admin-ajax.php
-
-Sitemap: https://www.wharton.upenn.edu/sitemap_index.xml
-
-# START YOAST BLOCK
-# ---------------------------
-User-agent: *
-Disallow:
-
-Sitemap: https://www.wharton.upenn.edu/sitemap_index.xml
-# ---------------------------
-# END YOAST BLOCK time 13 1669127957893 
-tawgxiiqcalarcziqadsrowmleioxgosgququmdg robotsReq 3 200 robots 1622 #
+ 
+www.library.upenn.edu robotsReq 3 200 robots 1664 #
 # robots.txt
 #
 # This file is to prevent the crawling and indexing of certain parts
@@ -856,20 +1491,257 @@ Disallow: /index.php/user/register
 Disallow: /index.php/user/login
 Disallow: /index.php/user/logout
 
-User-agent: Twitterbot/1.0
-Allow: / time 13 1669127966220 
-uqrgecsmgmpelmkmnsrmiaikfozkwokszicoxqbs robotsReq 3 200 robots 300 User-agent: *
-Disallow: /www-statistics/
-Disallow: /img/
-Disallow: /computing/web/webdev/web-security/
-Disallow: /calendar
-Disallow: /calendar-export
-Disallow: /cgi-bin/
-Disallow: /computing/test
-Disallow: /computing/isc/home/virtual-worlds/movie/
-Disallow: /almanac/volumes/*/*/*/issueContents.html
- time 13 1669127720675 
-wehglgnmhmzaiopkvsiiiqkkgqacjabkzaxqmmrq robotsReq 3 200 robots 169 User-agent: *
+# Custom directives here will be placed below the defaults from Drupal Core.
+ time 13 1669203307191 
+www.upenncovidrefundsettlement.com robotsReq 3 404 
+www.upenncovidrefundsettlement.com robotsReq 3 404 time 13 1669203309730 
+www.facilities.upenn.edu robotsReq 3 200 
+www.facilities.upenn.edu robotsReq 3 200 robots 2189 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+Crawl-delay: 10
+# CSS, JS, Images
+Allow: /misc/*.css$
+Allow: /misc/*.css?
+Allow: /misc/*.js$
+Allow: /misc/*.js?
+Allow: /misc/*.gif
+Allow: /misc/*.jpg
+Allow: /misc/*.jpeg
+Allow: /misc/*.png
+Allow: /modules/*.css$
+Allow: /modules/*.css?
+Allow: /modules/*.js$
+Allow: /modules/*.js?
+Allow: /modules/*.gif
+Allow: /modules/*.jpg
+Allow: /modules/*.jpeg
+Allow: /modules/*.png
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /themes/*.css$
+Allow: /themes/*.css?
+Allow: /themes/*.js$
+Allow: /themes/*.js?
+Allow: /themes/*.gif
+Allow: /themes/*.jpg
+Allow: /themes/*.jpeg
+Allow: /themes/*.png
+# Directories
+Disallow: /includes/
+Disallow: /misc/
+Disallow: /modules/
+Disallow: /profiles/
+Disallow: /scripts/
+Disallow: /themes/
+# Files
+Disallow: /CHANGELOG.txt
+Disallow: /cron.php
+Disallow: /INSTALL.mysql.txt
+Disallow: /INSTALL.pgsql.txt
+Disallow: /INSTALL.sqlite.txt
+Disallow: /install.php
+Disallow: /INSTALL.txt
+Disallow: /LICENSE.txt
+Disallow: /MAINTAINERS.txt
+Disallow: /update.php
+Disallow: /UPGRADE.txt
+Disallow: /xmlrpc.php
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips/
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register/
+Disallow: /user/password/
+Disallow: /user/login/
+Disallow: /user/logout/
+# Paths (no clean URLs)
+Disallow: /?q=admin/
+Disallow: /?q=comment/reply/
+Disallow: /?q=filter/tips/
+Disallow: /?q=node/add/
+Disallow: /?q=search/
+Disallow: /?q=user/password/
+Disallow: /?q=user/register/
+Disallow: /?q=user/login/
+Disallow: /?q=user/logout/
+ 
+www.facilities.upenn.edu robotsReq 3 200 robots 2189 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+Crawl-delay: 10
+# CSS, JS, Images
+Allow: /misc/*.css$
+Allow: /misc/*.css?
+Allow: /misc/*.js$
+Allow: /misc/*.js?
+Allow: /misc/*.gif
+Allow: /misc/*.jpg
+Allow: /misc/*.jpeg
+Allow: /misc/*.png
+Allow: /modules/*.css$
+Allow: /modules/*.css?
+Allow: /modules/*.js$
+Allow: /modules/*.js?
+Allow: /modules/*.gif
+Allow: /modules/*.jpg
+Allow: /modules/*.jpeg
+Allow: /modules/*.png
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /themes/*.css$
+Allow: /themes/*.css?
+Allow: /themes/*.js$
+Allow: /themes/*.js?
+Allow: /themes/*.gif
+Allow: /themes/*.jpg
+Allow: /themes/*.jpeg
+Allow: /themes/*.png
+# Directories
+Disallow: /includes/
+Disallow: /misc/
+Disallow: /modules/
+Disallow: /profiles/
+Disallow: /scripts/
+Disallow: /themes/
+# Files
+Disallow: /CHANGELOG.txt
+Disallow: /cron.php
+Disallow: /INSTALL.mysql.txt
+Disallow: /INSTALL.pgsql.txt
+Disallow: /INSTALL.sqlite.txt
+Disallow: /install.php
+Disallow: /INSTALL.txt
+Disallow: /LICENSE.txt
+Disallow: /MAINTAINERS.txt
+Disallow: /update.php
+Disallow: /UPGRADE.txt
+Disallow: /xmlrpc.php
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips/
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register/
+Disallow: /user/password/
+Disallow: /user/login/
+Disallow: /user/logout/
+# Paths (no clean URLs)
+Disallow: /?q=admin/
+Disallow: /?q=comment/reply/
+Disallow: /?q=filter/tips/
+Disallow: /?q=node/add/
+Disallow: /?q=search/
+Disallow: /?q=user/password/
+Disallow: /?q=user/register/
+Disallow: /?q=user/login/
+Disallow: /?q=user/logout/
+ time 13 1669203311698 
+www.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203314361 
+www.publicsafety.upenn.edu robotsReq 3 200 
+www.publicsafety.upenn.edu robotsReq 3 200 robots 169 User-agent: *
 Disallow: /penn22/wp-admin/
 Allow: /penn22/wp-admin/admin-ajax.php
 
@@ -877,8 +1749,80 @@ User-agent: PopeTech-CrawlBot
 Disallow:
 
 User-agent: PopeTech-ScanBot
-Disallow: time 13 1669127810248 
-ycmkuqpgdavspivqaikkvkymtojiyafkykfgbeog robotsReq 3 200 robots 2189 #
+Disallow: 
+www.publicsafety.upenn.edu robotsReq 3 200 robots 169 User-agent: *
+Disallow: /penn22/wp-admin/
+Allow: /penn22/wp-admin/admin-ajax.php
+
+User-agent: PopeTech-CrawlBot
+Disallow:
+
+User-agent: PopeTech-ScanBot
+Disallow: time 13 1669203317132 
+www.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203317923 
+coronavirus.upenn.edu robotsReq 3 200 
+coronavirus.upenn.edu robotsReq 3 200 robots 2189 #
 # robots.txt
 #
 # This file is to prevent the crawling and indexing of certain parts
@@ -968,379 +1912,8 @@ Disallow: /?q=user/password/
 Disallow: /?q=user/register/
 Disallow: /?q=user/login/
 Disallow: /?q=user/logout/
- time 13 1669127710993 
-yisoxqjoxeusyarsqerauiwqdmukniusagxeqmxg robotsReq 3 200 robots 5609 User-agent: BLP_bbot/0.1
-Disallow: /
  
-User-agent: BLP_bbot
-Disallow: /
-
-User-agent: Slurp 
-Disallow: /
-
-User-agent: Spinn3r
-Disallow: /
-
-User-agent: Baiduspider
-Disallow: /
-
-User-agent: BaiduImagespider
-Disallow: /
-
-User-agent: Speedy Spider
-Disallow: /
-
-User-agent: psbot
-Disallow: /
-
-User-agent: VoilaBot
-Disallow: /
-
-User-agent: Ask Jeeves
-Disallow: /
-
-User-agent: daumoa
-Disallow: /
-
-User-agent: Jaxified
-Disallow: /
-
-User-agent: Yeti
-Disallow: /
-
-User-agent: ICC-Crawler
-Disallow: /
-
-User-agent: YesupBot
-Disallow: /
-
-User-agent: Ezooms/1.0
-Disallow: /
-
-User-agent: DotSpotsBot
-Disallow: /
-
-User-agent: Twiceler
-Disallow: /
-
-User-agent: TurnitinBot
-Disallow: /
-
-User-agent: Willow Internet Crawler by Twotrees
-Disallow: /
-
-User-agent: LargeSmall Crawler 
-Disallow: /
-
-User-agent: spbot
-Disallow: /
-
-User-agent: mxbot
-Disallow: /
-
-User-agent: MJ12bot
-Disallow: /
-
-User-agent: magpie-crawler
-Disallow: /
-
-User-agent: Sogou web spider
-Disallow: /
-
-User-agent: Influencebot/0.9
-Disallow: / 
-
-User-agent: Kwaclebot
-Disallow: /
-
-User-agent: Sosospider
-Disallow: /
-
-User-agent: MSRBOT
-Disallow: /
-
-User-agent: betaBot
-Disallow: /
-
-User-agent: Yahoo-Newscrawler
-Disallow: /
-
-User-agent: Lycos_Spider
-Disallow: /
-
-User-agent: YahooMobile/1.0
-Disallow: /
-
-User-agent: Domaincrawler 1.0
-Disallow: /
-
-User-agent: Yahoo Pipes 1.0
-Disallow: /
-
-User-agent: KSCrawler
-Disallow: /
-
-User-agent: Synapse
-Disallow: /
-
-User-agent: Yandex
-Disallow: /
-
-User-agent: IstellaBot
-Disallow: /
-
-User-agent: BLEXBot
-Disallow: /
-
-User-agent: rogerbot
-Crawl-delay: 2
-Disallow: /admin/
-DisAllow: /services/
-Disallow: /*.axd
-Allow: /
-
-User-agent: inagist.com url crawler
-Disallow: /
-
-User-agent: ScoutJet
-Disallow: /
-
-User-agent: lmspider
-Disallow: /
-
-User-agent: DotBot
-Disallow: /
-
-User-agent: R6_CommentReader
-Disallow: /
-
-User-agent: R6_FeedFetcher
-Disallow: /
-
-User-agent: nu_tch-princeton
-Disallow: /
-
-User-agent: SheenBot
-Disallow: /
-
-User-agent: MSR-ISRCCrawler
-Disallow: /
-
-User-agent: abby
-Disallow: /
-
-User-agent: ichiro
-Disallow: /
-
-User-agent: Gigabot
-Disallow: /
-
-User-agent: Purebot
-Disallow: /
-
-User-agent: discobot
-Disallow: /
-
-User-agent: MSUbot
-Disallow: /
-
-User-agent: CyberPatrol SiteCat Webbot
-Disallow: /
-
-User-agent: diribot
-Disallow: /
-
-User-agent: envolk
-Disallow: / 
-
-User-agent: FAST Enterprise Crawler 6 
-Disallow: /
-
-User-agent: ShopWiki
-Disallow: /
-
-User-agent: Jyxobot
-Disallow: /
-
-User-agent: Exabot
-Disallow: /
-
-User-agent: PostRank
-Disallow: /
-
-User-agent: Hailoobot
-Disallow: /
-
-User-agent: agbot
-Disallow: /
-
-User-agent: UnwindFetchor/1.0
-Disallow: /
-
-User-agent: Voyager/1.0
-Disallow: /
-
-User-agent: 008
-Disallow: /
-
-User-agent: HuaweiSymantecSpider
-Disallow: / 
-
-User-agent: sitebot
-Disallow: /
-
-User-agent: AhrefsBot
-Disallow: / 
-
-User-agent: Mozilla/5.0 (compatible; Butterfly/1.0; +http://labs.topsy.com/butterfly/) Gecko/2009032608 Firefox/3.0.8
-Disallow: /
-
-User-agent: ccbot
-Disallow: /
-
-User-Agent: suggybot
-Disallow: /
-
-User-Agent: lemurwebcrawler
-Disallow: /
-
-User-Agent: Flamingo_SearchEngine
-Disallow: /
-
-User-Agent: www.integromedb.org/Crawler
-Disallow: /
-
-User-Agent: sistrix
-Disallow: /
-
-User-agent: SiteimproveBot-Crawler 
-Disallow: /admin/
-Disallow: /services/
-Disallow: /*.axd
-Disallow: /*print=true*
-Allow: /
-
-User-agent: PowerMapper
-Disallow: /admin/
-Disallow: /services/
-Disallow: /*.axd
-Disallow: /*print=true*
-Disallow: /common/
-Allow: /
-
-User-agent: Googlebot
-Disallow: /admin/
-DisAllow: /services/
-Disallow: /*.axd
-DisAllow: /*print=true*
-Disallow: /common/
-Allow: /services/podcast_rss.ashx
-Allow: /
- 
-User-agent: bingbot
-Crawl-delay: 30
-Disallow: /admin/
-Disallow: /images/
-Disallow: /admin/
-Disallow: /common/
-Disallow: /editor/
-DisAllow: /services/
-DisAllow: /site/
-Disallow: /*.js$
-Disallow: /*.css$
-Disallow: /*.jpg$
-Disallow: /*.gif$
-Disallow: /*.axd
-Allow: /documents/
-Allow: /
-
-User-agent: msnbot
-Crawl-delay: 30
-Disallow: /admin/
-Disallow: /images/
-Disallow: /admin/
-Disallow: /common/
-Disallow: /editor/
-DisAllow: /services/
-DisAllow: /site/
-Disallow: /*.js$
-Disallow: /*.css$
-Disallow: /*.jpg$
-Disallow: /*.gif$
-Disallow: /*.axd
-Allow: /documents/
-Allow: /
-
-User-agent: ltx71
-Disallow: /
-
-User-agent: archive.org_bot
-Disallow: /admin/
-DisAllow: /services/
-Disallow: /*.axd
-Allow: /
-
-User-agent: *
-Disallow: /common/
-Disallow: /images/
-Disallow: /documents/
-Disallow: /admin/
-Disallow: /services/
-DisAllow: /site/
-DisAllow: /hidden/
-Disallow: /*.js$
-Disallow: /*.css$
-Disallow: /*.jpg$
-Disallow: /*.gif$
-Disallow: /*.axd
-Disallow: /*print=true*
-Allow: /
-Crawl-delay: 30
-
-User-agent: heritrix
-Disallow: /admin/
-Disallow: /images/
-Disallow: /documents/
-Disallow: /admin/
-Disallow: /common/
-Disallow: /editor/
-DisAllow: /services/
-DisAllow: /site/
-Disallow: /*.axd
-Crawl-delay: 5
-Allow: /
-
-User-agent: Twitterbot/1.0
-Allow: /
-
-User-agent: Mozilla/4.0+(compatible;+T-H-U-N-D-E-R-S-T-O-N-E)
-Disallow: /admin/
-DisAllow: /services/
-DisAllow: /site/
-Disallow: /common/
-Disallow: /*.axd
-Crawl-delay: 2
-Allow: /
-
-User-agent: Swiftbot
-Disallow: /admin/
-DisAllow: /services/
-DisAllow: /site/
-Disallow: /*.axd
-Crawl-delay: 3
-Allow: /
-
-User-agent: gsa-crawler
-Crawl-delay: 2
-Disallow: /admin/
-Disallow: /common/
-DisAllow: /services/
-Disallow: /*.axd
-Allow: /
-
-
-Sitemap: https://pennathletics.com/sitemap.xml 
-yqzclorkyekcekugnqxoiixezexolopmuatgioik robotsReq 3 200 robots 2189 #
+coronavirus.upenn.edu robotsReq 3 200 robots 2189 #
 # robots.txt
 #
 # This file is to prevent the crawling and indexing of certain parts
@@ -1430,4 +2003,191 @@ Disallow: /?q=user/password/
 Disallow: /?q=user/register/
 Disallow: /?q=user/login/
 Disallow: /?q=user/logout/
- time 13 1669127697680 
+ time 13 1669203319810 
+www.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203320959 
+www.alumni.upenn.edu robotsReq 3 302 
+www.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203342141 
+www.upenn.edu robotsReq 3 200 robots 1586 #
+# robots.txt
+#
+# This file is to prevent the crawling and indexing of certain parts
+# of your site by web crawlers and spiders run by sites like Yahoo!
+# and Google. By telling these "robots" where not to go on your site,
+# you save bandwidth and server resources.
+#
+# This file will be ignored unless it is at the root of your host:
+# Used:    http://example.com/robots.txt
+# Ignored: http://example.com/site/robots.txt
+#
+# For more information about the robots.txt standard, see:
+# http://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+# CSS, JS, Images
+Allow: /core/*.css$
+Allow: /core/*.css?
+Allow: /core/*.js$
+Allow: /core/*.js?
+Allow: /core/*.gif
+Allow: /core/*.jpg
+Allow: /core/*.jpeg
+Allow: /core/*.png
+Allow: /core/*.svg
+Allow: /profiles/*.css$
+Allow: /profiles/*.css?
+Allow: /profiles/*.js$
+Allow: /profiles/*.js?
+Allow: /profiles/*.gif
+Allow: /profiles/*.jpg
+Allow: /profiles/*.jpeg
+Allow: /profiles/*.png
+Allow: /profiles/*.svg
+# Directories
+Disallow: /core/
+Disallow: /profiles/
+# Files
+Disallow: /README.txt
+Disallow: /web.config
+# Paths (clean URLs)
+Disallow: /admin/
+Disallow: /comment/reply/
+Disallow: /filter/tips
+Disallow: /node/add/
+Disallow: /search/
+Disallow: /user/register
+Disallow: /user/password
+Disallow: /user/login
+Disallow: /user/logout
+# Paths (no clean URLs)
+Disallow: /index.php/admin/
+Disallow: /index.php/comment/reply/
+Disallow: /index.php/filter/tips
+Disallow: /index.php/node/add/
+Disallow: /index.php/search/
+Disallow: /index.php/user/password
+Disallow: /index.php/user/register
+Disallow: /index.php/user/login
+Disallow: /index.php/user/logout
+ time 13 1669203344268 
