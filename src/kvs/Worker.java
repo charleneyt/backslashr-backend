@@ -933,6 +933,30 @@ public class Worker extends generic.Worker {
 			return "OK";
 		});
 
+		// add the route to delete the table for worker
+		put("/delete/:table", (req, res) -> {
+			String tableToDelete = req.params("table");
+
+			if (!worker.tables.containsKey(tableToDelete)) {
+				res.status(404, "Not Found");
+				return "404 Not Found";
+			}
+
+			Path fileToDelete = Paths.get(args[1] + "/" + tableToDelete + ".table");
+
+			// close the stream, then remove it
+			worker.streams.get(tableToDelete).close();
+			worker.streams.remove(tableToDelete);
+
+			// delete the file
+			Files.deleteIfExists(fileToDelete);
+
+			// delete old entry
+			worker.tables.remove(tableToDelete);
+
+			return "OK";
+		});
+
 		// If a table with this name exists, the body of the response should contain the
 		// number of rows in that table (as an ASCII string); otherwise, you should send
 		// a 404 error code.

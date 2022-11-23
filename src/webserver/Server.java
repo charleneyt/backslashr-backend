@@ -390,11 +390,11 @@ public class Server implements Runnable {
                 // ONLY REACH HERE if double CRLF is met!
 
                 // start process request when received double CRLF
-                requestString = sb.toString();
-                FileWriter fw = new FileWriter("./server_log", true);
-                fw.write("request string is: " + requestString);
-                fw.flush();
-                 System.out.print("request string is: " + requestString);
+//                requestString = sb.toString();
+//                FileWriter fw = new FileWriter("./server_log", true);
+//                fw.write("request string is: " + requestString);
+//                fw.flush();
+                //  System.out.print("request string is: " + requestString);
                 
                 parseRequest();
                 
