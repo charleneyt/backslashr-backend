@@ -1,0 +1,37 @@
+#! /bin/bash
+
+echo "Hello World"
+
+kill -9 $(lsof -t -i:8000)
+kill -9 $(lsof -t -i:9000)
+
+rm -rf /Users/joeshen/Desktop/backslashr-backend/worker1/*
+rm -rf /Users/joeshen/Desktop/backslashr-backend/worker2/*
+rm /Users/joeshen/Desktop/backslashr-backend/server_log
+
+java -cp bin kvs.Master 8000 & 
+java -cp bin flame.FlameMaster 9000 localhost:8000 & 
+
+sleep 1
+
+java -cp bin kvs.Worker 8001 worker1 localhost:8000 & 
+java -cp bin kvs.Worker 8002 worker2 localhost:8000 &
+
+java -cp bin flame.FlameWorker 9001 localhost:9000 &
+java -cp bin flame.FlameWorker 9002 localhost:9000 &
+
+
+
+# you need three clean terminals, A, B, C
+# in terminal A under the backslashr-backend/ run ./abc
+# this will kill existing server and kvs and delete files, see above
+# then start server and worker
+
+# now kick off crawler in terminal C
+
+# now you want to restart everything, because C is done or have errors
+# in terminal B under the backslashr-backend/ run ./abc
+# this will kill whatever in terminal A and start things in terminal B
+
+# now terminal A becomes B 
+
