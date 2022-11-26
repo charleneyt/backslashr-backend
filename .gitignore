@@ -4,4 +4,4 @@ job*
 .DS_Store
 **/.DS_Store
 **./gitignore
-*_log_*
+*log*
