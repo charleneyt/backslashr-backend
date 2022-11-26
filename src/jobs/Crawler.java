@@ -472,8 +472,11 @@ public class Crawler {
 				}
 			}
 		}
+		
 		for (String url : seen.keySet()) {
-			kvs.put("anchorEC", url, "anchor-" + originalUrl, seen.get(url).getBytes());
+			String key = Hasher.hash(url);
+			kvs.put("anchorEC", key, "url", url.getBytes());
+			kvs.put("anchorEC", key, "anchor-" + originalUrl, seen.get(url).getBytes());
 		}
 
 		// save the outdegrees of current url to outdegrees table (value is comma
@@ -500,7 +503,9 @@ public class Crawler {
 				sb.append(",");
 			}
 			sb.append(imgMap.get(url));
-			kvs.put("images", url, "altText", sb.toString());
+			String key = Hasher.hash(url);
+			kvs.put("images", key, "url", url.toString());
+			kvs.put("images", key, "altText", sb.toString());
 		}
 		return urlToVisit;
 	}
