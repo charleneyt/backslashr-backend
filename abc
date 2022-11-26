@@ -2,13 +2,19 @@
 
 echo "Hello World"
 
+# killing the master and workers
 kill -9 $(lsof -t -i:8000)
 kill -9 $(lsof -t -i:9000)
 
-rm -rf /Users/joeshen/Desktop/backslashr-backend/worker1/*
-rm -rf /Users/joeshen/Desktop/backslashr-backend/worker2/*
-rm /Users/joeshen/Desktop/backslashr-backend/server_log
+# cleaning up directories (tables, jars)
+rm -rf worker1/*.table # this removes ALL tables!!!!
+rm -rf worker2/*.table # this removes ALL tables!!!!
+rm server_log
+rm __worker*.jar
+rm job*.jar
+rm *log*
 
+# restarting master and workers
 java -cp bin kvs.Master 8000 & 
 java -cp bin flame.FlameMaster 9000 localhost:8000 & 
 

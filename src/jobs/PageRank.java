@@ -153,7 +153,10 @@ public class PageRank {
         System.out.println("Total iteration: " + count);
         state.saveAsTable("state");
         state = state.flatMapToPair(pair -> {
-        				KVSClient kvs = new KVSClient("localhost:8000");
+			        	if (FlameContext.getKVS() == null){
+			                FlameContext.setKVS("localhost:8000");
+			            }
+        				KVSClient kvs = FlameContext.getKVS();
                         List<FlamePair> ret = new ArrayList<>();
                         if (!"".equals(pair._1())){
                             String str = pair._2();

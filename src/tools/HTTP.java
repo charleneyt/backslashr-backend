@@ -131,7 +131,7 @@ public class HTTP {
       boolean readingHeaders = true;
       int contentLength = -1;
       Map<String,String> headers = new HashMap<String,String>();
-      byte buf[] = new byte[10000000];
+      byte buf[] = new byte[1000000];
       int inBuf = 0;
       int statusCode = -1;
 

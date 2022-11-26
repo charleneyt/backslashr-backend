@@ -9,6 +9,10 @@ public interface FlameContext {
     return FlameMaster.kvs;
   }
 
+  public static void setKVS(String arg) {
+    FlameMaster.kvs = new KVSClient(arg);
+  }
+
   public interface RowToString extends Serializable {
     String op(Row r);
   };

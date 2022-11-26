@@ -4,7 +4,6 @@ import flame.*;
 import kvs.*;
 
 import java.util.*;
-// TODO: some index could be missing - kvs too busy?
 public class Indexer {
     public static void run(FlameContext ctx, String[] args) throws Exception {
         // use fromTable to convert each row to a string of url,page
@@ -23,7 +22,11 @@ public class Indexer {
                                     // use flatMapToPair to create Iterable<FlamePair>
         
         FlamePairRDD urlsTable = imm.flatMapToPair(pair -> {
-        								KVSClient kvs = new KVSClient("localhost:8000");
+                                        if (FlameContext.getKVS() == null){
+                                            FlameContext.setKVS("localhost:8000");
+                                        }
+                                        KVSClient kvs = FlameContext.getKVS();
+        								// KVSClient kvs = new KVSClient("localhost:8000");
                                         List<FlamePair> ret = new ArrayList<FlamePair>();
                                         if (!"".equals(pair._1())){
                                             String url = pair._1();
@@ -62,12 +65,12 @@ public class Indexer {
                                             }
                                             for (String word : stem.keySet()){
                                                 // ec1: word, url, index1 index2 index3
-                                                kvs.put("ec1", word, url, stem.get(word).getBytes());
+                                                kvs.put("inverted-hs", word, url, stem.get(word).getBytes());
                                             }
                                             for (String word : original.keySet()){
                                                 if (!stem.containsKey(word)){
                                                     // ec1: word, url, index1 index2 index3
-                                                    kvs.put("ec1", word, url, original.get(word).getBytes());
+                                                    kvs.put("inverted-hs", word, url, original.get(word).getBytes());
                                                 }
                                             }
                                         }
@@ -89,7 +92,7 @@ public class Indexer {
         // Thread.sleep(FlameContext.getKVS().count("index-regular")/10);
 
         // EC 1 making a urls2 column that lists url by desc order of occurrences, and append those occurrence to url
-        FlamePairRDD urls2Table = ctx.fromTable("ec1", row -> {
+        FlamePairRDD urls2Table = ctx.fromTable("inverted-hs", row -> {
                                         // use treemap with count of indices as key, url1 url2 url3 as value
                                         TreeMap<Integer, String> currWordMap = new TreeMap<>(Collections.reverseOrder());
 
@@ -210,7 +213,7 @@ public class Indexer {
 
         // EC 1 add urls2 column to the index table that adds :x, and sort by occurrences in desc order
         // KVSClient kvs = FlameContext.getKVS();
-        // Iterator<Row> iter = kvs.scan("ec1", null, null);
+        // Iterator<Row> iter = kvs.scan("inverted-hs", null, null);
         // if (iter != null){
         //     while (iter.hasNext()){
         //         // row key is word, column is url, value is list of indices (separated by space)
