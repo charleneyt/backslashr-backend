@@ -475,7 +475,9 @@ public class Crawler {
 		
 		for (String url : seen.keySet()) {
 			String key = Hasher.hash(url);
-			kvs.put("anchorEC", key, "url", url.getBytes());
+			if (!kvs.existsRow("anchorEC", key)){
+				kvs.put("anchorEC", key, "url", url.getBytes());
+			}
 			kvs.put("anchorEC", key, "anchor-" + originalUrl, seen.get(url).getBytes());
 		}
 
@@ -484,11 +486,19 @@ public class Crawler {
 		sb.setLength(0);
 		List<String> urlToVisit = new LinkedList<>();
 		for (String url : urlSet) {
+			if (sb.length() > 0) {
+				sb.append(",");
+			}
+			sb.append(url);
 			// check if already crawled, if so, don't add to queue
 			if (!kvs.existsRow("crawl", Hasher.hash(url))){
 				urlToVisit.add(url);
 			}
 		}
+		// add to outdegrees table for current link and its outgoing links
+		String hashkey = Hasher.hash(originalUrl);
+		kvs.put("outdegrees", hashkey, "url", originalUrl);
+		kvs.put("outdegrees", hashkey, "links", sb.toString());
 
 		// save the images crawled (with potential alt text) to images table
 		sb.setLength(0);
@@ -504,7 +514,7 @@ public class Crawler {
 			}
 			sb.append(imgMap.get(url));
 			String key = Hasher.hash(url);
-			kvs.put("images", key, "url", url.toString());
+			kvs.put("images", key, "url", url);
 			kvs.put("images", key, "altText", sb.toString());
 		}
 		return urlToVisit;
