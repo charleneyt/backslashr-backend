@@ -97,7 +97,6 @@ public class Crawler {
 			// the KVS. For now, return an empty list from the flatMap, so that the loop
 			// will terminate after a single iteration.
 			urlQueue = urlQueue.flatMap(url -> {
-				System.out.println("Crawling: " + url);
 				FileWriter fw = new FileWriter("./crawler_log_inside_lambda", true);
 				fw.write("crawling: " + url + "\n");
 				fw.flush();
@@ -279,6 +278,7 @@ public class Crawler {
 						// update the hosts table's access time if it's last called more than 1 second
 						// ago
 						kvs.put("hosts", hostHash, "time", String.valueOf(System.currentTimeMillis()).getBytes());
+						System.out.println("Crawling: " + url);
 
 						// new GET connection only if responseCode is 200 and type is text/html
 						con = (HttpURLConnection) (new URL(url)).openConnection();
@@ -294,6 +294,52 @@ public class Crawler {
 						code = con.getResponseCode();
 						// tempRow.put("responseCode", String.valueOf(code).getBytes());
 						kvs.put("crawl", urlHash, "responseCode", String.valueOf(code));
+
+						// increment the crawler count by the root domain
+						// for example, sports.cnn.com/a.html would be cnn.com
+						// this is used to monitor the crawler status and prevent the results from too dense
+						int lastDot = parsedUrl[1].lastIndexOf(".");
+						if (lastDot != -1){
+							int startIdx = parsedUrl[1].substring(0, lastDot).lastIndexOf(".")+1;
+							String domainName = parsedUrl[1].substring(startIdx);
+							if (domainName.length() > 0){
+								String domainHash = Hasher.hash(domainName);
+								long crawlCount = 0;
+								if (kvs.existsRow("domain", domainHash)){
+									Row domainRow = kvs.getRow("domain", domainHash);
+									crawlCount = Long.valueOf(domainRow.get("count"));
+									if ("cnn.com".equals(domainName)){
+										if (crawlCount > 5000){
+											return null;
+										}
+									} else if (crawlCount > 1000){
+										return null;
+									}
+								}
+								kvs.put("domain", domainHash, "count", String.valueOf(crawlCount+1));
+								if (crawlCount == 0){
+									kvs.put("domain", domainHash, "domain", domainName);
+								}
+							}
+						} else {
+							String domainName = parsedUrl[1];
+							if (domainName.length() > 0){
+								String domainHash = Hasher.hash(domainName);
+								long crawlCount = 0;
+								if (kvs.existsRow("domain", domainHash)){
+									Row domainRow = kvs.getRow("domain", domainHash);
+									crawlCount = Long.parseLong(domainRow.get("count"));
+									if (crawlCount > 1000){
+										return null;
+									}
+								}
+								kvs.put("domain", domainHash, "count", String.valueOf(crawlCount+1));
+								if (crawlCount == 0){
+									kvs.put("domain", domainHash, "domain", domainName);
+								}
+							}
+						}
+
 
 						byte[] response = con.getInputStream().readAllBytes();
 						if (response != null) {
@@ -493,8 +539,44 @@ public class Crawler {
 				sb.append(",");
 			}
 			sb.append(url);
+			
 			// check if already crawled, if so, don't add to queue
 			if (!kvs.existsRow("crawl", Hasher.hash(url))){
+				// check the count by domain name, pass if currently crawled enough
+				String[] parsedUrl = parseURL(url);
+				int lastDot = parsedUrl[1].lastIndexOf(".");
+				if (lastDot != -1){
+					int startIdx = parsedUrl[1].substring(0, lastDot).lastIndexOf(".")+1;
+					String domainName = parsedUrl[1].substring(startIdx);
+					if (domainName.length() > 0){
+						String domainHash = Hasher.hash(domainName);
+						if (kvs.existsRow("domain", domainHash)){
+							Row domainRow = kvs.getRow("domain", domainHash);
+							long crawlCount = Long.valueOf(domainRow.get("count"));
+							if ("cnn.com".equals(domainName)){
+								if (crawlCount > 5000){
+									continue;
+								}
+							} else if (crawlCount > 1000){
+								continue;
+							}
+						}
+					}
+				} else {
+					String domainName = parsedUrl[1];
+					if (domainName.length() > 0){
+						String domainHash = Hasher.hash(domainName);
+						if (kvs.existsRow("domain", domainHash)){
+							Row domainRow = kvs.getRow("domain", domainHash);
+							long crawlCount = Long.parseLong(domainRow.get("count"));
+							if (crawlCount > 1000){
+								continue;
+							}
+						}
+					}
+				}
+
+				// check if already crawled, if so, don't add to queue
 				urlToVisit.add(url);
 			}
 		}
