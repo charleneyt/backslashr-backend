@@ -643,7 +643,7 @@ public class Worker extends generic.Worker {
 					}
 				}
 				// calculating endIndex to get a submap for better runtime
-				int endIndex = Math.min(rowsName.size() - 1, startIndex + 9);
+				int endIndex = Math.min(rowsName.size() - 1, startIndex + 99);
 				NavigableMap<String, Row> subTable = currTable.subMap(startRow, true, rowsName.get(endIndex), true);
 
 				// collect the column names in the 10 rows (or less if currently less than 10)
@@ -663,6 +663,9 @@ public class Worker extends generic.Worker {
 				sb.append("<br>");
 				sb.append("<table><tr><td>Row</td>");
 				for (String col : colsName) {
+					if (col.equals("page")){
+						continue;
+					}
 					sb.append("<td>" + col + "</td>");
 				}
 				sb.append("</tr>");

@@ -302,10 +302,12 @@ public class Crawler {
 							// key, hash
 							// value of url is column key, and url is value
 							String responseStr = new String(response);
-							kvs.put("crawl", urlHash, "page", response);
+							// filter out style and script tags and its content
+							String processed = responseStr.replaceAll("(<style.*?>.*?</style.*?>)|(<script.*?>[\\s\\S]*?</script.*?>)", "");
+							kvs.put("crawl", urlHash, "page", processed);
 							fw.write("Downloaded page for " + url + "\n");
 							fw.flush();
-							for (String newUrl : findUrl(kvs, responseStr, normalizedOriginal, rules)) {
+							for (String newUrl : findUrl(kvs, processed, normalizedOriginal, rules)) {
 								ret.add(newUrl);
 							}
 
@@ -405,6 +407,7 @@ public class Crawler {
 					case ".gif":
 					case ".png":
 					case ".txt":
+					case ".js":
 						unwantedType = true;
 						break;
 					}
