@@ -667,7 +667,7 @@ public class Worker extends generic.Worker {
 				sb.append("<br>");
 				sb.append("<table><tr><td>Row</td>");
 				for (String col : colsName) {
-					if (col.equals("page")){
+					if (col.equals("page")) {
 						continue;
 					}
 					sb.append("<td>" + col + "</td>");
@@ -679,6 +679,9 @@ public class Worker extends generic.Worker {
 					sb.append("<tr><td>" + row.key() + "</td>");
 					for (String col : colsName) {
 						if (row.columns().contains(col)) {
+							if (col.equals("page")) {
+								continue;
+							}
 							sb.append("<td>" + row.get(col) + "</td>");
 						} else {
 							sb.append("<td></td>");

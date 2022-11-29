@@ -350,7 +350,7 @@ public class Crawler {
 							String responseStr = new String(response);
 							// filter out style and script tags and its content
 							String processed = responseStr.replaceAll("(<style.*?>.*?</style.*?>)|(<script.*?>[\\s\\S]*?</script.*?>)", "");
-//							kvs.put("crawl", urlHash, "page", processed);
+							kvs.put("crawl", urlHash, "page", processed);
 							fw.write("Downloaded page for " + url + "\n");
 							fw.flush();
 							for (String newUrl : findUrl(kvs, processed, normalizedOriginal, rules)) {
