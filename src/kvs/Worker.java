@@ -95,11 +95,11 @@ public class Worker extends generic.Worker {
 		}
 	}
 
-	public void updateRequestReceived() {
+	public synchronized void updateRequestReceived() {
 		lastRequestReceived = System.currentTimeMillis();
 	}
 
-	public void addTable(String tableName) {
+	public synchronized void addTable(String tableName) {
 		tables.put(tableName, new TreeMap<String, Row>());
 	}
 
@@ -532,10 +532,14 @@ public class Worker extends generic.Worker {
 
 			if (!worker.tables.containsKey(tableName)) {
 				worker.addTable(tableName);
+			}
+
+			if (!worker.streams.containsKey(tableName)) {
 				Path outputFile = Paths.get(args[1] + "/" + tableName + ".table");
 				worker.streams.put(tableName,
 						new BufferedOutputStream(Files.newOutputStream(outputFile, CREATE, APPEND)));
 			}
+			BufferedOutputStream currStream = worker.streams.get(tableName);
 
 			Map<String, Row> currTable = worker.tables.get(tableName);
 			Row row;
@@ -546,8 +550,8 @@ public class Worker extends generic.Worker {
 			}
 			row.put(colName, req.bodyAsBytes());
 			currTable.put(rowName, row);
-			worker.streams.get(tableName).write(row.toByteArray());
-			worker.streams.get(tableName).write(Worker.LFbyte);
+			currStream.write(row.toByteArray());
+			currStream.write(Worker.LFbyte);
 			return "OK";
 		});
 
@@ -834,18 +838,22 @@ public class Worker extends generic.Worker {
 
 			if (!worker.tables.containsKey(tableName)) {
 				worker.addTable(tableName);
+			}
+
+			if (!worker.streams.containsKey(tableName)) {
 				Path outputFile = Paths.get(args[1] + "/" + tableName + ".table");
 				worker.streams.put(tableName,
 						new BufferedOutputStream(Files.newOutputStream(outputFile, CREATE, APPEND)));
 			}
+			BufferedOutputStream currStream = worker.streams.get(tableName);
 
 			InputStream input = new ByteArrayInputStream(req.bodyAsBytes());
 			while (input.available() > 0) {
 				Row row = Row.readFrom(input);
 				if (row != null) {
 					worker.tables.get(tableName).put(row.key(), row);
-					worker.streams.get(tableName).write(row.toByteArray());
-					worker.streams.get(tableName).write(Worker.LFbyte);
+					currStream.write(row.toByteArray());
+					currStream.write(Worker.LFbyte);
 				}
 			}
 			return "OK";

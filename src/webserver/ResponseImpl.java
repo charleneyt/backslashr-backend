@@ -85,7 +85,7 @@ public class ResponseImpl implements Response {
             write = true;
         }
         
-        System.out.println(new String(b));
+        // System.out.println(new String(b));
         worker.bw.write(b);
         worker.bw.flush();        
 	}

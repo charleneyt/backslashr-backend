@@ -3,6 +3,7 @@ package jobs;
 import java.util.*;
 
 import flame.*;
+// import kvs.*;
 import tools.*;
 
 public class PageRank {
@@ -24,6 +25,11 @@ public class PageRank {
                 inputThreshold = true;
             }
         }
+        
+        // if (FlameContext.getKVS() == null){
+        //     FlameContext.setKVS("localhost:8000");
+        // }
+        // KVSClient kvs = FlameContext.getKVS();
 
         FlamePairRDD state = ctx.fromTable("outdegrees", r -> {
                                         if (r.columns().contains("url") && r.get("url").length() > 0 && r.columns().contains("links") && r.get("links").length() > 0){
@@ -43,8 +49,8 @@ public class PageRank {
                                         } else {return null;}
                                     });
         int count = 0;
+        // Thread.sleep(kvs.count(state.getTableName())/10);
         state.saveAsTable("state-" + count);
-        // Thread.sleep(FlameContext.getKVS().count("state-" + count)/10);
 
         while (true){
             count++;
@@ -67,17 +73,23 @@ public class PageRank {
                                                     }
                                                     String val = String.valueOf(0.85 * currRank / n);
                                                     for (String link : links){
-                                                        FlamePair generatedPair = new FlamePair(Hasher.hash(link), val);
-                                                        ret.add(generatedPair);
-                                                        // System.out.println(generatedPair);
+                                                        String key = Hasher.hash(link);
+                                                        if ("".equals(key)){
+                                                            System.out.println("Hashed an empty link: "+link);
+                                                        } else {
+                                                            FlamePair generatedPair = new FlamePair(key, val);
+                                                            ret.add(generatedPair);
+                                                            // System.out.println(generatedPair);
+                                                        }
                                                     }
                                                 }
                                             }
                                             return ret;
                                         })
                                         .foldByKey("0.15", (d1, d2) -> String.valueOf(Double.parseDouble(d1) + Double.parseDouble(d2)));
+            // Thread.sleep(kvs.count(transfer.getTableName())/10);
             transfer.saveAsTable("transfer-" + count);
-            // Thread.sleep(FlameContext.getKVS().count("transfer-" + count)/10);
+//            Thread.sleep(kvs.count("transfer-" + count)/10);
 
             state = transfer.join(state)
                             .flatMapToPair(pair -> {
@@ -96,8 +108,9 @@ public class PageRank {
                                 }
                                 return ret;
                             });
+            // Thread.sleep(kvs.count(state.getTableName())/10);
             state.saveAsTable("state-" + count);
-            // Thread.sleep(FlameContext.getKVS().count("state-" + count)/10);
+//            Thread.sleep(kvs.count("state-" + count)/10);
             
             FlameRDD diffTable = state.flatMap(pair -> {
                                 List<String> ret = new ArrayList<>();
@@ -115,6 +128,8 @@ public class PageRank {
                                 }
                                 return ret;
                             });
+            diffTable.saveAsTable("diff-" + count);
+
             // EC 2 enhanced convergence: converge sooner if percentage is satisfied!
             boolean converged = false;
             if (inputThreshold){
@@ -143,17 +158,19 @@ public class PageRank {
                                     return String.valueOf(s1Double);
                                 }
                             });
+                System.out.println(maxDiffStr);
                 if (Double.parseDouble(maxDiffStr) < convergence){
-                  System.out.println("Checked with regular convergence!");
+                    System.out.println("Checked with regular convergence!");
                     break;
                 }
             }
             if (converged){
                 break;
             }
+            System.out.println("Checked " + count + " rounds, still not converged");
         }
         System.out.println("Total iteration: " + count);
-        state.saveAsTable("state");
+        // state.saveAsTable("state");
         state = state.flatMapToPair(pair -> {
                 List<FlamePair> ret = new ArrayList<>();
                 if (!"".equals(pair._1())){
@@ -167,7 +184,8 @@ public class PageRank {
                 }
                 return ret;
               });
-        state.saveAsTable("pageranks");
-      ctx.output("OK");
+    //    Thread.sleep(kvs.count(state.getTableName())/10);
+       state.saveAsTable("pageranks");
+       ctx.output("OK");
     }
 }
