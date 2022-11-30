@@ -95,11 +95,11 @@ public class Worker extends generic.Worker {
 		}
 	}
 
-	public synchronized void updateRequestReceived() {
+	public void updateRequestReceived() {
 		lastRequestReceived = System.currentTimeMillis();
 	}
 
-	public synchronized void addTable(String tableName) {
+	public void addTable(String tableName) {
 		tables.put(tableName, new TreeMap<String, Row>());
 	}
 
@@ -655,6 +655,10 @@ public class Worker extends generic.Worker {
 				for (Row row : subTable.values()) {
 					columnVals.addAll(row.columns());
 				}
+
+				// remove page content in UI
+				columnVals.remove("page");
+
 				// inevitable work to sort the columns in current 10 rows!
 				List<String> colsName = new ArrayList<>(columnVals);
 				colsName.sort((a, b) -> a.compareTo(b));
@@ -667,9 +671,6 @@ public class Worker extends generic.Worker {
 				sb.append("<br>");
 				sb.append("<table><tr><td>Row</td>");
 				for (String col : colsName) {
-					if (col.equals("page")) {
-						continue;
-					}
 					sb.append("<td>" + col + "</td>");
 				}
 				sb.append("</tr>");

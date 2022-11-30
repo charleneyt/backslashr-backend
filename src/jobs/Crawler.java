@@ -18,6 +18,8 @@ public class Crawler {
 	static List<String> blacklist = new ArrayList<>();
 	static boolean restartLog1 = true;
 	static boolean restartLog2 = true;
+	final static Set<String> allowedSuffix = new HashSet<>(Arrays.asList("com", "net", "org", "edu", "gov"));
+	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("cnn.com", "wikipedia.com"));
 
 	public static void run(FlameContext ctx, String[] args) throws Exception {
 		// Check whether the latter contains a single element (the seed URL), and output
@@ -548,12 +550,12 @@ public class Crawler {
 				if (lastDot != -1){
 					int startIdx = parsedUrl[1].substring(0, lastDot).lastIndexOf(".")+1;
 					String domainName = parsedUrl[1].substring(startIdx);
-					if (domainName.length() > 0){
+					if (domainName.length() > 0 && (lastDot = domainName.lastIndexOf(".")) != domainName.length()-1 && allowedSuffix.contains(domainName.substring(lastDot+1))){
 						String domainHash = Hasher.hash(domainName);
 						if (kvs.existsRow("domain", domainHash)){
 							Row domainRow = kvs.getRow("domain", domainHash);
 							long crawlCount = Long.valueOf(domainRow.get("count"));
-							if ("cnn.com".equals(domainName)){
+							if (authorityHubs.contains(domainName)){
 								if (crawlCount > 5000){
 									continue;
 								}
@@ -561,29 +563,20 @@ public class Crawler {
 								continue;
 							}
 						}
+						// check if already crawled, if so, don't add to queue
+						urlToVisit.add(url);
+					} else {
+						continue;
 					}
 				} else {
-					String domainName = parsedUrl[1];
-					if (domainName.length() > 0){
-						String domainHash = Hasher.hash(domainName);
-						if (kvs.existsRow("domain", domainHash)){
-							Row domainRow = kvs.getRow("domain", domainHash);
-							long crawlCount = Long.parseLong(domainRow.get("count"));
-							if (crawlCount > 1000){
-								continue;
-							}
-						}
-					}
+					continue;
 				}
-
-				// check if already crawled, if so, don't add to queue
-				urlToVisit.add(url);
 			}
 		}
 		// add to outdegrees table for current link and its outgoing links
-		String hashkey = Hasher.hash(originalUrl);
-		kvs.put("outdegrees", hashkey, "url", originalUrl);
-		kvs.put("outdegrees", hashkey, "links", sb.toString());
+		// String hashkey = Hasher.hash(originalUrl);
+		// kvs.put("outdegrees", hashkey, "url", originalUrl);
+		kvs.put("outdegrees", originalUrl, "links", sb.toString());
 
 		// save the images crawled (with potential alt text) to images table
 		sb.setLength(0);
