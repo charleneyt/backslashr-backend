@@ -8,6 +8,7 @@ public class PageRank {
     static boolean inputThreshold = false;
 
     public static void run(FlameContext ctx, String[] args) throws Exception {
+    	System.out.println("Executing pagerank ...");
       // add check for args, should be 1 for convergence threshold, and 1 optional
         if (args.length < 1 || args.length > 2){
             ctx.output("We are expecting one argument t for the convergence threshold, and one optional argument for percentage threshold!");
