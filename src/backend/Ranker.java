@@ -110,7 +110,8 @@ public class Ranker {
 			// compute the final scores by multiplying cosine scores and page ranks
 			Row row = kvs.getRow("pageranks", url);
 			if (row != null) {
-				double pageRank = Double.valueOf(row.get("rank"));
+				double pageRank = Double.valueOf(row.get(url + "0"));
+//				double pageRank = Double.valueOf(row.get("rank"));
 //				System.out.println("page rank for url " + url + " is: " + pageRank);
 				double finalScore = cosineScore * pageRank * 1000;
 //				System.out.println("final score for url " + url + " is: " + finalScore);
