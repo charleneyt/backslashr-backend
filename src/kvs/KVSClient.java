@@ -127,6 +127,8 @@ public class KVSClient implements KVS {
 						URL url = new URL(ranges.elementAt(currentRangeIndex));
 						HttpURLConnection con = (HttpURLConnection) url.openConnection();
 						con.setRequestMethod("GET");
+						con.setConnectTimeout(500);
+						con.setReadTimeout(10000);
 						con.connect();
 						in = con.getInputStream();
 						Row r = fill();

@@ -139,7 +139,7 @@ public class FlameRDDImpl implements FlameRDD {
 	public String fold(String zeroElement, TwoStringsToString lambda) throws Exception {
 		String outputTable = context.invokeOperation(tableName, "/rdd/fold", Serializer.objectToByteArray(lambda), zeroElement, null);
 		Row row;
-		if (kvs.existsRow(outputTable, "value") && (row = kvs.getRow(outputTable, "value")) != null){
+		if (kvs.existsRow(outputTable, "htotal") && (row = kvs.getRow(outputTable, "htotal")) != null){
 			String accumulator = null;
 			for (String colName : row.columns()){
 				accumulator = lambda.op(accumulator == null ? zeroElement : accumulator, row.get(colName));
