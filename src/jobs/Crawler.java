@@ -144,6 +144,8 @@ public class Crawler {
 					HttpURLConnection.setFollowRedirects(false);
 					HttpURLConnection con = (HttpURLConnection) (new URL(robotsUrl)).openConnection();
 					con.setRequestMethod("GET");
+					con.setConnectTimeout(500);
+					con.setReadTimeout(10000);
 					con.setDoInput(true);
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
@@ -198,6 +200,8 @@ public class Crawler {
 					HttpURLConnection.setFollowRedirects(false);
 					HttpURLConnection con = (HttpURLConnection) (new URL(url)).openConnection();
 					con.setRequestMethod("HEAD");
+					con.setConnectTimeout(500);
+					con.setReadTimeout(10000);
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
 					try {
@@ -285,6 +289,8 @@ public class Crawler {
 						// new GET connection only if responseCode is 200 and type is text/html
 						con = (HttpURLConnection) (new URL(url)).openConnection();
 						con.setRequestMethod("GET");
+						con.setConnectTimeout(500);
+						con.setReadTimeout(10000);
 						con.setRequestProperty("User-Agent", "cis5550-crawler");
 						con.setDoInput(true);
 						try {
