@@ -146,8 +146,6 @@ public class Crawler {
 					con.setConnectTimeout(5000);
 					con.setReadTimeout(10000);
 					con.setRequestMethod("GET");
-					con.setConnectTimeout(500);
-					con.setReadTimeout(10000);
 					con.setDoInput(true);
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
@@ -204,8 +202,6 @@ public class Crawler {
 					con.setConnectTimeout(5000);
 					con.setReadTimeout(10000);
 					con.setRequestMethod("HEAD");
-					con.setConnectTimeout(500);
-					con.setReadTimeout(10000);
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
 					try {
@@ -295,8 +291,6 @@ public class Crawler {
 						con.setConnectTimeout(5000);
 						con.setReadTimeout(10000);
 						con.setRequestMethod("GET");
-						con.setConnectTimeout(500);
-						con.setReadTimeout(10000);
 						con.setRequestProperty("User-Agent", "cis5550-crawler");
 						con.setDoInput(true);
 						try {
