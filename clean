@@ -10,6 +10,7 @@ rm server_log
 rm __worker*.jar
 rm job*.jar
 rm *log*
+rm nohup.out
 
 echo "All tables, jars, logs cleared!"
 
