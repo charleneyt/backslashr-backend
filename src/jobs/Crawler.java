@@ -143,6 +143,8 @@ public class Crawler {
 					String robotsUrl = makeRobotsUrl(parsedUrl);
 					HttpURLConnection.setFollowRedirects(false);
 					HttpURLConnection con = (HttpURLConnection) (new URL(robotsUrl)).openConnection();
+					con.setConnectTimeout(5000);
+					con.setReadTimeout(10000);
 					con.setRequestMethod("GET");
 					con.setConnectTimeout(500);
 					con.setReadTimeout(10000);
@@ -199,6 +201,8 @@ public class Crawler {
 					// sending HEAD request
 					HttpURLConnection.setFollowRedirects(false);
 					HttpURLConnection con = (HttpURLConnection) (new URL(url)).openConnection();
+					con.setConnectTimeout(5000);
+					con.setReadTimeout(10000);
 					con.setRequestMethod("HEAD");
 					con.setConnectTimeout(500);
 					con.setReadTimeout(10000);
@@ -288,6 +292,8 @@ public class Crawler {
 
 						// new GET connection only if responseCode is 200 and type is text/html
 						con = (HttpURLConnection) (new URL(url)).openConnection();
+						con.setConnectTimeout(5000);
+						con.setReadTimeout(10000);
 						con.setRequestMethod("GET");
 						con.setConnectTimeout(500);
 						con.setReadTimeout(10000);
@@ -316,7 +322,7 @@ public class Crawler {
 								if (kvs.existsRow("domain", domainHash)){
 									Row domainRow = kvs.getRow("domain", domainHash);
 									crawlCount = Long.valueOf(domainRow.get("count"));
-									if ("cnn.com".equals(domainName)){
+									if (authorityHubs.contains(domainName)){
 										if (crawlCount > 5000){
 											return null;
 										}
@@ -358,12 +364,16 @@ public class Crawler {
 							String responseStr = new String(response);
 							// filter out style and script tags and its content
 							String processed = responseStr.replaceAll("(<style.*?>.*?</style.*?>)|(<script.*?>[\\s\\S]*?</script.*?>)", "");
-							kvs.put("crawl", urlHash, "page", processed);
-							fw.write("Downloaded page for " + url + "\n");
-							fw.flush();
 							for (String newUrl : findUrl(kvs, processed, normalizedOriginal, rules)) {
 								ret.add(newUrl);
 							}
+							
+							fw.write("Downloaded page for " + url + "\n");
+							fw.flush();
+
+							// saving page content to new table
+							kvs.put("content", urlHash, "url", url);
+							kvs.put("content", urlHash, "page", processed);
 
 //				String responseHash = Hasher.hash(responseStr);
 //				boolean isDuplicate = false;
