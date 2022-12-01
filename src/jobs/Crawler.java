@@ -365,6 +365,8 @@ public class Crawler {
 							fw.write("Downloaded page for " + url + "\n");
 							fw.flush();
 
+							processed = processed.replaceAll("<[^>]*>", "");
+
 							// saving page content to new table
 							kvs.put("content", urlHash, "url", url);
 							kvs.put("content", urlHash, "page", processed);
