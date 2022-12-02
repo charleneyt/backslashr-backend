@@ -411,6 +411,8 @@ public class Server implements Runnable {
                 sb = new StringBuilder();
                 hasCR = false;
                 hasCRLF = false;
+//              Lily 12/2/22
+                qparams = null;
                 
                 r = null;
 
@@ -630,12 +632,15 @@ public class Server implements Runnable {
         private void parseQueryParams(){
             if (url.contains("?")){
                 if (qparams == null){
+                	System.out.println("qparams is null");
                     qparams = new HashMap<>();
+                } else {
+                	System.out.println("qparams is not null"+qparams);
                 }
                 parseQueryParams_Impl(url.split("\\?", 2)[1].split("&"));
             }
             if ("application/x-www-form-urlencoded".equals(headers.getOrDefault("content-type",null))){
-                if (qparams == null){
+				if (qparams == null){
                     qparams = new HashMap<>();
                 }
                 parseQueryParams_Impl(new String(messageBody).split("&"));

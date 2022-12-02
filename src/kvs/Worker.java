@@ -6,9 +6,11 @@ import static java.nio.file.StandardCopyOption.*;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Stream;
 
 import tools.HTTP;
 
@@ -18,6 +20,8 @@ public class Worker extends generic.Worker {
 
 	Map<String, TreeMap<String, Row>> tables; // TODO: Ed post 372, row keys case sensitive and we sort with case
 												// sensitive
+	// tableName: {rowName : lineNumber}
+	Map<String, ConcurrentSkipListMap<String, Integer>> tablesWithOffset; // updated to save memory and reduce initial load time per Ed post #766	
 	String directory;
 	Map<String, BufferedOutputStream> streams;
 	long lastRequestReceived;
@@ -41,6 +45,7 @@ public class Worker extends generic.Worker {
 
 		tables = new HashMap<>();
 		streams = new ConcurrentHashMap<>();
+		tablesWithOffset = new ConcurrentHashMap<>();
 
 		initializeTables();
 
@@ -71,8 +76,20 @@ public class Worker extends generic.Worker {
 		if (files == null) {
 			return;
 		}
+		
+		FileWriter fw = null;
+		long startTime = System.currentTimeMillis();
+		try {
+			fw = new FileWriter("kvsWorker_log", true);
+			fw.write("start writing table at: " + System.currentTimeMillis() + "\n");
+			fw.flush();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		for (File tableFile : files) {
+			int rowCount = 1;
 			try {
 				String tableDir = tableFile.getName();
 				FileInputStream input = new FileInputStream(tableFile);
@@ -83,8 +100,9 @@ public class Worker extends generic.Worker {
 					while (input.available() > 0) {
 						Row row = Row.readFrom(input);
 						if (row != null) {
-							tables.get(tableName).put(row.key(), row);
+							tablesWithOffset.get(tableName).put(row.key(), rowCount);
 						}
+						rowCount++;
 					}
 					streams.put(tableName, new BufferedOutputStream(new FileOutputStream(tableFile, true)));
 				}
@@ -93,6 +111,14 @@ public class Worker extends generic.Worker {
 				e.printStackTrace();
 			}
 		}
+		
+		try {
+			fw.write("end writing table at: " + System.currentTimeMillis() + "; took " + (System.currentTimeMillis() - startTime) + "\n");
+			fw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void updateRequestReceived() {
@@ -100,7 +126,8 @@ public class Worker extends generic.Worker {
 	}
 
 	public void addTable(String tableName) {
-		tables.put(tableName, new TreeMap<String, Row>());
+//		tables.put(tableName, new TreeMap<String, Row>());
+		tablesWithOffset.put(tableName, new ConcurrentSkipListMap<String, Integer>());
 	}
 
 	private class Flusher implements Runnable {
@@ -109,7 +136,7 @@ public class Worker extends generic.Worker {
 		public void run() {
 			while (true) {
 				try {
-					Thread.sleep(5000);
+					Thread.sleep(1000);
 					for (BufferedOutputStream stream : streams.values()) {
 						try {
 							stream.flush();
@@ -426,6 +453,76 @@ public class Worker extends generic.Worker {
 			}
 		}
 	}
+	
+	private void flush() {
+		for (BufferedOutputStream stream : streams.values()) {
+			try {
+				stream.flush();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private Row findRow(String tableName, String rowName) {
+//		System.out.println("from findRow, tablename is: " + tableName + ", rowName is: " + rowName);
+		flush();
+		
+		if (!tablesWithOffset.containsKey(tableName)) {
+//			System.out.println("returned null because cannot find table\n");
+			return null;
+		}
+			
+		if (!tablesWithOffset.get(tableName).containsKey(rowName)) {
+//			System.out.println("returned null because cannot find row\n");
+			return null;			
+		}
+		
+		File file = new File(directory + "/" + tableName + ".table");
+		
+		FileInputStream input;
+		try {
+			input = new FileInputStream(file);
+			int currCount = 0;
+			int rowCount = tablesWithOffset.get(tableName).get(rowName);
+			while (input.available() > 0 && currCount < rowCount) {
+				Row row = Row.readFrom(input);
+				currCount++;
+				if (currCount == rowCount && row != null) {
+//					System.out.println("curr count is: " + currCount + ", row count is: " + rowCount + "\n");
+//					System.out.println("return row: " + row.key() + "\n");
+					if (!row.key().equals(rowName)) {
+						FileWriter fw = new FileWriter("find_row_log", true);
+						fw.write("from findRow, tablename is: " + tableName + ", given row name is: " + rowName + " returned row name is: " + row.key() + "\n");
+						fw.close();
+					}
+
+					return row;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+//		System.out.println("returned null because end of file reached\n");
+		return null;
+
+//		try (Stream<String> lines = Files.lines(Paths.get(directory + "/" + tableName + ".table"))) {
+//			String targetLine = lines.skip(rowCount).findFirst().get();
+//			if (targetLine == null)
+//				return null;
+//			Row targetRow = Row.readFrom(new ByteArrayInputStream(targetLine.getBytes(StandardCharsets.UTF_8)));
+//			return targetRow;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return null;
+//		}
+	}
+	
+	private String findCol(Row row, String colName) {
+		return row.get(colName);
+	}
 
 	// Accept 3 command line args: 1) a port number for the worker, 2) a storage
 	// directory, and 3) the IP and port of the master, separated by a colon (:).
@@ -476,7 +573,8 @@ public class Worker extends generic.Worker {
 			String tableName = req.params("table");
 			String rowName = req.params("row");
 			String colName = req.params("col");
-
+//			System.out.println("from put /data/:table/:row/:col, table name is: " + tableName + ", rowName is: " + rowName + ", colName is: " + colName + "\n");
+			
 			// EC 1
 			worker.updateRequestReceived();
 
@@ -530,7 +628,7 @@ public class Worker extends generic.Worker {
 						req.bodyAsBytes());
 			}
 
-			if (!worker.tables.containsKey(tableName)) {
+			if (!worker.tablesWithOffset.containsKey(tableName)) {
 				worker.addTable(tableName);
 			}
 
@@ -541,17 +639,41 @@ public class Worker extends generic.Worker {
 			}
 			BufferedOutputStream currStream = worker.streams.get(tableName);
 
-			Map<String, Row> currTable = worker.tables.get(tableName);
+			Map<String, Integer> currTable = worker.tablesWithOffset.get(tableName);
 			Row row;
 			if (!currTable.containsKey(rowName)) {
+				System.out.println("in mem map does not have key " + rowName + "\n");
 				row = new Row(rowName);
 			} else {
-				row = currTable.get(rowName);
+				System.out.println("in mem map found key " + rowName + "\n");
+				row = worker.findRow(tableName, rowName);
 			}
+			
+			if (row == null) {
+				FileWriter fw = new FileWriter("missing_row_log", true);
+				fw.write("Table: " + tableName +", row: " + rowName + ", colName: " + colName + "\n");
+				fw.close();
+				row = new Row(rowName);
+			}
+			
+			// to update to maintain a max row count map {tableName : maxRowCount}
+			int maxRowNum = 0;
+			for (Integer rowNum : currTable.values()) {
+				maxRowNum = Math.max(maxRowNum, rowNum);
+			}
+			
+			currTable.put(rowName, maxRowNum + 1);
 			row.put(colName, req.bodyAsBytes());
-			currTable.put(rowName, row);
+//			currTable.put(rowName, row);
+//			worker.tablesWithOffset.put(tableName, worker.tablesWithOffset.get(tableName) + 1);
 			currStream.write(row.toByteArray());
 			currStream.write(Worker.LFbyte);
+//			System.out.println();
+
+			FileWriter fw = new FileWriter("put_row_log", true);
+			fw.write("put /data/:table/:row/:col: table is: " + tableName + ", row is: " + rowName + ", col is: " + colName + "\n");
+			fw.close();
+
 			return "OK";
 		});
 
@@ -564,20 +686,36 @@ public class Worker extends generic.Worker {
 
 			// EC 1
 			worker.updateRequestReceived();
-
-			// check table, row, col all exist
-			if (!worker.tables.containsKey(tableName)) {
+			
+//			// check table, row, col all exist
+//			if (!worker.tables.containsKey(tableName)) {
+//				res.status(404, "Not Found");
+//				return "404 Not Found";
+//			} else if (!worker.tables.get(tableName).containsKey(rowName)) {
+//				res.status(404, "Not Found");
+//				return "404 Not Found";
+//			} else if (!worker.tables.get(tableName).get(rowName).columns().contains(colName)) {
+//				res.status(404, "Not Found");
+//				return "404 Not Found";
+//			}
+//			System.out.println("from get /data/:table/:row/:col, " + tableName + ", " + rowName +", " + colName + "\n");
+			// check table, row, col all exist with offset
+			Row targetRow = worker.findRow(tableName, rowName);
+			if (targetRow == null) {
 				res.status(404, "Not Found");
-				return "404 Not Found";
-			} else if (!worker.tables.get(tableName).containsKey(rowName)) {
+				System.out.println("Failed to find row!");
+				return "404 Not Found";				
+			}
+			
+			String targetCol = worker.findCol(targetRow, colName);
+			if (targetCol == null) {
 				res.status(404, "Not Found");
-				return "404 Not Found";
-			} else if (!worker.tables.get(tableName).get(rowName).columns().contains(colName)) {
-				res.status(404, "Not Found");
-				return "404 Not Found";
+//				System.out.println("Failed to find col!");
+				return "404 Not Found";				
 			}
 
-			res.bodyAsBytes(worker.tables.get(tableName).get(rowName).getBytes(colName));
+			res.bodyAsBytes(targetCol.getBytes());
+//			System.out.println("Found the col! col is: " + targetCol);
 			return null;
 		});
 
@@ -595,11 +733,16 @@ public class Worker extends generic.Worker {
 			sb.append("<style> tr, th, td {border: 1px solid black;}</style>");
 			sb.append("<br>");
 			sb.append("<table><tr><td>Table Name</td><td>Number of Row Keys</td></tr>");
-			for (Map.Entry<String, TreeMap<String, Row>> tableEntry : worker.tables.entrySet()) {
+			for (Map.Entry<String, ConcurrentSkipListMap<String, Integer>> tableEntry : worker.tablesWithOffset.entrySet()) {
 				String link = "/view/" + tableEntry.getKey();
 				sb.append("<tr><td><a href=\"" + link + "\">" + tableEntry.getKey() + "</td><td>"
 						+ tableEntry.getValue().size() + "</td></tr>");
-			}
+			}			
+//			for (Map.Entry<String, TreeMap<String, Row>> tableEntry : worker.tables.entrySet()) {
+//				String link = "/view/" + tableEntry.getKey();
+//				sb.append("<tr><td><a href=\"" + link + "\">" + tableEntry.getKey() + "</td><td>"
+//						+ tableEntry.getValue().size() + "</td></tr>");
+//			}
 			sb.append("</table>");
 			return "<!doctype html><html><head><title>KVS Client - List of All Tables</title></head><body><div>KVS Client - List of All Tables</div>"
 					+ sb.toString() + "</body></html>";
@@ -619,92 +762,97 @@ public class Worker extends generic.Worker {
 
 			// EC 1
 			worker.updateRequestReceived();
+			
+			if (!worker.tablesWithOffset.containsKey(tableName)) {
+				res.status(404, "Not Found");
+				return "404 Not Found";
+			}
+			
+//				TreeMap<String, Row> currTable = worker.tables.get(tableName);
+			ConcurrentSkipListMap<String, Integer> currTable = worker.tablesWithOffset.get(tableName);
 
-			if (worker.tables.containsKey(tableName)) {
-
-				TreeMap<String, Row> currTable = worker.tables.get(tableName);
-
-				if (currTable.size() < 1) {
-					res.type("text/html");
-					return "<!doctype html><html><head><title>KVS Client - Table " + tableName
-							+ "</title></head><body><div>KVS Client - Table " + tableName + "</div>"
-							+ "<table>Table is empty!</table>" + "</body></html>";
-				}
-
-				// get the sorted key in list
-				List<String> rowsName = new ArrayList<>(currTable.navigableKeySet());
-
-				// get the rows starting index, by default it's 0, or if query param has
-				// startRow
-				String startRow = rowsName.get(0);
-				int startIndex = 0;
-				if (req.queryParams() != null && req.queryParams().contains("startRow")) {
-					startRow = req.queryParams("startRow");
-					startIndex = rowsName.indexOf(startRow);
-					if (startIndex == -1) {
-						res.status(404, "Not Found");
-						return "404 Not Found";
-					}
-				}
-				// calculating endIndex to get a submap for better runtime
-				int endIndex = Math.min(rowsName.size() - 1, startIndex + 99);
-				NavigableMap<String, Row> subTable = currTable.subMap(startRow, true, rowsName.get(endIndex), true);
-
-				// collect the column names in the 10 rows (or less if currently less than 10)
-				Set<String> columnVals = new HashSet<>();
-				for (Row row : subTable.values()) {
-					columnVals.addAll(row.columns());
-				}
-
-				// remove page content in UI
-				columnVals.remove("page");
-
-				// inevitable work to sort the columns in current 10 rows!
-				List<String> colsName = new ArrayList<>(columnVals);
-				colsName.sort((a, b) -> a.compareTo(b));
-
-				// start to make table!
-				// first line
-				StringBuilder sb = new StringBuilder();
-				sb.append("<html>");
-				sb.append("<style> tr, th, td {border: 1px solid black;}</style>");
-				sb.append("<br>");
-				sb.append("<table><tr><td>Row</td>");
-				for (String col : colsName) {
-					sb.append("<td>" + col + "</td>");
-				}
-				sb.append("</tr>");
-
-				// every row, for up to 10 rows
-				for (Row row : subTable.values()) {
-					sb.append("<tr><td>" + row.key() + "</td>");
-					for (String col : colsName) {
-						if (row.columns().contains(col)) {
-							if (col.equals("page")) {
-								continue;
-							}
-							sb.append("<td>" + row.get(col) + "</td>");
-						} else {
-							sb.append("<td></td>");
-						}
-					}
-					sb.append("</tr>");
-				}
-				sb.append("</table>");
-
-				// generate a Next link with startRow if we have more in the table
-				if (endIndex + 1 < rowsName.size()) {
-					String link = "/view/" + tableName + "?startRow=" + rowsName.get(endIndex + 1);
-					sb.append("<div><a href=\"" + link + "\">" + "Next</div>");
-				}
-
+			if (currTable.size() < 1) {
 				res.type("text/html");
 				return "<!doctype html><html><head><title>KVS Client - Table " + tableName
-						+ "</title></head><body><div>KVS Client - Table " + tableName + "</div>" + sb.toString()
-						+ "</body></html>";
+						+ "</title></head><body><div>KVS Client - Table " + tableName + "</div>"
+						+ "<table>Table is empty!</table>" + "</body></html>";
 			}
-			res.status(404, "Not Found");
-			return "404 Not Found";
+
+			// get the sorted key in list
+			List<String> rowsName = new ArrayList<>(currTable.navigableKeySet());
+
+			// get the rows starting index, by default it's 0, or if query param has
+			// startRow
+			String startRow = rowsName.get(0);
+			int startIndex = 0;
+			if (req.queryParams() != null && req.queryParams().contains("startRow")) {
+				startRow = req.queryParams("startRow");
+				startIndex = rowsName.indexOf(startRow);
+				if (startIndex == -1) {
+					res.status(404, "Not Found");
+					return "404 Not Found";
+				}
+			}
+			// calculating endIndex to get a submap for better runtime, 99 rows max
+			int endIndex = Math.min(rowsName.size() - 1, startIndex + 10);
+			NavigableMap<String, Integer> subTable = currTable.subMap(startRow, true, rowsName.get(endIndex), true);
+
+			// collect the column names in the 10 rows (or less if currently less than 10)
+			Set<String> columnVals = new HashSet<>();
+			for (String rowName : subTable.keySet()) {
+				Row row = worker.findRow(tableName, rowName);
+				if (row != null)
+					columnVals.addAll(row.columns());
+			}
+
+			// remove page content in UI
+//			columnVals.remove("page");
+
+			// inevitable work to sort the columns in current 10 rows!
+			List<String> colsName = new ArrayList<>(columnVals);
+			colsName.sort((a, b) -> a.compareTo(b));
+
+			// start to make table!
+			// first line
+			StringBuilder sb = new StringBuilder();
+			sb.append("<html>");
+			sb.append("<style> tr, th, td {border: 1px solid black;}</style>");
+			sb.append("<br>");
+			sb.append("<table><tr><td>Row</td>");
+			for (String col : colsName) {
+				sb.append("<td>" + col + "</td>");
+			}
+			sb.append("</tr>");
+			
+			// every row
+			for (String rowName : subTable.keySet()) {
+				sb.append("<tr><td>" + rowName + "</td>");
+				Row row = worker.findRow(tableName, rowName);
+				for (String col : colsName) {
+					if (row.columns().contains(col)) {
+//						if (col.equals("page")) {
+//							continue;
+//						}
+						sb.append("<td>" + row.get(col) + "</td>");
+					} else {
+						sb.append("<td></td>");
+					}
+				}
+				sb.append("</tr>");
+			}
+			sb.append("</table>");
+
+			// generate a Next link with startRow if we have more in the table
+			if (endIndex + 1 < rowsName.size()) {
+				String link = "/view/" + tableName + "?startRow=" + rowsName.get(endIndex + 1);
+				sb.append("<div><a href=\"" + link + "\">" + "Next</div>");
+			}
+
+			res.type("text/html");
+			return "<!doctype html><html><head><title>KVS Client - Table " + tableName
+					+ "</title></head><body><div>KVS Client - Table " + tableName + "</div>" + sb.toString()
+					+ "</body></html>";
+			
 		});
 
 		// GET route for /data/XXX/YYY, where XXX is a table name and YYY is a row key.
@@ -719,11 +867,22 @@ public class Worker extends generic.Worker {
 			// EC 1
 			worker.updateRequestReceived();
 
-			// check table, row all exist
-			if (worker.tables.containsKey(tableName) && worker.tables.get(tableName).containsKey(rowName)) {
-				res.bodyAsBytes(worker.tables.get(tableName).get(rowName).toByteArray());
+//			// check table, row all exist
+//			if (worker.tables.containsKey(tableName) && worker.tables.get(tableName).containsKey(rowName)) {
+//				res.bodyAsBytes(worker.tables.get(tableName).get(rowName).toByteArray());
+//				return null;
+//			} else {
+//				res.status(404, "Not Found");
+//				return "404 Not Found";
+//			}
+			
+			Row targetRow = worker.findRow(tableName, rowName);
+			
+			if (targetRow != null) {
+				res.bodyAsBytes(targetRow.toByteArray());
 				return null;
-			} else {
+			}
+			else {
 				res.status(404, "Not Found");
 				return "404 Not Found";
 			}
@@ -734,55 +893,82 @@ public class Worker extends generic.Worker {
 		// character (ASCII code 10). After the last entry, there should be another LF
 		// character to indicate the end of the stream.
 		get("/data/:table", (req, res) -> {
+			System.out.println("/data/:table"+ req.queryParams()+" " + req.url());
 			String tableName = req.params("table");
 
 			// EC 1
 			worker.updateRequestReceived();
-
-			// check table all exist
-			if (worker.tables.containsKey(tableName)) {
-				// check for startRow and endRowExclusive in query params
-				boolean hasStartRow = req.queryParams() != null && req.queryParams().contains("startRow");
-				String startRow = "";
-				if (hasStartRow) {
-					startRow = req.queryParams("startRow");
-				}
-				boolean hasEndRow = req.queryParams() != null && req.queryParams().contains("endRowExclusive");
-				String endRow = "";
-				if (hasEndRow) {
-					endRow = req.queryParams("endRowExclusive");
-				}
-
-				if (hasStartRow && hasEndRow && startRow.compareTo(endRow) > 0) {
-					res.status(400, "Bad Request");
-					return "400 Bad Request (startRow cannot be larger than endRowExclusive!)";
-				}
-
-				Collection<Row> workset = worker.tables.get(tableName).values();
-				int rowCount = 0;
-				boolean beginning = false;
-				for (Row row : workset) {
-					if (!hasStartRow || beginning || row.key().compareTo(startRow) >= 0) {
-						beginning = true;
-						if (!hasEndRow || row.key().compareTo(endRow) < 0) {
-							res.write(row.toByteArray());
-							res.write(Worker.LFbyte);
-							rowCount++;
-						} else {
-							break;
-						}
-					}
-				}
-				res.write(Worker.LFbyte);
-				// in case no row met the query
-				if (rowCount == 0) {
-					res.write(Worker.LFbyte);
-				}
-				return null;
-			} else {
+			
+			// check if the table exist			
+			if (!worker.tablesWithOffset.containsKey(tableName)) {
 				res.status(404, "Not Found");
 				return "404 Not Found";
 			}
+
+			// check for startRow and endRowExclusive in query params
+			boolean hasStartRow = req.queryParams() != null && req.queryParams().contains("startRow");
+			String startRow = "";
+			if (hasStartRow) {
+				startRow = req.queryParams("startRow");
+			}
+			boolean hasEndRow = req.queryParams() != null && req.queryParams().contains("endRowExclusive");
+			String endRow = "";
+			if (hasEndRow) {
+				endRow = req.queryParams("endRowExclusive");
+			}
+
+			if (hasStartRow && hasEndRow && startRow.compareTo(endRow) > 0) {
+				res.status(400, "Bad Request");
+				return "400 Bad Request (startRow cannot be larger than endRowExclusive!)";
+			}
+			
+			System.out.println("endRow: "+endRow);
+			Collection<String> rowSet = worker.tablesWithOffset.get(tableName).keySet();
+			int rowCount = 0;
+			boolean beginning = false;
+			for (String rowName : rowSet) {
+				System.out.println("rowName: "+rowName);
+				// need to improve here, run time is O(n^2)
+				Row row = worker.findRow(tableName, rowName);
+				if (row == null) {
+					System.out.println("from /data/:table " + rowName + "is null!!\n");
+					continue;
+				}
+				if (!hasStartRow || beginning || rowName.compareTo(startRow) >= 0) {
+					beginning = true;
+					if (!hasEndRow || rowName.compareTo(endRow) < 0) {
+						System.out.println("row.toByteArray(): "+row.toString());
+						res.write(row.toByteArray());
+						res.write(Worker.LFbyte);
+						rowCount++;
+					} else {
+						break;
+					}
+				}
+			}
+
+//			Collection<Row> workset = worker.tables.get(tableName).values();
+//			int rowCount = 0;
+//			boolean beginning = false;
+//			for (Row row : workset) {
+//				if (!hasStartRow || beginning || row.key().compareTo(startRow) >= 0) {
+//					beginning = true;
+//					if (!hasEndRow || row.key().compareTo(endRow) < 0) {
+//						res.write(row.toByteArray());
+//						res.write(Worker.LFbyte);
+//						rowCount++;
+//					} else {
+//						break;
+//					}
+//				}
+//			}
+			res.write(Worker.LFbyte);
+			// in case no row met the query
+			if (rowCount == 0) {
+				res.write(Worker.LFbyte);
+			}
+			return null;
+
 		});
 
 		// the body will contain one or multiple rows, separated by a LF character. The
@@ -840,7 +1026,7 @@ public class Worker extends generic.Worker {
 						req.bodyAsBytes());
 			}
 
-			if (!worker.tables.containsKey(tableName)) {
+			if (!worker.tablesWithOffset.containsKey(tableName)) {
 				worker.addTable(tableName);
 			}
 
@@ -852,14 +1038,27 @@ public class Worker extends generic.Worker {
 			BufferedOutputStream currStream = worker.streams.get(tableName);
 
 			InputStream input = new ByteArrayInputStream(req.bodyAsBytes());
+			if (!worker.tablesWithOffset.containsKey(tableName)) {
+				worker.addTable(tableName);
+			}
+			int rowCount = 0;
+			for (Integer rowNum : worker.tablesWithOffset.get(tableName).values()) {
+				rowCount = Math.max(rowCount, rowNum);
+			}
+			
 			while (input.available() > 0) {
 				Row row = Row.readFrom(input);
 				if (row != null) {
-					worker.tables.get(tableName).put(row.key(), row);
+					rowCount++;
+//					for (String col : row.columns()) {
+//						System.out.println("from data/:table, written row key is: " + row.key() + "; written col is: " + col + " in table " + tableName + "\n");						
+//					}
+					worker.tablesWithOffset.get(tableName).put(row.key(), rowCount);
 					currStream.write(row.toByteArray());
 					currStream.write(Worker.LFbyte);
 				}
 			}
+			
 			return "OK";
 		});
 
@@ -918,11 +1117,19 @@ public class Worker extends generic.Worker {
 			// req.bodyAsBytes());
 			// }
 
-			if (!worker.tables.containsKey(oldTable)) {
+//			if (!worker.tables.containsKey(oldTable)) {
+//				res.status(404, "Not Found");
+//				return "404 Not Found";
+//			}
+//			if (worker.tables.containsKey(newTable)) {
+//				res.status(409, "Conflict");
+//				return "409 Conflict";
+//			}
+			if (!worker.tablesWithOffset.containsKey(oldTable)) {
 				res.status(404, "Not Found");
 				return "404 Not Found";
 			}
-			if (worker.tables.containsKey(newTable)) {
+			if (worker.tablesWithOffset.containsKey(newTable)) {
 				res.status(409, "Conflict");
 				return "409 Conflict";
 			}
@@ -940,10 +1147,15 @@ public class Worker extends generic.Worker {
 			// open the new stream for new table name
 			worker.streams.put(newTable, new BufferedOutputStream(Files.newOutputStream(newFile, CREATE, APPEND)));
 
+//			// move the table from old to new key
+//			worker.tables.put(newTable, worker.tables.get(oldTable));
+//			// delete old entry
+//			worker.tables.remove(oldTable);
+			
 			// move the table from old to new key
-			worker.tables.put(newTable, worker.tables.get(oldTable));
+			worker.tablesWithOffset.put(newTable, worker.tablesWithOffset.get(oldTable));
 			// delete old entry
-			worker.tables.remove(oldTable);
+			worker.tablesWithOffset.remove(oldTable);
 
 			return "OK";
 		});
@@ -952,7 +1164,12 @@ public class Worker extends generic.Worker {
 		put("/delete/:table", (req, res) -> {
 			String tableToDelete = req.params("table");
 
-			if (!worker.tables.containsKey(tableToDelete)) {
+//			if (!worker.tables.containsKey(tableToDelete)) {
+//				res.status(404, "Not Found");
+//				return "404 Not Found";
+//			}
+			
+			if (!worker.tablesWithOffset.containsKey(tableToDelete)) {
 				res.status(404, "Not Found");
 				return "404 Not Found";
 			}
@@ -966,8 +1183,11 @@ public class Worker extends generic.Worker {
 			// delete the file
 			Files.deleteIfExists(fileToDelete);
 
+//			// delete old entry
+//			worker.tables.remove(tableToDelete);
+			
 			// delete old entry
-			worker.tables.remove(tableToDelete);
+			worker.tablesWithOffset.remove(tableToDelete);
 
 			return "OK";
 		});
@@ -981,11 +1201,21 @@ public class Worker extends generic.Worker {
 			// EC 1
 			worker.updateRequestReceived();
 
-			if (!worker.tables.containsKey(tableName)) {
+//			if (!worker.tables.containsKey(tableName)) {
+//				res.status(404, "Not Found");
+//				return "404 Not Found";
+//			} else {
+//				res.body(String.valueOf(worker.tables.get(tableName).size()));
+//				return null;
+//			}
+			
+			if (!worker.tablesWithOffset.containsKey(tableName)) {
 				res.status(404, "Not Found");
 				return "404 Not Found";
 			} else {
-				res.body(String.valueOf(worker.tables.get(tableName).size()));
+				int size = worker.tablesWithOffset.get(tableName).size();
+				res.body(String.valueOf(size));
+				System.out.println("quuee size is  " + size + " ... ");
 				return null;
 			}
 		});

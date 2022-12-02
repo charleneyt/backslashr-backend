@@ -53,6 +53,7 @@ public class FlameRDDImpl implements FlameRDD {
 
 	@Override
 	public FlameRDD flatMap(StringToIterable lambda) throws Exception {
+		System.out.println("from flatMap!!!!");
 		String outputTable = context.invokeOperation(tableName, "/rdd/flatMap", Serializer.objectToByteArray(lambda), null, null);
 		FlameRDDImpl ret = new FlameRDDImpl(context);
 		ret.saveTable(outputTable);

@@ -12,7 +12,7 @@ echo "Removing old jar and logs"
 # rm server_log
 rm __worker*.jar
 rm job*.jar
-rm *log*
+# rm *log*
 
 echo "Starting new server and workers"
 # restarting master and workers

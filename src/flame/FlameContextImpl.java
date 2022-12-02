@@ -1,5 +1,7 @@
 package flame;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 import exceptions.*;
@@ -110,7 +112,7 @@ public class FlameContextImpl implements FlameContext {
 				: ("&zeroElement=" + java.net.URLEncoder.encode(zeroElement, "UTF-8"));
 		String secondTableUrl = otherInputTable == null ? ""
 				: ("&secondTable=" + java.net.URLEncoder.encode(otherInputTable, "UTF-8"));
-
+		System.out.println("latestAssignment.size()" + latestAssignment.size());
 		for (int i = 0; i < latestAssignment.size(); i++) {
 			Partition par = latestAssignment.elementAt(i);
 			String fromKeyUrl = par.fromKey == null ? ""
@@ -127,7 +129,9 @@ public class FlameContextImpl implements FlameContext {
 			final int j = i;
 			threads[i] = new Thread(operation + "#" + (i + 1)) {
 				public void run() {
+					long startTime = System.currentTimeMillis();
 					try {
+						System.out.println("invokeOperation url " + url);
 						Response r = HTTP.doRequest("POST", url, lambda);
 						if (r.statusCode() != 200) {
 							results[j] = "Worker" + j + "Failed: " + new String(r.body());
@@ -138,6 +142,18 @@ public class FlameContextImpl implements FlameContext {
 						results[j] = "Worker" + j + "Exception: " + e;
 						e.printStackTrace();
 					}
+					long endTime = System.currentTimeMillis();
+					
+					FileWriter fw;
+					try {
+						fw = new FileWriter("FlameContext_log", true);
+						fw.write("thread " + operation + "#" + " start time: " + startTime + ", end time: " + endTime + ", took " + (endTime - startTime) + " to run \n");
+						fw.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
 				}
 			};
 			threads[i].start();

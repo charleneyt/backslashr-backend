@@ -51,26 +51,38 @@ class FlameWorker extends Worker {
 			StringToIterable lambda = (StringToIterable) Serializer.byteArrayToObject(req.bodyAsBytes(), myJAR);
 
 			KVSClient kvs = new KVSClient(qParamsStrings[2]);
-
+			System.out.println("qparam0 " + qParamsStrings[0]);
+			System.out.println("qparam1 " + qParamsStrings[1]);
+			System.out.println("qparam2 " + qParamsStrings[2]);
+			System.out.println("qparam3 " + qParamsStrings[3]);
+			System.out.println("qparam4 " + qParamsStrings[4]);
 			Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
 			if (iter != null) {
+				System.out.println("iter is not null");
 				while (iter.hasNext()) {
+					System.out.println("iter has next");
 					Row row = iter.next();
 					if (row == null) {
+						System.out.println("row is now so we break");
 						break;
 					}
 
 					if (row.columns().contains(FlameWorker.VALUE_STRING)) {
+						System.out.println("from Flameworker, row is " + row.key());
+						if (row.get(FlameWorker.VALUE_STRING) == null) {
+							System.out.println("value col is null");
+						}
 						Iterable<String> it = lambda.op(row.get(FlameWorker.VALUE_STRING));
 						if (it != null) {
 							int seq = 0;
 							for (String s : it) {
-								// System.out.println("put val is: " + s);
+								 System.out.println("put val is: " + s);
 								kvs.put(qParamsStrings[1], Hasher.hash(row.key() + String.valueOf(seq++)),
 										FlameWorker.VALUE_STRING, s.getBytes());
 							}
 						}
 					}
+					
 				}
 			}
 
