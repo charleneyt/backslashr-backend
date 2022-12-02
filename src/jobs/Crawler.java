@@ -142,21 +142,18 @@ public class Crawler {
 					String robotsUrl = makeRobotsUrl(parsedUrl);
 					HttpURLConnection.setFollowRedirects(false);
 					HttpURLConnection con = (HttpURLConnection) (new URL(robotsUrl)).openConnection();
-					try {
-						con.setConnectTimeout(5000);
-					} catch (Exception e) {
-						System.out.println("Connection timeout");
-						return null;
-					}
-//					con.setReadTimeout(10000);
+
 					con.setRequestMethod("GET");
 					con.setDoInput(true);
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
+					// Update where to put timeout Cindy 12/02
 					try {
 						con.connect();
+						con.setConnectTimeout(5000);
+						con.setReadTimeout(10000);
 					} catch (Exception e) {
-						System.out.println("Failed to connect");
+						System.out.println("Robot failed to connect");
 						return null;
 					}
 
@@ -203,20 +200,17 @@ public class Crawler {
 					// sending HEAD request
 					HttpURLConnection.setFollowRedirects(false);
 					HttpURLConnection con = (HttpURLConnection) (new URL(url)).openConnection();
-					try {
-						con.setConnectTimeout(5000);
-					} catch (Exception e) {
-						System.out.println("Connection timeout");
-						return null;
-					}
-//					con.setReadTimeout(10000);
+
 					con.setRequestMethod("HEAD");
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
+					// Update where to put timeout Cindy 12/02
 					try {
 						con.connect();
+						con.setConnectTimeout(5000);
+						con.setReadTimeout(10000);
 					} catch (Exception e) {
-						System.out.println("Failed to connect");
+						System.out.println("Head failed to connect");
 						return null;
 					}
 
@@ -295,21 +289,17 @@ public class Crawler {
 						kvs.put("hosts", hostHash, "time", String.valueOf(System.currentTimeMillis()).getBytes());
 						System.out.println("Crawling: " + url);
 						con = (HttpURLConnection) (new URL(url)).openConnection();
-						try {
-							con.setConnectTimeout(5000);
-						} catch (Exception e) {
-							System.out.println("Connection timeout");
-							return null;
-						}
 
-//						con.setReadTimeout(10000);
 						con.setRequestMethod("GET");
 						con.setRequestProperty("User-Agent", "cis5550-crawler");
 						con.setDoInput(true);
+						// Update where to put timeout Cindy 12/02
 						try {
 							con.connect();
+							con.setConnectTimeout(5000);
+							con.setReadTimeout(10000);
 						} catch (Exception e) {
-							System.out.println("Failed to connect");
+							System.out.println("Code 200 failed to connect");
 							return null;
 						}
 						code = con.getResponseCode();
@@ -550,13 +540,14 @@ public class Crawler {
 			}
 		}
 
-		for (String url : seen.keySet()) {
-			String key = Hasher.hash(url);
-			if (!kvs.existsRow("anchorEC", key)) {
-				kvs.put("anchorEC", key, "url", url.getBytes());
-			}
-			kvs.put("anchorEC", key, "anchor-" + originalUrl, seen.get(url).getBytes());
-		}
+		// Temporary exclude Cindy 12/02
+//		for (String url : seen.keySet()) {
+//			String key = Hasher.hash(url);
+//			if (!kvs.existsRow("anchorEC", key)) {
+//				kvs.put("anchorEC", key, "url", url.getBytes());
+//			}
+//			kvs.put("anchorEC", key, "anchor-" + originalUrl, seen.get(url).getBytes());
+//		}
 
 		// save the outdegrees of current url to outdegrees table (value is comma
 		// separated, to be used in pageranks)
@@ -569,7 +560,13 @@ public class Crawler {
 			sb.append(url);
 
 			// check if already crawled, if so, don't add to queue
-			if (!kvs.existsRow("crawl", Hasher.hash(url))) {
+			if (kvs.existsRow("crawl", Hasher.hash(url))) {
+				Row r = kvs.getRow("crawl", Hasher.hash(url));
+				if (r.columns().contains("url") && r.get("url").equals(url) && r.columns().contains("responseCode")) {
+					continue;
+				}
+			}
+//			if (!kvs.existsRow("crawl", Hasher.hash(url))) {
 				// check the count by domain name, pass if currently crawled enough
 				String[] parsedUrl = parseURL(url);
 				int lastDot = parsedUrl[1].lastIndexOf(".");
@@ -598,7 +595,7 @@ public class Crawler {
 				} else {
 					continue;
 				}
-			}
+//			}
 		}
 		// add to outdegrees table for current link and its outgoing links
 		// String hashkey = Hasher.hash(originalUrl);
