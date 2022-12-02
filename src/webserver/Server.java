@@ -441,7 +441,7 @@ public class Server implements Runnable {
             	startIdx = requestString.indexOf("POST");
             }
             else {
-            	System.out.println("NOT a valid reqeust");
+            	System.out.println("NOT a valid request");
             	return;
             }
             
