@@ -6,6 +6,7 @@ import static java.nio.file.StandardCopyOption.*;
 
 import java.io.*;
 import java.net.*;
+import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -20,7 +21,7 @@ public class Worker extends generic.Worker {
 
 	Map<String, TreeMap<String, Row>> tables; // TODO: Ed post 372, row keys case sensitive and we sort with case
 												// sensitive
-	// tableName: {rowName : lineNumber}
+	// tableName: {rowName : byteOffset}
 	Map<String, ConcurrentSkipListMap<String, Integer>> tablesWithOffset; // updated to save memory and reduce initial load time per Ed post #766	
 	String directory;
 	Map<String, BufferedOutputStream> streams;
@@ -89,7 +90,7 @@ public class Worker extends generic.Worker {
 		}
 
 		for (File tableFile : files) {
-			int rowCount = 1;
+			int startByte = 0;
 			try {
 				String tableDir = tableFile.getName();
 				FileInputStream input = new FileInputStream(tableFile);
@@ -98,11 +99,18 @@ public class Worker extends generic.Worker {
 					addTable(tableName);
 
 					while (input.available() > 0) {
-						Row row = Row.readFrom(input);
-						if (row != null) {
-							tablesWithOffset.get(tableName).put(row.key(), rowCount);
+						try {
+							Row row = Row.readFrom(input);
+							if (row != null) {
+								tablesWithOffset.get(tableName).put(row.key(), startByte);
+							}
+							startByte = row.toByteArray().length + 1;
 						}
-						rowCount++;
+						catch (Exception e) {
+							FileWriter fw2 = new FileWriter("read_row_error_log", true);
+							fw2.write("error in initializing tables, table name is: " + tableName + "; starting byte: " + startByte + "\n");
+							fw2.flush();
+						}
 					}
 					streams.put(tableName, new BufferedOutputStream(new FileOutputStream(tableFile, true)));
 				}
@@ -464,6 +472,27 @@ public class Worker extends generic.Worker {
 		}
 	}
 	
+	private String readStringSpace(RandomAccessFile file) throws Exception {
+	    byte buffer[] = new byte[1024];
+	    int numRead = 0;
+	    while (true) {
+	      if (numRead == buffer.length) {
+			FileWriter fw = new FileWriter("read_row_error_log", true);
+			fw.write("error in finding row, row key too long, so far read is: " + buffer.toString() + "\n");
+			fw.flush();
+			fw.close();
+			throw new Exception("Format error: Expecting string+space");
+	      }
+
+	      int b = file.read();
+	      if ((b < 0) || (b == 10))
+	        return null;
+	      buffer[numRead++] = (byte)b;
+	      if (b == ' ')
+	        return new String(buffer, 0, numRead-1);
+	    }		
+	}
+	
 	private Row findRow(String tableName, String rowName) {
 //		System.out.println("from findRow, tablename is: " + tableName + ", rowName is: " + rowName);
 		flush();
@@ -478,13 +507,27 @@ public class Worker extends generic.Worker {
 			return null;			
 		}
 		
-		File file = new File(directory + "/" + tableName + ".table");
+		RandomAccessFile file = new RandomAccessFile(directory + "/" + tableName + ".table", "r");
+		int bytePos = tablesWithOffset.get(tableName).get(rowName);
+		file.seek(bytePos);
 		
-		FileInputStream input;
+		while (file.read() != 10) {
+			String theKey;
+			try {
+				theKey = readStringSpace(file);				
+			}
+			catch (Exception e) {
+				return null;
+			}
+			
+			
+
+		}
+		
+		
+//		InputStream input = Channels.newInputStream(file.getChannel());
+		
 		try {
-			input = new FileInputStream(file);
-			int currCount = 0;
-			int rowCount = tablesWithOffset.get(tableName).get(rowName);
 			while (input.available() > 0 && currCount < rowCount) {
 				Row row = Row.readFrom(input);
 				currCount++;
