@@ -598,9 +598,9 @@ public class Crawler {
 //			}
 		}
 		// add to outdegrees table for current link and its outgoing links
-		// String hashkey = Hasher.hash(originalUrl);
-		// kvs.put("outdegrees", hashkey, "url", originalUrl);
-		kvs.put("outdegrees", originalUrl, "links", sb.toString());
+		String hashkey = Hasher.hash(originalUrl);
+		kvs.put("outdegrees", hashkey, "url", originalUrl);
+		kvs.put("outdegrees", hashkey, "links", sb.toString());
 
 		// save the images crawled (with potential alt text) to images table
 		sb.setLength(0);
