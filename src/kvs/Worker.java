@@ -641,10 +641,11 @@ public class Worker extends generic.Worker {
 				if (req.queryParams() != null && req.queryParams().contains("startRow")) {
 					startRow = req.queryParams("startRow");
 					startIndex = rowsName.indexOf(startRow);
-					if (startIndex == -1) {
-						res.status(404, "Not Found");
-						return "404 Not Found";
-					}
+					// Turn off 404 error Cindy 12/03
+//					if (startIndex == -1) {
+//						res.status(404, "Not Found");
+//						return "404 Not Found";
+//					}
 				}
 				// calculating endIndex to get a submap for better runtime
 				int endIndex = Math.min(rowsName.size() - 1, startIndex + 99);
@@ -703,8 +704,9 @@ public class Worker extends generic.Worker {
 						+ "</title></head><body><div>KVS Client - Table " + tableName + "</div>" + sb.toString()
 						+ "</body></html>";
 			}
-			res.status(404, "Not Found");
-			return "404 Not Found";
+			// Turn off 404 error Cindy 12/03
+//			res.status(404, "Not Found");
+			return "OK";
 		});
 
 		// GET route for /data/XXX/YYY, where XXX is a table name and YYY is a row key.
