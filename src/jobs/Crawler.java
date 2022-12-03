@@ -19,7 +19,7 @@ public class Crawler {
 	static boolean restartLog1 = true;
 	static boolean restartLog2 = true;
 	final static Set<String> allowedSuffix = new HashSet<>(Arrays.asList("com", "net", "org", "edu", "gov"));
-	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("cnn.com", "wikipedia.com"));
+	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("cnn.com", "wikipedia.com", "espn.com", "bbc.com", "irs.gov"));
 
 	public static void run(FlameContext ctx, String[] args) throws Exception {
 		// Check whether the latter contains a single element (the seed URL), and output
@@ -560,13 +560,7 @@ public class Crawler {
 			sb.append(url);
 
 			// check if already crawled, if so, don't add to queue
-			if (kvs.existsRow("crawl", Hasher.hash(url))) {
-				Row r = kvs.getRow("crawl", Hasher.hash(url));
-				if (r.columns().contains("url") && r.get("url").equals(url) && r.columns().contains("responseCode")) {
-					continue;
-				}
-			}
-//			if (!kvs.existsRow("crawl", Hasher.hash(url))) {
+			if (!kvs.existsRow("crawl", Hasher.hash(url))) {
 				// check the count by domain name, pass if currently crawled enough
 				String[] parsedUrl = parseURL(url);
 				int lastDot = parsedUrl[1].lastIndexOf(".");
@@ -595,7 +589,7 @@ public class Crawler {
 				} else {
 					continue;
 				}
-//			}
+			}
 		}
 		// add to outdegrees table for current link and its outgoing links
 		String hashkey = Hasher.hash(originalUrl);
