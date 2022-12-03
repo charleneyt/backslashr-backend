@@ -127,10 +127,8 @@ public class KVSClient implements KVS {
 						URL url = new URL(ranges.elementAt(currentRangeIndex));
 						HttpURLConnection con = (HttpURLConnection) url.openConnection();
 						con.setRequestMethod("GET");
-						// Update where to put timeout Cindy 12/02
-						con.connect();
 						con.setConnectTimeout(5000);
-						con.setReadTimeout(10000);
+						con.connect();
 						in = con.getInputStream();
 						Row r = fill();
 						if (r != null) {

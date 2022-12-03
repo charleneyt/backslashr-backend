@@ -147,14 +147,13 @@ public class Crawler {
 					con.setDoInput(true);
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
+					con.setConnectTimeout(500);
 					// Update where to put timeout Cindy 12/02
 					try {
 						con.connect();
-						con.setConnectTimeout(5000);
-						con.setReadTimeout(10000);
 					} catch (Exception e) {
 						System.out.println("Robot failed to connect");
-						return null;
+						return Arrays.asList(new String[] {});;
 					}
 
 					int robotsCode = con.getResponseCode();
@@ -204,14 +203,13 @@ public class Crawler {
 					con.setRequestMethod("HEAD");
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
+					con.setConnectTimeout(5000);
 					// Update where to put timeout Cindy 12/02
 					try {
 						con.connect();
-						con.setConnectTimeout(5000);
-						con.setReadTimeout(10000);
 					} catch (Exception e) {
 						System.out.println("Head failed to connect");
-						return null;
+						return Arrays.asList(new String[] {});;
 					}
 
 					int code = con.getResponseCode();
@@ -293,14 +291,13 @@ public class Crawler {
 						con.setRequestMethod("GET");
 						con.setRequestProperty("User-Agent", "cis5550-crawler");
 						con.setDoInput(true);
+						con.setConnectTimeout(5000);
 						// Update where to put timeout Cindy 12/02
 						try {
 							con.connect();
-							con.setConnectTimeout(5000);
-							con.setReadTimeout(10000);
 						} catch (Exception e) {
 							System.out.println("Code 200 failed to connect");
-							return null;
+							return Arrays.asList(new String[] {});
 						}
 						code = con.getResponseCode();
 						// tempRow.put("responseCode", String.valueOf(code).getBytes());
@@ -322,10 +319,10 @@ public class Crawler {
 									crawlCount = Long.valueOf(domainRow.get("count"));
 									if (authorityHubs.contains(domainName)) {
 										if (crawlCount > 5000) {
-											return null;
+											return Arrays.asList(new String[] {});
 										}
 									} else if (crawlCount > 1000) {
-										return null;
+										return Arrays.asList(new String[] {});
 									}
 								}
 								kvs.put("domain", domainHash, "count", String.valueOf(crawlCount + 1));
@@ -342,7 +339,7 @@ public class Crawler {
 									Row domainRow = kvs.getRow("domain", domainHash);
 									crawlCount = Long.parseLong(domainRow.get("count"));
 									if (crawlCount > 1000) {
-										return null;
+										return Arrays.asList(new String[] {});
 									}
 								}
 								kvs.put("domain", domainHash, "count", String.valueOf(crawlCount + 1));
