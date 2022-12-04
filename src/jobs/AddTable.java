@@ -18,9 +18,9 @@ public class AddTable {
 		String colName = args[1];
 		
 		List<String> values = new ArrayList<>();
-		values.add("http*://*.twitter.*");
-		values.add("http*://*.youtube.*");
-		values.add("http*://*.instagram.*");
+		values.add("http*.twitter.*");
+		values.add("http*.youtube.*");
+		values.add("http*.instagram.*");
 		
 		for (String value : values) {
 			kvs.put(tableName, Hasher.hash(value), colName, value.getBytes());

@@ -434,10 +434,11 @@ class FlameWorker extends Worker {
 
 				// check for the special circumstance if a worker was called twice
 				// for example, the highest id responsible for beginning and end range
-				String distinguisher = qParamsStrings[3] != null ? qParamsStrings[3] : "null";
-				distinguisher += "|" + qParamsStrings[4] != null ? qParamsStrings[4] : "null";
-				kvs.put(qParamsStrings[1], FlameWorker.VALUE_STRING, distinguisher,
-						accumulator == null ? zeroElement.getBytes() : accumulator.getBytes());
+				if (accumulator != null && !accumulator.equals(zeroElement)){
+					String distinguisher = qParamsStrings[3] != null ? qParamsStrings[3] : "null";
+					distinguisher += "|" + qParamsStrings[4] != null ? qParamsStrings[4] : "null";
+					kvs.put(qParamsStrings[1], "htotal", distinguisher, accumulator.getBytes());
+				}
 			}
 
 			return FlameWorker.OK_STRING;

@@ -95,11 +95,11 @@ public class Worker extends generic.Worker {
 		}
 	}
 
-	public synchronized void updateRequestReceived() {
+	public void updateRequestReceived() {
 		lastRequestReceived = System.currentTimeMillis();
 	}
 
-	public synchronized void addTable(String tableName) {
+	public void addTable(String tableName) {
 		tables.put(tableName, new TreeMap<String, Row>());
 	}
 
@@ -641,10 +641,11 @@ public class Worker extends generic.Worker {
 				if (req.queryParams() != null && req.queryParams().contains("startRow")) {
 					startRow = req.queryParams("startRow");
 					startIndex = rowsName.indexOf(startRow);
-					if (startIndex == -1) {
-						res.status(404, "Not Found");
-						return "404 Not Found";
-					}
+					// Turn off 404 error Cindy 12/03
+//					if (startIndex == -1) {
+//						res.status(404, "Not Found");
+//						return "404 Not Found";
+//					}
 				}
 				// calculating endIndex to get a submap for better runtime
 				int endIndex = Math.min(rowsName.size() - 1, startIndex + 99);
@@ -655,6 +656,10 @@ public class Worker extends generic.Worker {
 				for (Row row : subTable.values()) {
 					columnVals.addAll(row.columns());
 				}
+
+				// remove page content in UI
+				columnVals.remove("page");
+
 				// inevitable work to sort the columns in current 10 rows!
 				List<String> colsName = new ArrayList<>(columnVals);
 				colsName.sort((a, b) -> a.compareTo(b));
@@ -667,9 +672,6 @@ public class Worker extends generic.Worker {
 				sb.append("<br>");
 				sb.append("<table><tr><td>Row</td>");
 				for (String col : colsName) {
-					if (col.equals("page")) {
-						continue;
-					}
 					sb.append("<td>" + col + "</td>");
 				}
 				sb.append("</tr>");
@@ -702,8 +704,9 @@ public class Worker extends generic.Worker {
 						+ "</title></head><body><div>KVS Client - Table " + tableName + "</div>" + sb.toString()
 						+ "</body></html>";
 			}
-			res.status(404, "Not Found");
-			return "404 Not Found";
+			// Turn off 404 error Cindy 12/03
+//			res.status(404, "Not Found");
+			return "OK";
 		});
 
 		// GET route for /data/XXX/YYY, where XXX is a table name and YYY is a row key.

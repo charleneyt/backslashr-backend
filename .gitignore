@@ -5,3 +5,4 @@ job*
 **/.DS_Store
 **./gitignore
 *log*
+bin/

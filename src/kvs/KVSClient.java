@@ -127,6 +127,7 @@ public class KVSClient implements KVS {
 						URL url = new URL(ranges.elementAt(currentRangeIndex));
 						HttpURLConnection con = (HttpURLConnection) url.openConnection();
 						con.setRequestMethod("GET");
+						con.setConnectTimeout(5000);
 						con.connect();
 						in = con.getInputStream();
 						Row r = fill();
@@ -236,8 +237,7 @@ public class KVSClient implements KVS {
 		for (WorkerEntry w : workers) {
 			try {
 				HTTP.doRequest("PUT",
-						"http://" + w.address + "/delete/" + java.net.URLEncoder.encode(tableName, "UTF-8"),
-						null);
+						"http://" + w.address + "/delete/" + java.net.URLEncoder.encode(tableName, "UTF-8"), null);
 			} catch (Exception e) {
 			}
 		}
@@ -253,7 +253,7 @@ public class KVSClient implements KVS {
 			byte[] response = HTTP.doRequest("PUT", target, value).body();
 			String result = new String(response);
 			if (!result.equals("OK")) {
-				FileWriter fw =  new FileWriter("./KVSClient_log", true);
+				FileWriter fw = new FileWriter("./KVSClient_log", true);
 				fw.write("PUT returned something other than OK: " + result + "(" + target + ")");
 				fw.close();
 //				throw new RuntimeException("PUT returned something other than OK: " + result + "(" + target + ")");	

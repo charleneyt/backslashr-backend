@@ -167,30 +167,21 @@ public class Ranker {
 			// compute the final scores by multiplying cosine scores and page ranks
 			Row row = kvs.getRow("pageranks", Hasher.hash(url));
 			if (row != null) {
-				for (String col: row.columns()) {
-					String val = row.get(col);
-					if (val != null) {
-						String[] urlAndPagerank = val.split(",");
-						if (urlAndPagerank.length == 2) {
-							double pageRank = Double.valueOf(urlAndPagerank[1]);
-//							System.out.println("page rank for url " + url + " is: " + pageRank);
-							double finalScore = cosineScore * pageRank * 1000;
-							if (finalScore > 10) System.out.println("initial score for url " + url + " is: " + finalScore);
-							if (urlsWithExactMatch.contains(url)) {
-								finalScore += 500;
-//								System.out.println("bumped score for url " + url + " is: " + finalScore);
-							} else if (urlsWithNearExactMatch.contains(url)) {
-								finalScore += 300;
-//								System.out.println("bumped score for url " + url + " is: " + finalScore);
-							}
-//							System.out.println("final score for url " + url + " is: " + finalScore);
-							finalScores.put(url, finalScore);
-							break;
-						}
-					}
+				double pageRank = Double.valueOf(row.get(url + "0"));
+//				System.out.println("page rank for url " + url + " is: " + pageRank);
+				double finalScore = cosineScore * pageRank * 1000;
+
+				if (urlsWithExactMatch.contains(url)) {
+					finalScore += 500;
+					// System.out.println("bumped score for url " + url + " is: " + finalScore);
+				} else if (urlsWithNearExactMatch.contains(url)) {
+					finalScore += 300;
+					// System.out.println("bumped score for url " + url + " is: " + finalScore);
 				}
+				// System.out.println("final score for url " + url + " is: " + finalScore);
+				finalScores.put(url, finalScore);
 			}
-		}		
+		}
 		
 		// step 6 - rank URLs first by searchTermCount, then by finalScore, both in descending order
 		List<URLWithScores> list = new ArrayList<>();

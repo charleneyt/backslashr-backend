@@ -33,7 +33,8 @@ public class Server implements Runnable {
     static Map<String, SessionImpl> sessions = new HashMap<>();
     public static Map<String, HostRecord> hostTable = new HashMap<>();
 	
-	public static int NUM_WORKERS = 20;
+    // Increased the number of workers Cindy 12/02
+	public static int NUM_WORKERS = 30;
     static String CRLF = "\r\n";
     static String BOUNDARY = "A_FANCY_SEPARATOR_MADE_BY_CHARLENE_TAM";
     static String DELIMITER = "--";
@@ -441,7 +442,7 @@ public class Server implements Runnable {
             	startIdx = requestString.indexOf("POST");
             }
             else {
-            	System.out.println("NOT a valid reqeust");
+            	System.out.println("NOT a valid request");
             	return;
             }
             

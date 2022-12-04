@@ -2,12 +2,14 @@ package jobs;
 
 import flame.*;
 import kvs.*;
+import tools.*;
 
 import java.util.*;
 public class Indexer {
     public static void run(FlameContext ctx, String[] args) throws Exception {
+    	System.out.println("Executing indexer ...");
         // use fromTable to convert each row to a string of url,page
-        FlamePairRDD imm = ctx.fromTable("crawl", r -> {
+        FlamePairRDD imm = ctx.fromTable("content", r -> {
                                         if (r.get("page") != null && r.get("page").length() > 0){
                                             return r.get("url") + "," + r.get("page");
                                         } else return "";
@@ -30,8 +32,10 @@ public class Indexer {
                                         List<FlamePair> ret = new ArrayList<FlamePair>();
                                         if (!"".equals(pair._1())){
                                             String url = pair._1();
-                                            String content = pair._2().replaceAll("[.,:;!\\?\'\"()-]", " ").replaceAll("<[^>]*>", "").toLowerCase();
+                                            String content = pair._2().replaceAll("[.,:;!\\?\'\"()-]", " ").toLowerCase();
                                             String[] words = content.split("\\s+");
+
+                                            kvs.put("crawl", Hasher.hash(url), "wordCount", String.valueOf(words.length));
 
                                             // example entry: (word, index1 index2 index3)
                                             Map<String, String> original = new HashMap<>();

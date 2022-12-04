@@ -18,6 +18,8 @@ public class Crawler {
 	static List<String> blacklist = new ArrayList<>();
 	static boolean restartLog1 = true;
 	static boolean restartLog2 = true;
+	final static Set<String> allowedSuffix = new HashSet<>(Arrays.asList("com", "net", "org", "edu", "gov"));
+	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("cnn.com", "wikipedia.com", "espn.com", "bbc.com", "irs.gov"));
 
 	public static void run(FlameContext ctx, String[] args) throws Exception {
 		// Check whether the latter contains a single element (the seed URL), and output
@@ -100,10 +102,10 @@ public class Crawler {
 				FileWriter fw = new FileWriter("./crawler_log_inside_lambda", true);
 				fw.write("crawling: " + url + "\n");
 				fw.flush();
-				if (FlameContext.getKVS() == null){
+				if (FlameContext.getKVS() == null) {
 					FlameContext.setKVS("localhost:8000");
 				}
-       			KVSClient kvs = FlameContext.getKVS();
+				KVSClient kvs = FlameContext.getKVS();
 				// KVSClient kvs = new KVSClient("localhost:8000");
 
 				// process blacklist if given argument is not null
@@ -120,7 +122,6 @@ public class Crawler {
 					}
 					parsedBlackList = true;
 				}
-
 				String[] parsedUrl = parseURL(url);
 				String hostHash = parsedUrl[1];
 
@@ -141,15 +142,18 @@ public class Crawler {
 					String robotsUrl = makeRobotsUrl(parsedUrl);
 					HttpURLConnection.setFollowRedirects(false);
 					HttpURLConnection con = (HttpURLConnection) (new URL(robotsUrl)).openConnection();
+
 					con.setRequestMethod("GET");
 					con.setDoInput(true);
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
+					con.setConnectTimeout(500);
+					// Update where to put timeout Cindy 12/02
 					try {
 						con.connect();
 					} catch (Exception e) {
-						e.printStackTrace();
-						return null;
+						System.out.println("Robot failed to connect");
+						return Arrays.asList(new String[] {});;
 					}
 
 					int robotsCode = con.getResponseCode();
@@ -195,14 +199,17 @@ public class Crawler {
 					// sending HEAD request
 					HttpURLConnection.setFollowRedirects(false);
 					HttpURLConnection con = (HttpURLConnection) (new URL(url)).openConnection();
+
 					con.setRequestMethod("HEAD");
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
+					con.setConnectTimeout(5000);
+					// Update where to put timeout Cindy 12/02
 					try {
 						con.connect();
 					} catch (Exception e) {
-						e.printStackTrace();
-						return null;
+						System.out.println("Head failed to connect");
+						return Arrays.asList(new String[] {});;
 					}
 
 					int code = con.getResponseCode();
@@ -279,17 +286,18 @@ public class Crawler {
 						// ago
 						kvs.put("hosts", hostHash, "time", String.valueOf(System.currentTimeMillis()).getBytes());
 						System.out.println("Crawling: " + url);
-
-						// new GET connection only if responseCode is 200 and type is text/html
 						con = (HttpURLConnection) (new URL(url)).openConnection();
+
 						con.setRequestMethod("GET");
 						con.setRequestProperty("User-Agent", "cis5550-crawler");
 						con.setDoInput(true);
+						con.setConnectTimeout(5000);
+						// Update where to put timeout Cindy 12/02
 						try {
 							con.connect();
 						} catch (Exception e) {
-							e.printStackTrace();
-							return null;
+							System.out.println("Code 200 failed to connect");
+							return Arrays.asList(new String[] {});
 						}
 						code = con.getResponseCode();
 						// tempRow.put("responseCode", String.valueOf(code).getBytes());
@@ -297,49 +305,49 @@ public class Crawler {
 
 						// increment the crawler count by the root domain
 						// for example, sports.cnn.com/a.html would be cnn.com
-						// this is used to monitor the crawler status and prevent the results from too dense
+						// this is used to monitor the crawler status and prevent the results from too
+						// dense
 						int lastDot = parsedUrl[1].lastIndexOf(".");
-						if (lastDot != -1){
-							int startIdx = parsedUrl[1].substring(0, lastDot).lastIndexOf(".")+1;
+						if (lastDot != -1) {
+							int startIdx = parsedUrl[1].substring(0, lastDot).lastIndexOf(".") + 1;
 							String domainName = parsedUrl[1].substring(startIdx);
-							if (domainName.length() > 0){
+							if (domainName.length() > 0) {
 								String domainHash = Hasher.hash(domainName);
 								long crawlCount = 0;
-								if (kvs.existsRow("domain", domainHash)){
+								if (kvs.existsRow("domain", domainHash)) {
 									Row domainRow = kvs.getRow("domain", domainHash);
 									crawlCount = Long.valueOf(domainRow.get("count"));
-									if ("cnn.com".equals(domainName)){
-										if (crawlCount > 5000){
-											return null;
+									if (authorityHubs.contains(domainName)) {
+										if (crawlCount > 5000) {
+											return Arrays.asList(new String[] {});
 										}
-									} else if (crawlCount > 1000){
-										return null;
+									} else if (crawlCount > 1000) {
+										return Arrays.asList(new String[] {});
 									}
 								}
-								kvs.put("domain", domainHash, "count", String.valueOf(crawlCount+1));
-								if (crawlCount == 0){
+								kvs.put("domain", domainHash, "count", String.valueOf(crawlCount + 1));
+								if (crawlCount == 0) {
 									kvs.put("domain", domainHash, "domain", domainName);
 								}
 							}
 						} else {
 							String domainName = parsedUrl[1];
-							if (domainName.length() > 0){
+							if (domainName.length() > 0) {
 								String domainHash = Hasher.hash(domainName);
 								long crawlCount = 0;
-								if (kvs.existsRow("domain", domainHash)){
+								if (kvs.existsRow("domain", domainHash)) {
 									Row domainRow = kvs.getRow("domain", domainHash);
 									crawlCount = Long.parseLong(domainRow.get("count"));
-									if (crawlCount > 1000){
-										return null;
+									if (crawlCount > 1000) {
+										return Arrays.asList(new String[] {});
 									}
 								}
-								kvs.put("domain", domainHash, "count", String.valueOf(crawlCount+1));
-								if (crawlCount == 0){
+								kvs.put("domain", domainHash, "count", String.valueOf(crawlCount + 1));
+								if (crawlCount == 0) {
 									kvs.put("domain", domainHash, "domain", domainName);
 								}
 							}
 						}
-
 
 						byte[] response = con.getInputStream().readAllBytes();
 						if (response != null) {
@@ -349,13 +357,20 @@ public class Crawler {
 							// value of url is column key, and url is value
 							String responseStr = new String(response);
 							// filter out style and script tags and its content
-							String processed = responseStr.replaceAll("(<style.*?>.*?</style.*?>)|(<script.*?>[\\s\\S]*?</script.*?>)", "");
-							kvs.put("crawl", urlHash, "page", processed);
-							fw.write("Downloaded page for " + url + "\n");
-							fw.flush();
+							String processed = responseStr
+									.replaceAll("(<style.*?>.*?</style.*?>)|(<script.*?>[\\s\\S]*?</script.*?>)", "");
 							for (String newUrl : findUrl(kvs, processed, normalizedOriginal, rules)) {
 								ret.add(newUrl);
 							}
+
+							fw.write("Downloaded page for " + url + "\n");
+							fw.flush();
+
+							processed = processed.replaceAll("<[^>]*>", "");
+
+							// saving page content to new table
+							kvs.put("content", urlHash, "url", url);
+							kvs.put("content", urlHash, "page", processed);
 
 //				String responseHash = Hasher.hash(responseStr);
 //				boolean isDuplicate = false;
@@ -521,14 +536,15 @@ public class Crawler {
 				}
 			}
 		}
-		
-		for (String url : seen.keySet()) {
-			String key = Hasher.hash(url);
-			if (!kvs.existsRow("anchorEC", key)){
-				kvs.put("anchorEC", key, "url", url.getBytes());
-			}
-			kvs.put("anchorEC", key, "anchor-" + originalUrl, seen.get(url).getBytes());
-		}
+
+		// Temporary exclude Cindy 12/02
+//		for (String url : seen.keySet()) {
+//			String key = Hasher.hash(url);
+//			if (!kvs.existsRow("anchorEC", key)) {
+//				kvs.put("anchorEC", key, "url", url.getBytes());
+//			}
+//			kvs.put("anchorEC", key, "anchor-" + originalUrl, seen.get(url).getBytes());
+//		}
 
 		// save the outdegrees of current url to outdegrees table (value is comma
 		// separated, to be used in pageranks)
@@ -539,45 +555,37 @@ public class Crawler {
 				sb.append(",");
 			}
 			sb.append(url);
-			
+
 			// check if already crawled, if so, don't add to queue
-			if (!kvs.existsRow("crawl", Hasher.hash(url))){
+			if (!kvs.existsRow("crawl", Hasher.hash(url))) {
 				// check the count by domain name, pass if currently crawled enough
 				String[] parsedUrl = parseURL(url);
 				int lastDot = parsedUrl[1].lastIndexOf(".");
-				if (lastDot != -1){
-					int startIdx = parsedUrl[1].substring(0, lastDot).lastIndexOf(".")+1;
+				if (lastDot != -1) {
+					int startIdx = parsedUrl[1].substring(0, lastDot).lastIndexOf(".") + 1;
 					String domainName = parsedUrl[1].substring(startIdx);
-					if (domainName.length() > 0){
+					if (domainName.length() > 0 && (lastDot = domainName.lastIndexOf(".")) != domainName.length() - 1
+							&& allowedSuffix.contains(domainName.substring(lastDot + 1))) {
 						String domainHash = Hasher.hash(domainName);
-						if (kvs.existsRow("domain", domainHash)){
+						if (kvs.existsRow("domain", domainHash)) {
 							Row domainRow = kvs.getRow("domain", domainHash);
 							long crawlCount = Long.valueOf(domainRow.get("count"));
-							if ("cnn.com".equals(domainName)){
-								if (crawlCount > 5000){
+							if (authorityHubs.contains(domainName)) {
+								if (crawlCount > 5000) {
 									continue;
 								}
-							} else if (crawlCount > 1000){
+							} else if (crawlCount > 1000) {
 								continue;
 							}
 						}
+						// check if already crawled, if so, don't add to queue
+						urlToVisit.add(url);
+					} else {
+						continue;
 					}
 				} else {
-					String domainName = parsedUrl[1];
-					if (domainName.length() > 0){
-						String domainHash = Hasher.hash(domainName);
-						if (kvs.existsRow("domain", domainHash)){
-							Row domainRow = kvs.getRow("domain", domainHash);
-							long crawlCount = Long.parseLong(domainRow.get("count"));
-							if (crawlCount > 1000){
-								continue;
-							}
-						}
-					}
+					continue;
 				}
-
-				// check if already crawled, if so, don't add to queue
-				urlToVisit.add(url);
 			}
 		}
 		// add to outdegrees table for current link and its outgoing links
@@ -688,10 +696,12 @@ public class Crawler {
 				}
 
 			} else {
-				if (originalUrl.startsWith("http://")) {
-					sb.append(originalUrl.substring(0, 5));
-				} else {
-					sb.append(originalUrl.substring(0, 6));
+				if (originalUrl != null) {
+					if (originalUrl.startsWith("http://")) {
+						sb.append(originalUrl.substring(0, 5));
+					} else {
+						sb.append(originalUrl.substring(0, 6));
+					}
 				}
 				sb.append(url);
 			}
