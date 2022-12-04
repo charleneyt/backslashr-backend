@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.*;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.regex.*;
 
 import java.util.*;
@@ -16,18 +17,18 @@ import java.util.*;
 public class Crawler {
 	static boolean parsedBlackList = false;
 	static List<String> blacklist = new ArrayList<>();
-	static boolean restartLog1 = true;
-	static boolean restartLog2 = true;
 	final static Set<String> allowedSuffix = new HashSet<>(Arrays.asList("com", "net", "org", "edu", "gov"));
 	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("cnn.com", "wikipedia.com"));
+	final static boolean debugMode = true;
 
 	public static void run(FlameContext ctx, String[] args) throws Exception {
 		// Check whether the latter contains a single element (the seed URL), and output
 		// an error message (using the context’s output method)
 		// if it does not. If it does, output a success message, maybe "OK"
 		System.out.println("Executing crawler ...");
-		long startTime = System.currentTimeMillis();
-		ctx.output("Starting time: " + startTime);
+		long startTime = System.currentTimeMillis();  
+		Date resultdate = new Date(startTime);
+		System.out.println("Starting time: " + resultdate);
 
 		if (args.length < 1 || args.length > 2) {
 			ctx.output(
@@ -36,19 +37,6 @@ public class Crawler {
 		}
 
 		FlameRDD urlQueue;
-		if (restartLog1) {
-			File file = new File("./crawler_log_inside_lambda");
-			Files.deleteIfExists(file.toPath());
-			restartLog1 = false;
-		}
-
-		if (restartLog2) {
-			File file = new File("./crawler_log_outside_lambda");
-			Files.deleteIfExists(file.toPath());
-			restartLog2 = false;
-		}
-
-		FileWriter fw2 = new FileWriter("./crawler_log_outside_lambda", true);
 
 		if (args[0].startsWith("http")) {
 			String[] parsedSeedUrl = parseURL(args[0]);
@@ -91,7 +79,7 @@ public class Crawler {
 
 		// and then set up a while loop that runs until urlQueue.count() is zero
 		while (urlQueue.count() > 0) {
-			System.out.println("from Crawler, in while loop!!");
+//			System.out.println("from Crawler, in while loop!!");
 			// Within this loop, replace urlQueue with the result of a flatMap on itself.
 			// The flatMap will be running in parallel on all the workers, and each worker
 			// will be returning the (new) URLs it wants to put into the queue. In the
@@ -103,10 +91,13 @@ public class Crawler {
 			// the KVS. For now, return an empty list from the flatMap, so that the loop
 			// will terminate after a single iteration.
 			urlQueue = urlQueue.flatMap(url -> {
-				System.out.println("from Crawler, in flatmap!");
-				FileWriter fw = new FileWriter("./crawler_log_inside_lambda", true);
-				fw.write("crawling: " + url + "\n");
-				fw.flush();
+//				System.out.println("from Crawler, in flatmap!");
+				if (debugMode) {
+					FileWriter fw = new FileWriter("./crawler_log_inside_lambda", true);
+					fw.write("crawling: " + url + "at time " + System.currentTimeMillis() + "\n");
+					fw.flush();					
+				}
+
 				if (FlameContext.getKVS() == null) {
 					FlameContext.setKVS("localhost:8000");
 				}
@@ -152,6 +143,7 @@ public class Crawler {
 					con.setDoInput(true);
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
+					con.setConnectTimeout(100);
 					try {
 						con.connect();
 					} catch (Exception e) {
@@ -164,7 +156,7 @@ public class Crawler {
 //          Response r = HTTP.doRequest("GET", robotsUrl, null);
 					kvs.put("hosts", hostHash, "robotsReq", String.valueOf(robotsCode).getBytes());
 					if (robotsCode == 200) {
-						System.out.println("robo res code is 200!\n");
+//						System.out.println("robo res code is 200!\n");
 						byte[] robotsResponse = con.getInputStream().readAllBytes();
 						if (robotsResponse != null) {
 							kvs.put("hosts", hostHash, "robots", robotsResponse);
@@ -360,8 +352,12 @@ public class Crawler {
 							String processed = responseStr
 									.replaceAll("(<style.*?>.*?</style.*?>)|(<script.*?>[\\s\\S]*?</script.*?>)", "");
 							kvs.put("crawl", urlHash, "page", processed);
-							fw.write("Downloaded page for " + url + "\n");
-							fw.flush();
+							if (debugMode) {
+								FileWriter fw = new FileWriter("./crawler_log_inside_lambda", true);
+								fw.write("Downloaded page for " + url + "\n");
+								fw.flush();								
+							}
+
 							for (String newUrl : findUrl(kvs, processed, normalizedOriginal, rules)) {
 								ret.add(newUrl);
 							}
@@ -410,10 +406,14 @@ public class Crawler {
 			System.out.println("Finished a round");
 			System.out.println("New table name: " + urlQueue.getTableName());
 			System.out.println("New table count: " + urlQueue.count());
-			fw2.write("Finished a round\n");
-			fw2.write("New table name: " + urlQueue.getTableName() + "\n");
-			fw2.write("New table count: " + urlQueue.count() + "\n");
-			fw2.flush();
+			
+			if (debugMode) {
+				FileWriter fw2 = new FileWriter("./crawler_log_outside_lambda", true);
+				fw2.write("Finished a round\n");
+				fw2.write("New table name: " + urlQueue.getTableName() + "\n");
+				fw2.write("New table count: " + urlQueue.count() + "\n");
+				fw2.flush();				
+			}
 
 			Thread.sleep(1000);
 		}
@@ -533,13 +533,13 @@ public class Crawler {
 			}
 		}
 
-		for (String url : seen.keySet()) {
-			String key = Hasher.hash(url);
-			if (!kvs.existsRow("anchorEC", key)) {
-				kvs.put("anchorEC", key, "url", url.getBytes());
-			}
-			kvs.put("anchorEC", key, "anchor-" + originalUrl, seen.get(url).getBytes());
-		}
+//		for (String url : seen.keySet()) {
+//			String key = Hasher.hash(url);
+//			if (!kvs.existsRow("anchorEC", key)) {
+//				kvs.put("anchorEC", key, "url", url.getBytes());
+//			}
+//			kvs.put("anchorEC", key, "anchor-" + originalUrl, seen.get(url).getBytes());
+//		}
 
 		// save the outdegrees of current url to outdegrees table (value is comma
 		// separated, to be used in pageranks)
@@ -558,9 +558,11 @@ public class Crawler {
 				if (r.columns().contains("url") && r.get("url").equals(url) && r.columns().contains("responseCode")) {
 					continue;
 				}
-				FileWriter fw = new FileWriter("findurl_check_log", true);
-				fw.write("from crawler, url exists but no response code, this should not happen: " + url + "\n");
-				fw.close();
+				if (debugMode) {
+					FileWriter fw = new FileWriter("findurl_check_log", true);
+					fw.write("from crawler, url exists but no response code, this should not happen: " + url + ", and got url: " + url + "\n");
+					fw.close();					
+				}
 			}
 
 			// check the count by domain name, pass if currently crawled enough
@@ -623,9 +625,6 @@ public class Crawler {
 		if (url == null || url.length() == 0) {
 			return null;
 		}
-
-		FileWriter fw = new FileWriter("./url_log", true);
-		fw.write("URL = " + url + "\n");
 
 		if (url.startsWith("http://")) {
 			sb.append(url.substring(0, 7));
@@ -701,7 +700,7 @@ public class Crawler {
 				}
 
 			} else {
-				if (originalUrl.startsWith("http://")) {
+				if (originalUrl != null && originalUrl.startsWith("http://")) {
 					sb.append(originalUrl.substring(0, 5));
 				} else {
 					sb.append(originalUrl.substring(0, 6));
@@ -754,8 +753,6 @@ public class Crawler {
 			}
 		}
 
-		fw.write("FINAL URL = " + sb.toString() + "\n");
-		fw.flush();
 		return sb.toString();
 	}
 

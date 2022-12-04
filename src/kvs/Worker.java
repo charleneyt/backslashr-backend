@@ -22,7 +22,7 @@ public class Worker extends generic.Worker {
 	Map<String, TreeMap<String, Row>> tables; // TODO: Ed post 372, row keys case sensitive and we sort with case
 												// sensitive
 	// tableName: {rowName : byteOffset}
-	Map<String, ConcurrentSkipListMap<String, Integer>> tablesWithOffset; // updated to save memory and reduce initial load time per Ed post #766	
+	Map<String, ConcurrentSkipListMap<String, Long>> tablesWithOffset; // updated to save memory and reduce initial load time per Ed post #766	
 	String directory;
 	Map<String, BufferedOutputStream> streams;
 	long lastRequestReceived;
@@ -36,6 +36,7 @@ public class Worker extends generic.Worker {
 
 	String nextLowerIpAndPort;
 	String nextTwoLowerIpAndPort;
+	boolean debugMode = true;
 
 	public Worker(String id, int port, String masterAddr, String directory) {
 		super(id, port);
@@ -50,7 +51,7 @@ public class Worker extends generic.Worker {
 
 		initializeTables();
 
-		new Thread(new Flusher()).start();
+//		new Thread(new Flusher()).start();
 
 		// EC 1
 //		new Thread(new GarbageCollector()).start();
@@ -78,21 +79,27 @@ public class Worker extends generic.Worker {
 			return;
 		}
 		
-		FileWriter fw = null;
 		long startTime = System.currentTimeMillis();
-		try {
-			fw = new FileWriter("kvsWorker_log", true);
-			fw.write("start writing table at: " + System.currentTimeMillis() + "\n");
-			fw.flush();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		if (debugMode) {
+			FileWriter fw = null;
+			try {
+				fw = new FileWriter("kvsWorker_log", true);
+				fw.write("start writing table at: " + System.currentTimeMillis() + "\n");
+				fw.flush();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}			
 		}
 
+
 		for (File tableFile : files) {
-			int startByte = 0;
+			long startByte = 0;
 			try {
 				String tableDir = tableFile.getName();
+				if (debugMode) {
+					System.out.println("initializing table " + tableDir);
+				}
 				FileInputStream input = new FileInputStream(tableFile);
 				String tableName = tableDir.split(".table")[0];
 				if (input.available() > 0) {
@@ -104,12 +111,14 @@ public class Worker extends generic.Worker {
 							if (row != null) {
 								tablesWithOffset.get(tableName).put(row.key(), startByte);
 							}
-							startByte = row.toByteArray().length + 1;
+							startByte += row.toByteArray().length + 1;
 						}
 						catch (Exception e) {
-							FileWriter fw2 = new FileWriter("read_row_error_log", true);
-							fw2.write("error in initializing tables, table name is: " + tableName + "; starting byte: " + startByte + "\n");
-							fw2.flush();
+							if (debugMode) {
+								FileWriter fw2 = new FileWriter("read_row_error_log", true);
+								fw2.write("error in initializing tables, table name is: " + tableName + "; starting byte: " + startByte + "\n");
+								fw2.flush();								
+							}
 						}
 					}
 					streams.put(tableName, new BufferedOutputStream(new FileOutputStream(tableFile, true)));
@@ -120,12 +129,19 @@ public class Worker extends generic.Worker {
 			}
 		}
 		
-		try {
-			fw.write("end writing table at: " + System.currentTimeMillis() + "; took " + (System.currentTimeMillis() - startTime) + "\n");
-			fw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (debugMode) {
+			if (tablesWithOffset.get("domain") != null) {
+				System.out.println(tablesWithOffset.get("domain").toString());				
+			}
+			FileWriter fw;
+			try {
+				fw = new FileWriter("kvsWorker_log", true);
+				fw.write("end writing table at: " + System.currentTimeMillis() + "; took " + (System.currentTimeMillis() - startTime) + "\n");
+				fw.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}			
 		}
 	}
 
@@ -135,7 +151,7 @@ public class Worker extends generic.Worker {
 
 	public void addTable(String tableName) {
 //		tables.put(tableName, new TreeMap<String, Row>());
-		tablesWithOffset.put(tableName, new ConcurrentSkipListMap<String, Integer>());
+		tablesWithOffset.put(tableName, new ConcurrentSkipListMap<String, Long>());
 	}
 
 	private class Flusher implements Runnable {
@@ -477,17 +493,21 @@ public class Worker extends generic.Worker {
 	    int numRead = 0;
 	    while (true) {
 	      if (numRead == buffer.length) {
-			FileWriter fw = new FileWriter("read_row_error_log", true);
-			fw.write("error in finding row, row key too long, so far read is: " + buffer.toString() + "\n");
-			fw.flush();
-			fw.close();
-			throw new Exception("Format error: Expecting string+space");
+	    	  if (debugMode) {
+				FileWriter fw = new FileWriter("read_row_error_log", true);
+				fw.write("error in readStringSpace, not enough space in buffer, so far read is: " + buffer.toString() + "\n");
+				fw.flush();
+				fw.close();    		  
+	    	  }
+	    	  throw new Exception("Format error: Expecting string+space");	
 	      }
 
 	      int b = file.read();
 	      if ((b < 0) || (b == 10))
 	        return null;
 	      buffer[numRead++] = (byte)b;
+//	      System.out.println("byte read is: " + (char)b);
+	      
 	      if (b == ' ')
 	        return new String(buffer, 0, numRead-1);
 	    }		
@@ -495,8 +515,7 @@ public class Worker extends generic.Worker {
 	
 	private Row findRow(String tableName, String rowName) {
 //		System.out.println("from findRow, tablename is: " + tableName + ", rowName is: " + rowName);
-		flush();
-		
+
 		if (!tablesWithOffset.containsKey(tableName)) {
 //			System.out.println("returned null because cannot find table\n");
 			return null;
@@ -507,65 +526,172 @@ public class Worker extends generic.Worker {
 			return null;			
 		}
 		
-		RandomAccessFile file = new RandomAccessFile(directory + "/" + tableName + ".table", "r");
-		int bytePos = tablesWithOffset.get(tableName).get(rowName);
-		file.seek(bytePos);
-		
-		while (file.read() != 10) {
-			String theKey;
-			try {
-				theKey = readStringSpace(file);				
-			}
-			catch (Exception e) {
-				return null;
-			}
-			
-			
-
-		}
-		
-		
-//		InputStream input = Channels.newInputStream(file.getChannel());
-		
+		flush();
+		RandomAccessFile file;
+		long bytePos = tablesWithOffset.get(tableName).get(rowName);
 		try {
-			while (input.available() > 0 && currCount < rowCount) {
-				Row row = Row.readFrom(input);
-				currCount++;
-				if (currCount == rowCount && row != null) {
-//					System.out.println("curr count is: " + currCount + ", row count is: " + rowCount + "\n");
-//					System.out.println("return row: " + row.key() + "\n");
-					if (!row.key().equals(rowName)) {
-						FileWriter fw = new FileWriter("find_row_log", true);
-						fw.write("from findRow, tablename is: " + tableName + ", given row name is: " + rowName + " returned row name is: " + row.key() + "\n");
-						fw.close();
-					}
-
-					return row;
-				}
-			}
+			file = new RandomAccessFile(directory + "/" + tableName + ".table", "r");
+			file.seek(bytePos);
 		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
-		
-//		System.out.println("returned null because end of file reached\n");
-		return null;
 
-//		try (Stream<String> lines = Files.lines(Paths.get(directory + "/" + tableName + ".table"))) {
-//			String targetLine = lines.skip(rowCount).findFirst().get();
-//			if (targetLine == null)
-//				return null;
-//			Row targetRow = Row.readFrom(new ByteArrayInputStream(targetLine.getBytes(StandardCharsets.UTF_8)));
-//			return targetRow;
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return null;
-//		}
+//		System.out.println("from findRow, read line: " + file.readLine());
+//		System.out.println("byte pos is: " + bytePos);
+		
+		String theKey;
+		try {
+			theKey = readStringSpace(file);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			return null;
+		}		
+//		System.out.println("the key is: " + theKey);
+	    if (theKey == null) {
+	    	if (debugMode) {
+	        	FileWriter fw;
+				try {
+					fw = new FileWriter("missing_row_log", true);
+		        	fw.write("From findRow, failed to find row, table name is: " + tableName + "; requested row is: " + rowName + "; bytePos is: " + bytePos +  "\n");
+		        	fw.close();	
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}    		
+	    	}
+	        return null;
+	    }
+	    Row newRow = new Row(theKey);
+	    
+		while (true) {
+	        String keyOrMarker;
+			try {
+				keyOrMarker = readStringSpace(file);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				return null;
+			}
+	        if (keyOrMarker == null) {
+	        	if (debugMode) {
+		        	FileWriter fw;
+					try {
+						fw = new FileWriter("find_row_log", true);
+			        	if (!rowName.equals(newRow.key())) {
+			        		fw.write("FOUND DIFFERENCE!!!\n");
+			        	}
+			        	fw.write("table name is: " + tableName + "; requested row is: " + rowName + "; returned row is: " + newRow.key() + " bytePos is: " + bytePos +  "\n");
+			        	fw.close();	    
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	        	}
+	        	return newRow;
+	        }
+	        
+	        int len;
+	        try {
+		        len = Integer.parseInt(readStringSpace(file));	        	
+	        }
+	        catch (Exception e) {
+	        	e.printStackTrace();
+	        	return null;
+	        }
+
+	        byte[] theValue = new byte[len];
+	        int bytesRead = 0;
+	        while (bytesRead < len) {
+	          int n;
+				try {
+					n = file.read(theValue, bytesRead, len - bytesRead);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+	        	  if (debugMode) {
+			  			FileWriter fw;
+						try {
+							fw = new FileWriter("read_row_error_log", true);
+							fw.write("error in findRow," +  "Premature end of stream while reading value for key '"+keyOrMarker+"' (read "+bytesRead+" bytes, expecting "+len+")" + "\n");
+							fw.flush();   
+						} catch (Exception e2) {
+							// TODO Auto-generated catch block
+							e2.printStackTrace();
+							return null;
+						} 		  
+	        	  }
+					return null;
+				}
+	          if (n < 0) {
+	        	  if (debugMode) {
+			  			FileWriter fw;
+						try {
+							fw = new FileWriter("read_row_error_log", true);
+							fw.write("error in findRow," +  "Premature end of stream while reading value for key '"+keyOrMarker+"' (read "+bytesRead+" bytes, expecting "+len+")" + "\n");
+							fw.flush();   
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} 		  
+	        	  }
+				return null;
+	          }
+	          bytesRead += n;
+	        }
+
+	        byte b;
+			try {
+				b = (byte)file.read();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+	        	if (debugMode) {
+		  			FileWriter fw;
+					try {
+						fw = new FileWriter("read_row_error_log", true);
+						fw.write("error in findRow," +  "Expecting a space separator after value for key '"+keyOrMarker+"'" + "\n");
+						fw.flush();
+						fw.close();
+					} catch (Exception e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+						return null;
+					}	        		
+	        	}
+	        	return null;
+			}
+	        if (b != ' ') {
+	        	if (debugMode) {
+		  			FileWriter fw;
+					try {
+						fw = new FileWriter("read_row_error_log", true);
+						fw.write("error in findRow," +  "Expecting a space separator after value for key '"+keyOrMarker+"'" + "\n");
+						fw.flush();
+						fw.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}	        		
+	        	}
+				return null;	        	
+	        }
+
+	        newRow.put(keyOrMarker, theValue);
+		}
 	}
 	
 	private String findCol(Row row, String colName) {
 		return row.get(colName);
 	}
+	
+	private static byte[] toByteArrayWithNewLine(byte[] rowBytes)  {
+		byte[] result = Arrays.copyOf(rowBytes, rowBytes.length + LFbyte.length);
+		System.arraycopy(LFbyte, 0, result, rowBytes.length, LFbyte.length);
+		return result;
+	  }
 
 	// Accept 3 command line args: 1) a port number for the worker, 2) a storage
 	// directory, and 3) the IP and port of the master, separated by a colon (:).
@@ -682,40 +808,42 @@ public class Worker extends generic.Worker {
 			}
 			BufferedOutputStream currStream = worker.streams.get(tableName);
 
-			Map<String, Integer> currTable = worker.tablesWithOffset.get(tableName);
+			Map<String, Long> currTable = worker.tablesWithOffset.get(tableName);
 			Row row;
 			if (!currTable.containsKey(rowName)) {
-				System.out.println("in mem map does not have key " + rowName + "\n");
+//				System.out.println("in mem map does not have key " + rowName + "\n");
 				row = new Row(rowName);
 			} else {
-				System.out.println("in mem map found key " + rowName + "\n");
+//				System.out.println("in mem map found key " + rowName + "\n");
 				row = worker.findRow(tableName, rowName);
 			}
 			
 			if (row == null) {
-				FileWriter fw = new FileWriter("missing_row_log", true);
-				fw.write("Table: " + tableName +", row: " + rowName + ", colName: " + colName + "\n");
-				fw.close();
+				if (worker.debugMode) {
+					FileWriter fw = new FileWriter("missing_row_log", true);
+					fw.write("Table: " + tableName +", row: " + rowName + ", colName: " + colName + "\n");
+					fw.close();					
+				}
+
 				row = new Row(rowName);
 			}
 			
-			// to update to maintain a max row count map {tableName : maxRowCount}
-			int maxRowNum = 0;
-			for (Integer rowNum : currTable.values()) {
-				maxRowNum = Math.max(maxRowNum, rowNum);
-			}
+			worker.flush();
+			long currByteCount = Files.size(Paths.get(worker.directory, tableName + ".table"));
 			
-			currTable.put(rowName, maxRowNum + 1);
+			currTable.put(rowName, currByteCount);
 			row.put(colName, req.bodyAsBytes());
 //			currTable.put(rowName, row);
 //			worker.tablesWithOffset.put(tableName, worker.tablesWithOffset.get(tableName) + 1);
-			currStream.write(row.toByteArray());
-			currStream.write(Worker.LFbyte);
+			currStream.write(toByteArrayWithNewLine(row.toByteArray()));
+//			currStream.write(Worker.LFbyte);
 //			System.out.println();
-
-			FileWriter fw = new FileWriter("put_row_log", true);
-			fw.write("put /data/:table/:row/:col: table is: " + tableName + ", row is: " + rowName + ", col is: " + colName + "\n");
-			fw.close();
+			
+			if (worker.debugMode) {
+				FileWriter fw = new FileWriter("put_row_log", true);
+				fw.write("put /data/:table/:row/:col: table is: " + tableName + ", row is: " + rowName + ", col is: " + colName + "\n");
+				fw.close();				
+			}
 
 			return "OK";
 		});
@@ -746,7 +874,7 @@ public class Worker extends generic.Worker {
 			Row targetRow = worker.findRow(tableName, rowName);
 			if (targetRow == null) {
 				res.status(404, "Not Found");
-				System.out.println("Failed to find row!");
+//				System.out.println("Failed to find row!");
 				return "404 Not Found";				
 			}
 			
@@ -776,7 +904,7 @@ public class Worker extends generic.Worker {
 			sb.append("<style> tr, th, td {border: 1px solid black;}</style>");
 			sb.append("<br>");
 			sb.append("<table><tr><td>Table Name</td><td>Number of Row Keys</td></tr>");
-			for (Map.Entry<String, ConcurrentSkipListMap<String, Integer>> tableEntry : worker.tablesWithOffset.entrySet()) {
+			for (Map.Entry<String, ConcurrentSkipListMap<String, Long>> tableEntry : worker.tablesWithOffset.entrySet()) {
 				String link = "/view/" + tableEntry.getKey();
 				sb.append("<tr><td><a href=\"" + link + "\">" + tableEntry.getKey() + "</td><td>"
 						+ tableEntry.getValue().size() + "</td></tr>");
@@ -812,7 +940,7 @@ public class Worker extends generic.Worker {
 			}
 			
 //				TreeMap<String, Row> currTable = worker.tables.get(tableName);
-			ConcurrentSkipListMap<String, Integer> currTable = worker.tablesWithOffset.get(tableName);
+			ConcurrentSkipListMap<String, Long> currTable = worker.tablesWithOffset.get(tableName);
 
 			if (currTable.size() < 1) {
 				res.type("text/html");
@@ -836,9 +964,9 @@ public class Worker extends generic.Worker {
 					return "404 Not Found";
 				}
 			}
-			// calculating endIndex to get a submap for better runtime, 99 rows max
+			// calculating endIndex to get a submap for better runtime, 10 rows max
 			int endIndex = Math.min(rowsName.size() - 1, startIndex + 10);
-			NavigableMap<String, Integer> subTable = currTable.subMap(startRow, true, rowsName.get(endIndex), true);
+			NavigableMap<String, Long> subTable = currTable.subMap(startRow, true, rowsName.get(endIndex), true);
 
 			// collect the column names in the 10 rows (or less if currently less than 10)
 			Set<String> columnVals = new HashSet<>();
@@ -936,7 +1064,7 @@ public class Worker extends generic.Worker {
 		// character (ASCII code 10). After the last entry, there should be another LF
 		// character to indicate the end of the stream.
 		get("/data/:table", (req, res) -> {
-			System.out.println("/data/:table"+ req.queryParams()+" " + req.url());
+//			System.out.println("/data/:table"+ req.queryParams()+" " + req.url());
 			String tableName = req.params("table");
 
 			// EC 1
@@ -965,24 +1093,23 @@ public class Worker extends generic.Worker {
 				return "400 Bad Request (startRow cannot be larger than endRowExclusive!)";
 			}
 			
-			System.out.println("endRow: "+endRow);
+//			System.out.println("endRow: "+endRow);
 			Collection<String> rowSet = worker.tablesWithOffset.get(tableName).keySet();
 			int rowCount = 0;
 			boolean beginning = false;
 			for (String rowName : rowSet) {
-				System.out.println("rowName: "+rowName);
-				// need to improve here, run time is O(n^2)
+//				System.out.println("rowName: "+rowName);
 				Row row = worker.findRow(tableName, rowName);
 				if (row == null) {
-					System.out.println("from /data/:table " + rowName + "is null!!\n");
+//					System.out.println("from /data/:table " + rowName + "is null!!\n");
 					continue;
 				}
 				if (!hasStartRow || beginning || rowName.compareTo(startRow) >= 0) {
 					beginning = true;
 					if (!hasEndRow || rowName.compareTo(endRow) < 0) {
-						System.out.println("row.toByteArray(): "+row.toString());
-						res.write(row.toByteArray());
-						res.write(Worker.LFbyte);
+//						System.out.println("row.toByteArray(): "+row.toString());
+						res.write(toByteArrayWithNewLine(row.toByteArray()));
+//						res.write(Worker.LFbyte);
 						rowCount++;
 					} else {
 						break;
@@ -1084,19 +1211,15 @@ public class Worker extends generic.Worker {
 			if (!worker.tablesWithOffset.containsKey(tableName)) {
 				worker.addTable(tableName);
 			}
-			int rowCount = 0;
-			for (Integer rowNum : worker.tablesWithOffset.get(tableName).values()) {
-				rowCount = Math.max(rowCount, rowNum);
-			}
 			
+			worker.flush();
+			long bytesRead = Files.size(Paths.get(worker.directory, tableName + ".table"));
 			while (input.available() > 0) {
 				Row row = Row.readFrom(input);
 				if (row != null) {
-					rowCount++;
-//					for (String col : row.columns()) {
-//						System.out.println("from data/:table, written row key is: " + row.key() + "; written col is: " + col + " in table " + tableName + "\n");						
-//					}
-					worker.tablesWithOffset.get(tableName).put(row.key(), rowCount);
+					worker.tablesWithOffset.get(tableName).put(row.key(), bytesRead);
+					bytesRead += row.toByteArray().length + 1;
+					
 					currStream.write(row.toByteArray());
 					currStream.write(Worker.LFbyte);
 				}
@@ -1258,7 +1381,7 @@ public class Worker extends generic.Worker {
 			} else {
 				int size = worker.tablesWithOffset.get(tableName).size();
 				res.body(String.valueOf(size));
-				System.out.println("quuee size is  " + size + " ... ");
+//				System.out.println("queue size is  " + size + " ... ");
 				return null;
 			}
 		});

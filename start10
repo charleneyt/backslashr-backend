@@ -26,13 +26,22 @@ java -cp bin kvs.Worker 8002 worker2 localhost:8000 &
 java -cp bin kvs.Worker 8003 worker3 localhost:8000 &
 java -cp bin kvs.Worker 8004 worker4 localhost:8000 &
 java -cp bin kvs.Worker 8005 worker5 localhost:8000 &
+java -cp bin kvs.Worker 8006 worker6 localhost:8000 &
+java -cp bin kvs.Worker 8007 worker7 localhost:8000 &
+java -cp bin kvs.Worker 8008 worker8 localhost:8000 &
+java -cp bin kvs.Worker 8009 worker9 localhost:8000 &
+java -cp bin kvs.Worker 8010 worker10 localhost:8000 &
 
 java -cp bin flame.FlameWorker 9001 localhost:9000 &
 java -cp bin flame.FlameWorker 9002 localhost:9000 &
 java -cp bin flame.FlameWorker 9003 localhost:9000 &
 java -cp bin flame.FlameWorker 9004 localhost:9000 &
 java -cp bin flame.FlameWorker 9005 localhost:9000 &
-
+java -cp bin flame.FlameWorker 9006 localhost:9000 &
+java -cp bin flame.FlameWorker 9007 localhost:9000 &
+java -cp bin flame.FlameWorker 9008 localhost:9000 &
+java -cp bin flame.FlameWorker 9009 localhost:9000 &
+java -cp bin flame.FlameWorker 9010 localhost:9000 &
 
 echo "Ready! Please invoke job, such as java -cp bin flame.FlameSubmit localhost:9000 crawler.jar jobs.Crawler http://simple.crawltest.cis5550.net/"
 

@@ -18,6 +18,7 @@ public class FlameContextImpl implements FlameContext {
 	public int masterPort;
 	Set<String> tables;
 	Vector<Partition> latestAssignment;
+	boolean debugMode = false;
 
 	public FlameContextImpl(String jarName, int masterPort) {
 		super();
@@ -112,7 +113,7 @@ public class FlameContextImpl implements FlameContext {
 				: ("&zeroElement=" + java.net.URLEncoder.encode(zeroElement, "UTF-8"));
 		String secondTableUrl = otherInputTable == null ? ""
 				: ("&secondTable=" + java.net.URLEncoder.encode(otherInputTable, "UTF-8"));
-		System.out.println("latestAssignment.size()" + latestAssignment.size());
+//		System.out.println("latestAssignment.size()" + latestAssignment.size());
 		for (int i = 0; i < latestAssignment.size(); i++) {
 			Partition par = latestAssignment.elementAt(i);
 			String fromKeyUrl = par.fromKey == null ? ""
@@ -129,9 +130,9 @@ public class FlameContextImpl implements FlameContext {
 			final int j = i;
 			threads[i] = new Thread(operation + "#" + (i + 1)) {
 				public void run() {
-					long startTime = System.currentTimeMillis();
+//					long startTime = System.currentTimeMillis();
 					try {
-						System.out.println("invokeOperation url " + url);
+//						System.out.println("invokeOperation url " + url);
 						Response r = HTTP.doRequest("POST", url, lambda);
 						if (r.statusCode() != 200) {
 							results[j] = "Worker" + j + "Failed: " + new String(r.body());
@@ -142,17 +143,17 @@ public class FlameContextImpl implements FlameContext {
 						results[j] = "Worker" + j + "Exception: " + e;
 						e.printStackTrace();
 					}
-					long endTime = System.currentTimeMillis();
+//					long endTime = System.currentTimeMillis();
 					
-					FileWriter fw;
-					try {
-						fw = new FileWriter("FlameContext_log", true);
-						fw.write("thread " + operation + "#" + " start time: " + startTime + ", end time: " + endTime + ", took " + (endTime - startTime) + " to run \n");
-						fw.close();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+//					FileWriter fw;
+//					try {
+//						fw = new FileWriter("FlameContext_log", true);
+//						fw.write("thread " + operation + "#" + " start time: " + startTime + ", end time: " + endTime + ", took " + (endTime - startTime) + " to run \n");
+//						fw.close();
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
 
 				}
 			};
@@ -169,7 +170,12 @@ public class FlameContextImpl implements FlameContext {
 		for (int i = 0; i < results.length; i++) {
 			if (!"OK".equals(results[i])) {
 				System.out.println(results[i]);
-				throw new UserDefinedException(results[i]);
+				if (debugMode) {
+					FileWriter fw = new FileWriter("FlameContextImpl_error_log", true);
+					fw.write(results[i]);
+					fw.flush();					
+				}
+//				throw new UserDefinedException(results[i]);
 			}
 		}
 

@@ -88,7 +88,7 @@ public class KVSClient implements KVS {
 						String url = getURL(tableNameArg, i, useActualStartRow ? startRowArg : getWorkerID(i),
 								useActualEndRow ? endRowExclusiveArg
 										: ((i < numWorkers() - 1) ? getWorkerID(i + 1) : null));
-						System.out.println("kvs store url"+ url);
+//						System.out.println("kvs store url"+ url);
 						ranges.add(url);
 					}
 				}
@@ -126,7 +126,7 @@ public class KVSClient implements KVS {
 
 					try {
 						URL url = new URL(ranges.elementAt(currentRangeIndex));
-						System.out.println("urkl in side of kvs" + ranges.elementAt(currentRangeIndex));
+//						System.out.println("urkl in side of kvs" + ranges.elementAt(currentRangeIndex));
 						HttpURLConnection con = (HttpURLConnection) url.openConnection();
 						con.setRequestMethod("GET");
 						con.setConnectTimeout(500);
