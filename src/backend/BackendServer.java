@@ -1,6 +1,8 @@
 package backend;
 
 import static webserver.Server.*;
+
+import java.net.URLDecoder;
 import java.util.List;
 import kvs.KVSClient;
 import tools.Hasher;
@@ -25,9 +27,9 @@ public class BackendServer {
 		get("/search", (req, res) -> {
 			// this header is needed to for CORS
 			res.header("Access-Control-Allow-Origin", "*");
-			String query = req.queryParams("query");
+			String query = URLDecoder.decode(req.queryParams("query").toLowerCase(), "UTF-8");
 			System.out.println("Query is: " + query);
-			String[] searchTerms = query.split(" ");
+			String[] searchTerms = query.split("\\s+");
 			JSONObject results = new JSONObject();
 			results.put("results", null);
 			
