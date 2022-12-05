@@ -282,7 +282,9 @@ class FlameWorker extends Worker {
 						if (it != null) {
 							int seq = 0;
 							for (FlamePair p : it) {
-								kvs.put(qParamsStrings[1], p._1(), row.key() + seq++, p._2().getBytes());
+								if (!"".equals(p._1())){
+									kvs.put(qParamsStrings[1], p._1(), row.key() + seq++, p._2().getBytes());
+								}
 							}
 						}
 					}
@@ -343,7 +345,9 @@ class FlameWorker extends Worker {
 						if (it != null) {
 							int seq = 0;
 							for (FlamePair p : it) {
-								kvs.put(qParamsStrings[1], p._1(), row.key() + seq++, p._2().getBytes());
+								if (!"".equals(p._1())){
+									kvs.put(qParamsStrings[1], p._1(), row.key() + seq++, p._2().getBytes());
+								}
 							}
 						}
 					}
@@ -416,9 +420,12 @@ class FlameWorker extends Worker {
 			KVSClient kvs = new KVSClient(qParamsStrings[2]);
 			String zeroElement = req.queryParams().contains("zeroElement") ? req.queryParams("zeroElement") : "";
 
+			String accumulator = null;
+			String distinguisher = qParamsStrings[3] != null ? qParamsStrings[3] : "null";
+			distinguisher += qParamsStrings[4] != null ? qParamsStrings[4] : "null";
+
 			Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
 			if (iter != null) {
-				String accumulator = null;
 				while (iter.hasNext()) {
 					Row row = iter.next();
 					if (row == null) {
@@ -431,15 +438,11 @@ class FlameWorker extends Worker {
 						}
 					}
 				}
-
-				// check for the special circumstance if a worker was called twice
-				// for example, the highest id responsible for beginning and end range
-				if (accumulator != null && !accumulator.equals(zeroElement)){
-					String distinguisher = qParamsStrings[3] != null ? qParamsStrings[3] : "null";
-					distinguisher += "|" + qParamsStrings[4] != null ? qParamsStrings[4] : "null";
-					kvs.put(qParamsStrings[1], "htotal", distinguisher, accumulator.getBytes());
-				}
 			}
+
+			// check for the special circumstance if a worker was called twice
+			// for example, the highest id responsible for beginning and end range
+			kvs.put(qParamsStrings[1], distinguisher, FlameWorker.VALUE_STRING, accumulator == null ? zeroElement.getBytes() : accumulator.getBytes());
 
 			return FlameWorker.OK_STRING;
 		});

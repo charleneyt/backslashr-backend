@@ -34,7 +34,7 @@ public class Server implements Runnable {
     public static Map<String, HostRecord> hostTable = new HashMap<>();
 	
     // Increased the number of workers Cindy 12/02
-	public static int NUM_WORKERS = 30;
+	public static int NUM_WORKERS = 25;
     static String CRLF = "\r\n";
     static String BOUNDARY = "A_FANCY_SEPARATOR_MADE_BY_CHARLENE_TAM";
     static String DELIMITER = "--";
@@ -59,7 +59,7 @@ public class Server implements Runnable {
 	private Timer timer;
 
 	public void run() {		
-		queue = new LinkedBlockingDeque<>(NUM_WORKERS*10);
+		queue = new LinkedBlockingDeque<>(NUM_WORKERS*50);
 		workers = new Worker[NUM_WORKERS];
         Server server;
         if (instanceSecureType){
@@ -417,6 +417,9 @@ public class Server implements Runnable {
 
                 statusCode = 200;
                 reasonPhrase = "200 OK";
+
+                params = null;
+                qparams = null;
 
                 currSession = null;
                 newSession = false;

@@ -153,7 +153,7 @@ public class Crawler {
 						con.connect();
 					} catch (Exception e) {
 						System.out.println("Robot failed to connect");
-						return Arrays.asList(new String[] {});;
+						return Arrays.asList(new String[] {});
 					}
 
 					int robotsCode = con.getResponseCode();
@@ -209,7 +209,7 @@ public class Crawler {
 						con.connect();
 					} catch (Exception e) {
 						System.out.println("Head failed to connect");
-						return Arrays.asList(new String[] {});;
+						return Arrays.asList(new String[] {});
 					}
 
 					int code = con.getResponseCode();

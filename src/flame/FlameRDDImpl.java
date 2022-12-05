@@ -138,16 +138,52 @@ public class FlameRDDImpl implements FlameRDD {
 	@Override
 	public String fold(String zeroElement, TwoStringsToString lambda) throws Exception {
 		String outputTable = context.invokeOperation(tableName, "/rdd/fold", Serializer.objectToByteArray(lambda), zeroElement, null);
-		Row row;
-		if (kvs.existsRow(outputTable, "htotal") && (row = kvs.getRow(outputTable, "htotal")) != null){
-			String accumulator = null;
-			for (String colName : row.columns()){
-				accumulator = lambda.op(accumulator == null ? zeroElement : accumulator, row.get(colName));
+
+		String accumulator = null;
+
+		for (Partition par : latestAssignment){
+			String distinguisher = par.fromKey != null ? par.fromKey : "null";
+			distinguisher += par.toKeyExclusive != null ? par.toKeyExclusive : "null";
+			int count = 0;
+			while (!kvs.existsRow(outputTable, distinguisher)){
+				if (count == 0){
+					System.out.println("waiting on distinguisher " + distinguisher);
+				}
+				count++;
 			}
-			return accumulator == null ? zeroElement : accumulator;
-		} else {
-			return zeroElement;
+			accumulator = lambda.op(accumulator == null ? zeroElement : accumulator, new String(kvs.get(outputTable, distinguisher, "value")));
 		}
+
+		return accumulator == null ? zeroElement : accumulator;
+		
+
+		// Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
+		// if (iter != null) {
+		// 	while (iter.hasNext()) {
+		// 		Row row = iter.next();
+		// 		if (row == null) {
+		// 			break;
+		// 		}
+		// 		if (row.columns().contains(FlameWorker.VALUE_STRING)) {
+		// 			String s = row.get(FlameWorker.VALUE_STRING);
+		// 			if (s != null) {
+		// 				accumulator = lambda.op(accumulator == null ? zeroElement : accumulator, s);
+		// 			}
+		// 		}
+		// 	}
+		// }
+
+		// Row row;
+
+		// if (kvs.existsRow(outputTable, "htotal") && (row = kvs.getRow(outputTable, "htotal")) != null){
+		// 	String accumulator = null;
+		// 	for (String colName : row.columns()){
+		// 		accumulator = lambda.op(accumulator == null ? zeroElement : accumulator, row.get(colName));
+		// 	}
+		// 	return accumulator == null ? zeroElement : accumulator;
+		// } else {
+		// 	return zeroElement;
+		// }
 	}
 
 	@Override

@@ -1,19 +1,20 @@
 package kvs;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.io.*;
 
 public class Row implements Serializable {
 
   protected String key;
-  protected HashMap<String,byte[]> values;
+  protected ConcurrentHashMap<String,byte[]> values;
 
   public Row(String keyArg) {
     key = keyArg;
-    values = new HashMap<String,byte[]>();
+    values = new ConcurrentHashMap<String,byte[]>();
   }
 
-  public synchronized String key() {
+  public String key() {
     return key;
   }
 
@@ -24,7 +25,7 @@ public class Row implements Serializable {
     return theClone;
   }
 
-  public synchronized Set<String> columns() {
+  public Set<String> columns() {
     return values.keySet();
   }
 
@@ -36,13 +37,13 @@ public class Row implements Serializable {
     values.put(key, value);
   }
 
-  public synchronized String get(String key) {
+  public String get(String key) {
     if (values.get(key) == null)
       return null;
   	return new String(values.get(key));
   }
 
-  public synchronized byte[] getBytes(String key) {
+  public byte[] getBytes(String key) {
     return values.get(key);
   }
 

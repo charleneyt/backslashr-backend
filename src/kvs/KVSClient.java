@@ -127,8 +127,10 @@ public class KVSClient implements KVS {
 						URL url = new URL(ranges.elementAt(currentRangeIndex));
 						HttpURLConnection con = (HttpURLConnection) url.openConnection();
 						con.setRequestMethod("GET");
-						con.setConnectTimeout(5000);
+						// Update where to put timeout Cindy 12/02
 						con.connect();
+						// con.setConnectTimeout(5000);
+						// con.setReadTimeout(10000);
 						in = con.getInputStream();
 						Row r = fill();
 						if (r != null) {
@@ -250,6 +252,7 @@ public class KVSClient implements KVS {
 		try {
 			String target = "http://" + workers.elementAt(workerIndexForKey(row)).address + "/data/" + tableName + "/"
 					+ java.net.URLEncoder.encode(row, "UTF-8") + "/" + java.net.URLEncoder.encode(column, "UTF-8");
+			// System.out.println(target);
 			byte[] response = HTTP.doRequest("PUT", target, value).body();
 			String result = new String(response);
 			if (!result.equals("OK")) {
