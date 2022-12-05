@@ -71,24 +71,14 @@ public class Ranker {
 				}
 				
 				for (String url : urlToWordCount.keySet()) {
-    				if (map.containsKey(url)) {
-    					int freq = map.get(url);
-    					if (urlToFrequencies.containsKey(url)) {
-	        				urlToFrequencies.get(url)[cur] = freq;
-	        			} else {
-	        				int[] freqs = new int[searchTerms.length];
-	        				freqs[cur] = freq;
-	        				urlToFrequencies.put(url, freqs);
-	        			}
-    				} else {
-    					if (urlToFrequencies.containsKey(url)) {
-	        				urlToFrequencies.get(url)[cur] = 0;
-	        			} else {
-	        				int[] freqs = new int[searchTerms.length];
-	        				freqs[cur] = 0;
-	        				urlToFrequencies.put(url, freqs);
-	        			}
-    				}
+    				int freq = map.containsKey(url) ? map.get(url) : 0;
+					if (urlToFrequencies.containsKey(url)) {
+        				urlToFrequencies.get(url)[cur] = freq;
+        			} else {
+        				int[] freqs = new int[searchTerms.length];
+        				freqs[cur] = freq;
+        				urlToFrequencies.put(url, freqs);
+        			}
     			}
 			} else {
 				idfArray[cur] = 0.0;
@@ -114,7 +104,7 @@ public class Ranker {
 		}
 		
 		// step 4 - perform phrase search and find URLs that contain the exact match of the search terms,
-		// and also URLs that contain a near exact match (defined as terms which has one less word than
+		// and also URLs that contain a near exact match (defined as terms which have one less word than
 		// the original search terms, but otherwise maintain the same word order, e.g. the original search
 		// term is "hello world cup", and its near exact matches are "hello world", "hello cup" and "world cup")
 		List<String> urlsWithExactMatch = new ArrayList<>();
