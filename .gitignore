@@ -6,3 +6,4 @@ job*
 **./gitignore
 *log*
 bin/
+*.zip

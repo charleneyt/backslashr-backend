@@ -249,7 +249,7 @@ public class FlameContextImpl implements FlameContext {
 		for (int i = 0; i < results.length; i++) {
 			if (!"OK".equals(results[i])) {
 				System.out.println(results[i]);
-				throw new UserDefinedException(results[i]);
+				// throw new UserDefinedException(results[i]);
 			}
 		}
 

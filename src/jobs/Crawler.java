@@ -17,7 +17,7 @@ public class Crawler {
 	static boolean restartLog1 = true;
 	static boolean restartLog2 = true;
 	final static Set<String> allowedSuffix = new HashSet<>(Arrays.asList("com", "net", "org", "edu", "gov"));
-	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("cnn.com", "wikipedia.com", "espn.com", "bbc.com", "irs.gov"));
+	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("cnn.com", "wikipedia.com", "espn.com", "bbc.com", "irs.gov", "cbssports.com", "imdb.com"));
 	static boolean debugMode = false;
 
 	public static void run(FlameContext ctx, String[] args) throws Exception {
@@ -176,7 +176,7 @@ public class Crawler {
 				List<String> ret = new LinkedList<>();
 
 				// only crawl data if passed the rule check
-				if (checkRules(parsedUrl[3], rules)) {
+				if (checkRules(parsedUrl[3], rules) && notBlacklisted(url, blacklist)) {
 					String normalizedOriginal = normalizeImpl(url, null, new StringBuilder());
 					if (normalizedOriginal == null || normalizedOriginal.length() == 0) {
 						return ret;
