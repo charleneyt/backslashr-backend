@@ -69,78 +69,83 @@ public class Indexer {
                                             }
                                             for (String word : stem.keySet()){
                                                 // ec1: word, url, index1 index2 index3
-                                                kvs.put("inverted-hs", word, url, stem.get(word).getBytes());
+                                                // 12/6 add a check to only add words appearing more than once
+                                                if (stem.get(word).indexOf(" ") != -1){
+                                                    kvs.put("inverted-hs", word, url, stem.get(word).getBytes());
+                                                }
                                             }
                                             for (String word : original.keySet()){
-                                                if (!stem.containsKey(word)){
+                                                // 12/6 add a check to only add words appearing more than once
+                                                if (!stem.containsKey(word) && original.get(word).indexOf(" ") != -1){
                                                     // ec1: word, url, index1 index2 index3
                                                     kvs.put("inverted-hs", word, url, original.get(word).getBytes());
                                                 }
                                             }
                                         }
-                                        return ret;
-                                    })
-                                    .foldByKey("", (s1, s2) -> {
-                                        if ("".equals(s1) && "".equals(s2)){
-                                            return "";
-                                        } else if ("".equals(s1)){
-                                            return s2;
-                                        } else if ("".equals(s2)){
-                                            return s1;
-                                        } else {
-                                            return s1 + "," + s2;
-                                        }
+                                        // 12/6 don't return pairs!
+                                        return null;
                                     });
-        urlsTable.saveAsTable("index-regular");
+                                    // .foldByKey("", (s1, s2) -> {
+                                    //     if ("".equals(s1) && "".equals(s2)){
+                                    //         return "";
+                                    //     } else if ("".equals(s1)){
+                                    //         return s2;
+                                    //     } else if ("".equals(s2)){
+                                    //         return s1;
+                                    //     } else {
+                                    //         return s1 + "," + s2;
+                                    //     }
+                                    // });
+        // urlsTable.saveAsTable("index-regular");
         // urlsTable.saveAsTable("index");
         // Thread.sleep(FlameContext.getKVS().count("index-regular")/10);
 
         // EC 1 making a urls2 column that lists url by desc order of occurrences, and append those occurrence to url
-        FlamePairRDD urls2Table = ctx.fromTable("inverted-hs", row -> {
-                                        // use treemap with count of indices as key, url1 url2 url3 as value
-                                        TreeMap<Integer, String> currWordMap = new TreeMap<>(Collections.reverseOrder());
+        // FlamePairRDD urls2Table = ctx.fromTable("inverted-hs", row -> {
+        //                                 // use treemap with count of indices as key, url1 url2 url3 as value
+        //                                 TreeMap<Integer, String> currWordMap = new TreeMap<>(Collections.reverseOrder());
 
-                                        for (String colName : row.columns()){
-                                            int count = row.get(colName).split(" ").length;
-                                            if (count == 0) continue;
-                                            currWordMap.put(count, currWordMap.containsKey(count) ? currWordMap.get(count) + " " + colName : colName);
-                                        }
+        //                                 for (String colName : row.columns()){
+        //                                     int count = row.get(colName).split(" ").length;
+        //                                     if (count == 0) continue;
+        //                                     currWordMap.put(count, currWordMap.containsKey(count) ? currWordMap.get(count) + " " + colName : colName);
+        //                                 }
 
-                                        StringBuilder sb = new StringBuilder();
-                                        for (String entry : currWordMap.values()){
-                                            String[] splitStr = entry.split(" ");
-                                            for (String link : splitStr){
-                                                if (sb.length() > 0){
-                                                    sb.append(",");
-                                                }
-                                                sb.append(link + ":" + row.get(link));
-                                            }
-                                        }
-                                        if (sb.length() > 0){
-                                            return row.key() + "," + sb.toString();
-                                        } else {
-                                            return "";
-                                        }
-                                    })
-                                    // then split the String into FlamePair
-                                    .mapToPair(s -> {
-                                        if (s.length() > 0){
-                                            int idx = s.indexOf(",");
-                                            return new FlamePair(s.substring(0, idx), s.substring(idx + 1));
-                                        } else {return new FlamePair("", "");}
-                                    })
-                                    .foldByKey("", (s1, s2) -> {
-                                        if ("".equals(s1) && "".equals(s2)){
-                                            return "";
-                                        } else if ("".equals(s1)){
-                                            return s2;
-                                        } else if ("".equals(s2)){
-                                            return s1;
-                                        } else {
-                                            return s1 + "," + s2;
-                                        }
-                                    });
-        urls2Table.saveAsTable("index");
+        //                                 StringBuilder sb = new StringBuilder();
+        //                                 for (String entry : currWordMap.values()){
+        //                                     String[] splitStr = entry.split(" ");
+        //                                     for (String link : splitStr){
+        //                                         if (sb.length() > 0){
+        //                                             sb.append(",");
+        //                                         }
+        //                                         sb.append(link + ":" + row.get(link));
+        //                                     }
+        //                                 }
+        //                                 if (sb.length() > 0){
+        //                                     return row.key() + "," + sb.toString();
+        //                                 } else {
+        //                                     return "";
+        //                                 }
+        //                             })
+        //                             // then split the String into FlamePair
+        //                             .mapToPair(s -> {
+        //                                 if (s.length() > 0){
+        //                                     int idx = s.indexOf(",");
+        //                                     return new FlamePair(s.substring(0, idx), s.substring(idx + 1));
+        //                                 } else {return new FlamePair("", "");}
+        //                             })
+        //                             .foldByKey("", (s1, s2) -> {
+        //                                 if ("".equals(s1) && "".equals(s2)){
+        //                                     return "";
+        //                                 } else if ("".equals(s1)){
+        //                                     return s2;
+        //                                 } else if ("".equals(s2)){
+        //                                     return s1;
+        //                                 } else {
+        //                                     return s1 + "," + s2;
+        //                                 }
+        //                             });
+        // urls2Table.saveAsTable("index");
         // Thread.sleep(FlameContext.getKVS().count("index")/10);
         
         // FlamePairRDD urlsJoined = urlsTable.join(ec1);
