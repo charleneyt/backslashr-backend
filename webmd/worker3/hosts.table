@@ -1,0 +1,636 @@
+go.webmdcare.com robotsReq 3 200 
+go.webmdcare.com robotsReq 3 200 robots 60 User-agent: *
+Disallow: /webmail/
+Disallow: /shared/webmail/ 
+go.webmdcare.com robotsReq 3 200 robots 60 User-agent: *
+Disallow: /webmail/
+Disallow: /shared/webmail/ time 13 1670309117678 
+help.medscape.com robotsReq 3 200 
+help.medscape.com robotsReq 3 200 robots 2094 # See http://www.robotstxt.org/wc/norobots.html for documentation on how to use the robots.txt file
+
+User-agent: AppleBot # Allow /tickets
+Disallow: /children
+Disallow: /groups
+Disallow: /organizations
+Disallow: /requests
+Disallow: /registration
+Disallow: /plans
+Disallow: /accounts
+Disallow: /account
+Disallow: /proxy
+Disallow: /rules
+Disallow: /tags
+Disallow: /ticket_fields
+Disallow: /reports
+Disallow: /search
+Disallow: /slas
+Disallow: /integrations
+Disallow: /users
+Disallow: /suspended_tickets
+Disallow: /events
+Disallow: /console
+Disallow: /requests/*/satisfaction/
+Disallow: /hc/change_language/
+Disallow: /hc/communities/public/topics/*?*filter=
+Disallow: /hc/communities/public/questions$
+Disallow: /hc/communities/public/questions?*filter=
+Disallow: /hc/communities/public/questions/unanswered
+Disallow: /hc/*/signin
+Disallow: /hc/requests/
+Disallow: /hc/*/requests/
+Allow: /hc/*/requests/new
+Disallow: /hc/*/search
+Disallow: /access/normal
+Disallow: /access/sso_bypass
+Disallow: /access/unauthenticated
+Disallow: /theming
+Disallow: /knowledge
+Disallow: /access/
+
+User-agent: *
+Disallow: /children
+Disallow: /groups
+Disallow: /organizations
+Disallow: /requests
+Disallow: /registration
+Disallow: /plans
+Disallow: /accounts
+Disallow: /account
+Disallow: /proxy
+Disallow: /rules
+Disallow: /tags
+Disallow: /ticket_fields
+Disallow: /reports
+Disallow: /search
+Disallow: /slas
+Disallow: /integrations
+Disallow: /users
+Disallow: /suspended_tickets
+Disallow: /events
+Disallow: /console
+Disallow: /requests/*/satisfaction/
+Disallow: /hc/change_language/
+Disallow: /hc/communities/public/topics/*?*filter=
+Disallow: /hc/communities/public/questions$
+Disallow: /hc/communities/public/questions?*filter=
+Disallow: /hc/communities/public/questions/unanswered
+Disallow: /hc/*/signin
+Disallow: /hc/requests/
+Disallow: /hc/*/requests/
+Allow: /hc/*/requests/new
+Disallow: /hc/*/search
+Disallow: /access/normal
+Disallow: /access/sso_bypass
+Disallow: /access/unauthenticated
+Disallow: /theming
+Disallow: /knowledge
+Disallow: /access/
+Disallow: /tickets
+
+Sitemap: https://help.medscape.com/hc/sitemap.xml
+ 
+francais.medscape.com robotsReq 3 200 
+francais.medscape.com robotsReq 3 200 robots 42 User-agent: *
+
+Disallow: /dpc/activity/* 
+francais.medscape.com robotsReq 3 200 robots 42 User-agent: *
+
+Disallow: /dpc/activity/* time 13 1670309132046 
+feedback-form.truste.com robotsReq 3 404 
+feedback-form.truste.com robotsReq 3 404 time 13 1670309397639 
+fit.webmd.com robotsReq 3 301 
+fit.webmd.com robotsReq 3 301 
+feedback-form.truste.com robotsReq 3 404 time 13 1670309504084 
+firstaid.webmd.com robotsReq 3 403 
+findtreatment.samhsa.gov robotsReq 3 301 
+helping.apa.org robotsReq 3 301 
+go.microsoft.com robotsReq 3 200 
+go.microsoft.com robotsReq 3 200 robots 98 ﻿# Robots.txt file for http://go.microsoft.com
+#
+
+User-agent: *
+Allow:/fwlink/p/
+Disallow:/ 
+get.adobe.com robotsReq 3 200 
+get.adobe.com robotsReq 3 200 robots 317 User-agent: *
+Disallow: /reader/download/
+Disallow: /*/reader/download/
+Disallow: /reader/completion/
+Disallow: /*/reader/completion/
+Disallow: /reader/otherversions/
+Disallow: /*/reader/otherversions/
+Disallow: /reader/direct/
+Disallow: /*/reader/direct/
+Disallow: /reader/enterprise/
+Disallow: /*/reader/enterprise/ 
+get.adobe.com robotsReq 3 200 robots 317 User-agent: *
+Disallow: /reader/download/
+Disallow: /*/reader/download/
+Disallow: /reader/completion/
+Disallow: /*/reader/completion/
+Disallow: /reader/otherversions/
+Disallow: /*/reader/otherversions/
+Disallow: /reader/direct/
+Disallow: /*/reader/direct/
+Disallow: /reader/enterprise/
+Disallow: /*/reader/enterprise/ time 13 1670311480918 
+hbr.org robotsReq 3 200 
+hbr.org robotsReq 3 200 robots 799 User-Agent: *
+Disallow: /resources/
+Allow: /resources/js
+Allow: /resources/css
+Allow: /resources/images/
+Allow: /resources/xml/sitemaps/
+Disallow: /fastanswers
+Disallow: /my-library*
+Disallow: /email-colleague/
+Disallow: /add-to-cart/
+Disallow: /login*
+Disallow: /shopping-cart/
+Disallow: /shipping-payment
+Disallow: /review-order
+Disallow: /order/thank-you/
+Disallow: /content/ipad/
+Disallow: /newsletters*
+Disallow: /product/recommended*
+Disallow: /webinar-assessment
+Disallow: /search*
+Disallow: /academic-subscriptions
+Disallow: /alumni-subscriptions
+Disallow: /*?*language=es
+Disallow: /*?*language=pt
+Allow: /resources/html/infographics/2018/ceo-activism-desktop/index.html
+Disallow: /resources/html/error/404.html
+User-Agent: 008
+Disallow: /
+User-Agent: FeedBurner/1.0
+Allow: /resources/xml/
+ 
+hbr.org robotsReq 3 200 robots 799 User-Agent: *
+Disallow: /resources/
+Allow: /resources/js
+Allow: /resources/css
+Allow: /resources/images/
+Allow: /resources/xml/sitemaps/
+Disallow: /fastanswers
+Disallow: /my-library*
+Disallow: /email-colleague/
+Disallow: /add-to-cart/
+Disallow: /login*
+Disallow: /shopping-cart/
+Disallow: /shipping-payment
+Disallow: /review-order
+Disallow: /order/thank-you/
+Disallow: /content/ipad/
+Disallow: /newsletters*
+Disallow: /product/recommended*
+Disallow: /webinar-assessment
+Disallow: /search*
+Disallow: /academic-subscriptions
+Disallow: /alumni-subscriptions
+Disallow: /*?*language=es
+Disallow: /*?*language=pt
+Allow: /resources/html/infographics/2018/ceo-activism-desktop/index.html
+Disallow: /resources/html/error/404.html
+User-Agent: 008
+Disallow: /
+User-Agent: FeedBurner/1.0
+Allow: /resources/xml/
+ time 13 1670311661171 
+fortune.com robotsReq 3 200 
+fortune.com robotsReq 3 200 robots 1073 User-agent: *
+Disallow: /wp-admin/
+Allow: /wp-admin/admin-ajax.php
+Disallow: /search/*
+Disallow: /sponsored/
+Disallow: /feeds/
+Disallow: /feed/
+Disallow: */feed/
+Allow: */feed/*/articles.xml
+Allow: /feed/sitema*
+Disallow: /wp-login.php
+Disallow: /wp-signup.php
+Disallow: /press-this.php
+Disallow: /remote-login.php
+Disallow: /activate/
+Disallow: /cgi-bin/
+Disallow: /mshots/v1/
+Disallow: /next/
+Disallow: /public.api/*
+
+User-agent: Googlebot
+Disallow: /search/*
+Disallow: /sponsored/
+Disallow: /feeds/
+Disallow: /feed/
+Disallow: */feed/
+Allow: */feed/*/articles.xml
+Allow: /feed/sitema*
+Disallow: /wp-login.php
+Disallow: /wp-signup.php
+Disallow: /press-this.php
+Disallow: /remote-login.php
+Disallow: /activate/
+Disallow: /cgi-bin/
+Disallow: /mshots/v1/
+Disallow: /next/
+Disallow: /public.api/*
+
+# Google SiteMaps
+Sitemap: https://fortune.com/feed/sitemap/
+# Sitemap: https://fortune.com/feed/googlesitemap/articles.xml
+Sitemap: https://fortune.com/feed/googlenews/articles.xml
+Sitemap: https://fortune.com/videos/sitemap.xml
+Sitemap: https://fortune.com/nativo-sitemap.xml
+ 
+fortune.com robotsReq 3 200 robots 1073 User-agent: *
+Disallow: /wp-admin/
+Allow: /wp-admin/admin-ajax.php
+Disallow: /search/*
+Disallow: /sponsored/
+Disallow: /feeds/
+Disallow: /feed/
+Disallow: */feed/
+Allow: */feed/*/articles.xml
+Allow: /feed/sitema*
+Disallow: /wp-login.php
+Disallow: /wp-signup.php
+Disallow: /press-this.php
+Disallow: /remote-login.php
+Disallow: /activate/
+Disallow: /cgi-bin/
+Disallow: /mshots/v1/
+Disallow: /next/
+Disallow: /public.api/*
+
+User-agent: Googlebot
+Disallow: /search/*
+Disallow: /sponsored/
+Disallow: /feeds/
+Disallow: /feed/
+Disallow: */feed/
+Allow: */feed/*/articles.xml
+Allow: /feed/sitema*
+Disallow: /wp-login.php
+Disallow: /wp-signup.php
+Disallow: /press-this.php
+Disallow: /remote-login.php
+Disallow: /activate/
+Disallow: /cgi-bin/
+Disallow: /mshots/v1/
+Disallow: /next/
+Disallow: /public.api/*
+
+# Google SiteMaps
+Sitemap: https://fortune.com/feed/sitemap/
+# Sitemap: https://fortune.com/feed/googlesitemap/articles.xml
+Sitemap: https://fortune.com/feed/googlenews/articles.xml
+Sitemap: https://fortune.com/videos/sitemap.xml
+Sitemap: https://fortune.com/nativo-sitemap.xml
+ time 13 1670311728677 
+giving.cedars-sinai.edu robotsReq 3 200 
+giving.cedars-sinai.edu robotsReq 3 200 robots 47 User-agent: *
+Disallow: *.pdf$
+Disallow: /file/ 
+giftshop.cedars-sinai.org robotsReq 3 200 
+giftshop.cedars-sinai.org robotsReq 3 200 robots 3195 # we use Shopify as our ecommerce platform
+
+User-agent: *
+Disallow: /admin
+Disallow: /cart
+Disallow: /orders
+Disallow: /checkouts/
+Disallow: /checkout
+Disallow: /7550435401/checkouts
+Disallow: /7550435401/orders
+Disallow: /carts
+Disallow: /account
+Disallow: /collections/*sort_by*
+Disallow: /*/collections/*sort_by*
+Disallow: /collections/*+*
+Disallow: /collections/*%2B*
+Disallow: /collections/*%2b*
+Disallow: /*/collections/*+*
+Disallow: /*/collections/*%2B*
+Disallow: /*/collections/*%2b*
+Disallow: /blogs/*+*
+Disallow: /blogs/*%2B*
+Disallow: /blogs/*%2b*
+Disallow: /*/blogs/*+*
+Disallow: /*/blogs/*%2B*
+Disallow: /*/blogs/*%2b*
+Disallow: /*?*oseid=*
+Disallow: /*preview_theme_id*
+Disallow: /*preview_script_id*
+Disallow: /policies/
+Disallow: /*/*?*ls=*&ls=*
+Disallow: /*/*?*ls%3D*%3Fls%3D*
+Disallow: /*/*?*ls%3d*%3fls%3d*
+Disallow: /search
+Disallow: /apple-app-site-association
+Sitemap: https://giftshop.cedars-sinai.org/sitemap.xml
+
+# Google adsbot ignores robots.txt unless specifically named!
+User-agent: adsbot-google
+Disallow: /checkouts/
+Disallow: /checkout
+Disallow: /carts
+Disallow: /orders
+Disallow: /7550435401/checkouts
+Disallow: /7550435401/orders
+Disallow: /*?*oseid=*
+Disallow: /*preview_theme_id*
+Disallow: /*preview_script_id*
+
+User-agent: Nutch
+Disallow: /
+
+User-agent: AhrefsBot
+Crawl-delay: 10
+Disallow: /admin
+Disallow: /cart
+Disallow: /orders
+Disallow: /checkouts/
+Disallow: /checkout
+Disallow: /7550435401/checkouts
+Disallow: /7550435401/orders
+Disallow: /carts
+Disallow: /account
+Disallow: /collections/*sort_by*
+Disallow: /*/collections/*sort_by*
+Disallow: /collections/*+*
+Disallow: /collections/*%2B*
+Disallow: /collections/*%2b*
+Disallow: /*/collections/*+*
+Disallow: /*/collections/*%2B*
+Disallow: /*/collections/*%2b*
+Disallow: /blogs/*+*
+Disallow: /blogs/*%2B*
+Disallow: /blogs/*%2b*
+Disallow: /*/blogs/*+*
+Disallow: /*/blogs/*%2B*
+Disallow: /*/blogs/*%2b*
+Disallow: /*?*oseid=*
+Disallow: /*preview_theme_id*
+Disallow: /*preview_script_id*
+Disallow: /policies/
+Disallow: /*/*?*ls=*&ls=*
+Disallow: /*/*?*ls%3D*%3Fls%3D*
+Disallow: /*/*?*ls%3d*%3fls%3d*
+Disallow: /search
+Disallow: /apple-app-site-association
+Sitemap: https://giftshop.cedars-sinai.org/sitemap.xml
+
+User-agent: AhrefsSiteAudit
+Crawl-delay: 10
+Disallow: /admin
+Disallow: /cart
+Disallow: /orders
+Disallow: /checkouts/
+Disallow: /checkout
+Disallow: /7550435401/checkouts
+Disallow: /7550435401/orders
+Disallow: /carts
+Disallow: /account
+Disallow: /collections/*sort_by*
+Disallow: /*/collections/*sort_by*
+Disallow: /collections/*+*
+Disallow: /collections/*%2B*
+Disallow: /collections/*%2b*
+Disallow: /*/collections/*+*
+Disallow: /*/collections/*%2B*
+Disallow: /*/collections/*%2b*
+Disallow: /blogs/*+*
+Disallow: /blogs/*%2B*
+Disallow: /blogs/*%2b*
+Disallow: /*/blogs/*+*
+Disallow: /*/blogs/*%2B*
+Disallow: /*/blogs/*%2b*
+Disallow: /*?*oseid=*
+Disallow: /*preview_theme_id*
+Disallow: /*preview_script_id*
+Disallow: /policies/
+Disallow: /*/*?*ls=*&ls=*
+Disallow: /*/*?*ls%3D*%3Fls%3D*
+Disallow: /*/*?*ls%3d*%3fls%3d*
+Disallow: /search
+Disallow: /apple-app-site-association
+Sitemap: https://giftshop.cedars-sinai.org/sitemap.xml
+
+User-agent: MJ12bot
+Crawl-Delay: 10
+
+User-agent: Pinterest
+Crawl-delay: 1
+ 
+giftshop.cedars-sinai.org robotsReq 3 200 robots 3195 # we use Shopify as our ecommerce platform
+
+User-agent: *
+Disallow: /admin
+Disallow: /cart
+Disallow: /orders
+Disallow: /checkouts/
+Disallow: /checkout
+Disallow: /7550435401/checkouts
+Disallow: /7550435401/orders
+Disallow: /carts
+Disallow: /account
+Disallow: /collections/*sort_by*
+Disallow: /*/collections/*sort_by*
+Disallow: /collections/*+*
+Disallow: /collections/*%2B*
+Disallow: /collections/*%2b*
+Disallow: /*/collections/*+*
+Disallow: /*/collections/*%2B*
+Disallow: /*/collections/*%2b*
+Disallow: /blogs/*+*
+Disallow: /blogs/*%2B*
+Disallow: /blogs/*%2b*
+Disallow: /*/blogs/*+*
+Disallow: /*/blogs/*%2B*
+Disallow: /*/blogs/*%2b*
+Disallow: /*?*oseid=*
+Disallow: /*preview_theme_id*
+Disallow: /*preview_script_id*
+Disallow: /policies/
+Disallow: /*/*?*ls=*&ls=*
+Disallow: /*/*?*ls%3D*%3Fls%3D*
+Disallow: /*/*?*ls%3d*%3fls%3d*
+Disallow: /search
+Disallow: /apple-app-site-association
+Sitemap: https://giftshop.cedars-sinai.org/sitemap.xml
+
+# Google adsbot ignores robots.txt unless specifically named!
+User-agent: adsbot-google
+Disallow: /checkouts/
+Disallow: /checkout
+Disallow: /carts
+Disallow: /orders
+Disallow: /7550435401/checkouts
+Disallow: /7550435401/orders
+Disallow: /*?*oseid=*
+Disallow: /*preview_theme_id*
+Disallow: /*preview_script_id*
+
+User-agent: Nutch
+Disallow: /
+
+User-agent: AhrefsBot
+Crawl-delay: 10
+Disallow: /admin
+Disallow: /cart
+Disallow: /orders
+Disallow: /checkouts/
+Disallow: /checkout
+Disallow: /7550435401/checkouts
+Disallow: /7550435401/orders
+Disallow: /carts
+Disallow: /account
+Disallow: /collections/*sort_by*
+Disallow: /*/collections/*sort_by*
+Disallow: /collections/*+*
+Disallow: /collections/*%2B*
+Disallow: /collections/*%2b*
+Disallow: /*/collections/*+*
+Disallow: /*/collections/*%2B*
+Disallow: /*/collections/*%2b*
+Disallow: /blogs/*+*
+Disallow: /blogs/*%2B*
+Disallow: /blogs/*%2b*
+Disallow: /*/blogs/*+*
+Disallow: /*/blogs/*%2B*
+Disallow: /*/blogs/*%2b*
+Disallow: /*?*oseid=*
+Disallow: /*preview_theme_id*
+Disallow: /*preview_script_id*
+Disallow: /policies/
+Disallow: /*/*?*ls=*&ls=*
+Disallow: /*/*?*ls%3D*%3Fls%3D*
+Disallow: /*/*?*ls%3d*%3fls%3d*
+Disallow: /search
+Disallow: /apple-app-site-association
+Sitemap: https://giftshop.cedars-sinai.org/sitemap.xml
+
+User-agent: AhrefsSiteAudit
+Crawl-delay: 10
+Disallow: /admin
+Disallow: /cart
+Disallow: /orders
+Disallow: /checkouts/
+Disallow: /checkout
+Disallow: /7550435401/checkouts
+Disallow: /7550435401/orders
+Disallow: /carts
+Disallow: /account
+Disallow: /collections/*sort_by*
+Disallow: /*/collections/*sort_by*
+Disallow: /collections/*+*
+Disallow: /collections/*%2B*
+Disallow: /collections/*%2b*
+Disallow: /*/collections/*+*
+Disallow: /*/collections/*%2B*
+Disallow: /*/collections/*%2b*
+Disallow: /blogs/*+*
+Disallow: /blogs/*%2B*
+Disallow: /blogs/*%2b*
+Disallow: /*/blogs/*+*
+Disallow: /*/blogs/*%2B*
+Disallow: /*/blogs/*%2b*
+Disallow: /*?*oseid=*
+Disallow: /*preview_theme_id*
+Disallow: /*preview_script_id*
+Disallow: /policies/
+Disallow: /*/*?*ls=*&ls=*
+Disallow: /*/*?*ls%3D*%3Fls%3D*
+Disallow: /*/*?*ls%3d*%3fls%3d*
+Disallow: /search
+Disallow: /apple-app-site-association
+Sitemap: https://giftshop.cedars-sinai.org/sitemap.xml
+
+User-agent: MJ12bot
+Crawl-Delay: 10
+
+User-agent: Pinterest
+Crawl-delay: 1
+ time 13 1670311864508 
+hopkinscme.cloud-cme.com robotsReq 3 200 
+hopkinscme.cloud-cme.com robotsReq 3 200 robots 549 User-agent: *
+Disallow: /ap.aspx
+
+User-agent: *
+Disallow: /AP.aspx
+
+User-agent: *
+Disallow: /ap.aspx?
+
+User-agent: *
+Disallow: /AP.aspx?
+
+User-agent: Googlebot
+Disallow: /AP.aspx?*
+
+User-agent: Googlebot
+Disallow: /ap.aspx?*
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: *
+Disallow: /Agenda/SpeakerAgenda.aspx
+
+User-agent: *
+Disallow: /Agenda/SpeakerAgenda.aspx?*
+
+User-agent: *
+Disallow: /agenda/speakeragenda.aspx
+
+User-agent: *
+Disallow: /agenda/speakeragenda.aspx?*
+
+User-agent: Googlebot
+Disallow: /Assets/* 
+fortune.com robotsReq 3 200 robots 1073 User-agent: *
+Disallow: /wp-admin/
+Allow: /wp-admin/admin-ajax.php
+Disallow: /search/*
+Disallow: /sponsored/
+Disallow: /feeds/
+Disallow: /feed/
+Disallow: */feed/
+Allow: */feed/*/articles.xml
+Allow: /feed/sitema*
+Disallow: /wp-login.php
+Disallow: /wp-signup.php
+Disallow: /press-this.php
+Disallow: /remote-login.php
+Disallow: /activate/
+Disallow: /cgi-bin/
+Disallow: /mshots/v1/
+Disallow: /next/
+Disallow: /public.api/*
+
+User-agent: Googlebot
+Disallow: /search/*
+Disallow: /sponsored/
+Disallow: /feeds/
+Disallow: /feed/
+Disallow: */feed/
+Allow: */feed/*/articles.xml
+Allow: /feed/sitema*
+Disallow: /wp-login.php
+Disallow: /wp-signup.php
+Disallow: /press-this.php
+Disallow: /remote-login.php
+Disallow: /activate/
+Disallow: /cgi-bin/
+Disallow: /mshots/v1/
+Disallow: /next/
+Disallow: /public.api/*
+
+# Google SiteMaps
+Sitemap: https://fortune.com/feed/sitemap/
+# Sitemap: https://fortune.com/feed/googlesitemap/articles.xml
+Sitemap: https://fortune.com/feed/googlenews/articles.xml
+Sitemap: https://fortune.com/videos/sitemap.xml
+Sitemap: https://fortune.com/nativo-sitemap.xml
+ time 13 1670312233643 

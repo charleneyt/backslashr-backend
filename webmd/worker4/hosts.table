@@ -1,0 +1,843 @@
+jobs.jobvite.com robotsReq 3 404 
+jobs.jobvite.com robotsReq 3 404 time 13 1670309100993 
+img.webmd.com robotsReq 3 200 
+img.webmd.com robotsReq 3 200 robots 202 #   Robots.txt file WebMD
+
+
+
+
+User-agent: *
+Allow: /dtmcms/live/webmd/consumer_assets/site_images/sponsored_programs/r_fit/*
+Disallow: /dtmcms/live/webmd/consumer_assets/site_images/sponsored_programs/
+ 
+investors.liveramp.com robotsReq 3 200 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / 
+intouchvet.com robotsReq 3 200 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670310197692 
+jordanmendiola.medium.com robotsReq 3 200 
+jordanmendiola.medium.com robotsReq 3 200 robots 423 User-Agent: *
+Disallow: /m/
+Disallow: /me/
+Disallow: /@me$
+Disallow: /@me/
+Disallow: /*/edit$
+Disallow: /*/*/edit$
+Disallow: /r/
+Disallow: /t/
+Disallow: /search?q$
+Disallow: /search?q=
+Allow: /_/
+Allow: /_/api/users/*/meta
+Allow: /_/api/users/*/profile/stream
+Allow: /_/api/posts/*/responses
+Allow: /_/api/posts/*/responsesStream
+Allow: /_/api/posts/*/related
+Sitemap: https://jordanmendiola.medium.com/sitemap/sitemap.xml
+ 
+jordanmendiola.medium.com robotsReq 3 200 robots 423 User-Agent: *
+Disallow: /m/
+Disallow: /me/
+Disallow: /@me$
+Disallow: /@me/
+Disallow: /*/edit$
+Disallow: /*/*/edit$
+Disallow: /r/
+Disallow: /t/
+Disallow: /search?q$
+Disallow: /search?q=
+Allow: /_/
+Allow: /_/api/users/*/meta
+Allow: /_/api/users/*/profile/stream
+Allow: /_/api/posts/*/responses
+Allow: /_/api/posts/*/responsesStream
+Allow: /_/api/posts/*/related
+Sitemap: https://jordanmendiola.medium.com/sitemap/sitemap.xml
+ time 13 1670310363160 
+info.ccfa.org robotsReq 3 200 
+info.ccfa.org robotsReq 3 200 robots 83 
+/spin4
+
+User-agent: *
+Disallow: /_hcms/preview/
+Disallow: /hs/manage-preferences/
+ 
+info.ccfa.org robotsReq 3 200 robots 83 
+/spin4
+
+User-agent: *
+Disallow: /_hcms/preview/
+Disallow: /hs/manage-preferences/
+ time 13 1670310713742 
+jordanmendiola.medium.com robotsReq 3 200 robots 423 User-Agent: *
+Disallow: /m/
+Disallow: /me/
+Disallow: /@me$
+Disallow: /@me/
+Disallow: /*/edit$
+Disallow: /*/*/edit$
+Disallow: /r/
+Disallow: /t/
+Disallow: /search?q$
+Disallow: /search?q=
+Allow: /_/
+Allow: /_/api/users/*/meta
+Allow: /_/api/users/*/profile/stream
+Allow: /_/api/posts/*/responses
+Allow: /_/api/posts/*/responsesStream
+Allow: /_/api/posts/*/related
+Sitemap: https://jordanmendiola.medium.com/sitemap/sitemap.xml
+ time 13 1670310728410 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670310743738 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670310762726 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670310777184 
+jordanmendiola.medium.com robotsReq 3 200 robots 423 User-Agent: *
+Disallow: /m/
+Disallow: /me/
+Disallow: /@me$
+Disallow: /@me/
+Disallow: /*/edit$
+Disallow: /*/*/edit$
+Disallow: /r/
+Disallow: /t/
+Disallow: /search?q$
+Disallow: /search?q=
+Allow: /_/
+Allow: /_/api/users/*/meta
+Allow: /_/api/users/*/profile/stream
+Allow: /_/api/posts/*/responses
+Allow: /_/api/posts/*/responsesStream
+Allow: /_/api/posts/*/related
+Sitemap: https://jordanmendiola.medium.com/sitemap/sitemap.xml
+ time 13 1670310784330 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670310839964 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670310866610 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670310929717 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670310964134 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670310975450 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670310985746 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311139545 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311168169 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311184096 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311377008 
+johnshopkins.corefacilities.org robotsReq 3 200 
+johnshopkins.corefacilities.org robotsReq 3 200 robots 284 # See http://www.robotstxt.org/wc/norobots.html for documentation on how to use the robots.txt file
+#
+# To ban all spiders from the entire site uncomment the next two lines:
+User-Agent: *
+Disallow: /account/signup
+Disallow: /account/forgot_password
+Disallow: /account/*/cancel_signup
+ 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311396802 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311406181 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311416865 
+jobs.cdc.gov robotsReq 3 404 
+jobs.cdc.gov robotsReq 3 404 time 13 1670311431420 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311437258 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311440011 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311448085 
+info.ccfa.org robotsReq 3 200 robots 83 
+/spin4
+
+User-agent: *
+Disallow: /_hcms/preview/
+Disallow: /hs/manage-preferences/
+ time 13 1670311455593 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311462361 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311506494 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311515439 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311517250 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311533638 
+info.ccfa.org robotsReq 3 200 robots 83 
+/spin4
+
+User-agent: *
+Disallow: /_hcms/preview/
+Disallow: /hs/manage-preferences/
+ time 13 1670311551772 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311552563 
+it.johnshopkins.edu robotsReq 3 200 
+it.johnshopkins.edu robotsReq 3 200 robots 180 User-agent: *
+Disallow: /wp-admin/
+Allow: /wp-admin/admin-ajax.php
+
+Sitemap: https://it.johnshopkins.edu/wp-sitemap.xml
+
+Disallow: /wp-content/uploads/wpo-plugins-tables-list.json
+ 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311582977 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311591586 
+jobs.cedars-sinai.edu robotsReq 3 200 
+jobs.cedars-sinai.edu robotsReq 3 200 robots 39 User-agent: *
+Disallow:/search-jobs/
+ 
+jobs.cedars-sinai.edu robotsReq 3 200 robots 39 User-agent: *
+Disallow:/search-jobs/
+ time 13 1670311610854 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311642382 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311655796 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311670368 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311675282 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311683664 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311692303 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311692994 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311717993 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311814235 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311816946 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311828660 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311847696 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311873702 
+info.ccfa.org robotsReq 3 200 robots 83 
+/spin4
+
+User-agent: *
+Disallow: /_hcms/preview/
+Disallow: /hs/manage-preferences/
+ time 13 1670311874262 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311877821 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311883972 
+info.ccfa.org robotsReq 3 200 robots 83 
+/spin4
+
+User-agent: *
+Disallow: /_hcms/preview/
+Disallow: /hs/manage-preferences/
+ time 13 1670311889747 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311897311 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311901345 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311944168 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670311950670 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311950960 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670311985276 
+info.ccfa.org robotsReq 3 200 robots 83 
+/spin4
+
+User-agent: *
+Disallow: /_hcms/preview/
+Disallow: /hs/manage-preferences/
+ time 13 1670312046290 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670312079131 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670312081307 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670312105052 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670312111722 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670312161606 
+investors.liveramp.com robotsReq 3 200 robots 207 User-agent: *
+Crawl-delay: 10
+Allow: /
+
+User-agent: Eluta.ca
+Crawl-delay: 60
+Allow: /
+
+User-agent: MS Search 6.0 Robot
+Crawl-delay: 60
+Allow: /
+
+User-agent: gsa-crawler
+Crawl-delay: 60
+Allow: / time 13 1670312229239 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670312261193 
+intouchvet.com robotsReq 3 200 robots 207 Disallow: */wp-content/podscache/*
+# START YOAST BLOCK
+# ---------------------------
+User-agent: *
+Disallow:
+
+Sitemap: https://intouchvet.com/sitemap_index.xml
+# ---------------------------
+# END YOAST BLOCK time 13 1670312271538 
