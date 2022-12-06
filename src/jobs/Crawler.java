@@ -4,11 +4,9 @@ import flame.*;
 import kvs.*;
 import tools.*;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.*;
-import java.nio.file.Files;
 import java.util.regex.*;
 
 import java.util.*;
@@ -20,6 +18,7 @@ public class Crawler {
 	static boolean restartLog2 = true;
 	final static Set<String> allowedSuffix = new HashSet<>(Arrays.asList("com", "net", "org", "edu", "gov"));
 	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("cnn.com", "wikipedia.com", "espn.com", "bbc.com", "irs.gov"));
+	static boolean debugMode = false;
 
 	public static void run(FlameContext ctx, String[] args) throws Exception {
 		// Check whether the latter contains a single element (the seed URL), and output
@@ -33,19 +32,6 @@ public class Crawler {
 		}
 
 		FlameRDD urlQueue;
-		if (restartLog1) {
-			File file = new File("./crawler_log_inside_lambda");
-			Files.deleteIfExists(file.toPath());
-			restartLog1 = false;
-		}
-
-		if (restartLog2) {
-			File file = new File("./crawler_log_outside_lambda");
-			Files.deleteIfExists(file.toPath());
-			restartLog2 = false;
-		}
-
-		FileWriter fw2 = new FileWriter("./crawler_log_outside_lambda", true);
 
 		if (args[0].startsWith("http")) {
 			String[] parsedSeedUrl = parseURL(args[0]);
@@ -85,6 +71,11 @@ public class Crawler {
 		} else {
 			urlQueue = ctx.fromTable(args[0], r -> r.get("value"));
 		}
+		
+		FileWriter fw3 = new FileWriter("./crawler_log_outside_lambda", true);
+		fw3.write("Starting a round, time at: " + System.currentTimeMillis() + "\n");
+		fw3.write("Starting table name: " + urlQueue.getTableName() + "\n");
+		fw3.close();
 
 		// and then set up a while loop that runs until urlQueue.count() is zero
 		while (urlQueue.count() > 0) {
@@ -99,9 +90,13 @@ public class Crawler {
 			// the KVS. For now, return an empty list from the flatMap, so that the loop
 			// will terminate after a single iteration.
 			urlQueue = urlQueue.flatMap(url -> {
-				FileWriter fw = new FileWriter("./crawler_log_inside_lambda", true);
-				fw.write("crawling: " + url + "\n");
-				fw.flush();
+				System.out.println("working on " + url + " , at time: " + System.currentTimeMillis() + "\n");
+				if (debugMode) {
+					FileWriter fw = new FileWriter("./crawler_log_inside_lambda", true);
+					fw.write("working on " + url + " , at time: " + System.currentTimeMillis() + "\n");
+					fw.close();					
+				}
+
 				if (FlameContext.getKVS() == null) {
 					FlameContext.setKVS("localhost:8000");
 				}
@@ -147,7 +142,7 @@ public class Crawler {
 					con.setDoInput(true);
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
-					con.setConnectTimeout(500);
+					con.setConnectTimeout(1000);
 					// Update where to put timeout Cindy 12/02
 					try {
 						con.connect();
@@ -285,7 +280,13 @@ public class Crawler {
 						// update the hosts table's access time if it's last called more than 1 second
 						// ago
 						kvs.put("hosts", hostHash, "time", String.valueOf(System.currentTimeMillis()).getBytes());
-						System.out.println("Crawling: " + url);
+						System.out.println("crawling " + url + ", at time: " + System.currentTimeMillis() + "\n");
+						if (debugMode) {
+							FileWriter fw = new FileWriter("./crawler_log_inside_lambda", true);
+							fw.write("crawling " + url + ", at time: " + System.currentTimeMillis() + "\n");
+							fw.close();					
+						}
+						
 						con = (HttpURLConnection) (new URL(url)).openConnection();
 
 						con.setRequestMethod("GET");
@@ -363,81 +364,31 @@ public class Crawler {
 								ret.add(newUrl);
 							}
 
-							fw.write("Downloaded page for " + url + "\n");
-							fw.flush();
-
 							processed = processed.replaceAll("<[^>]*>", "");
 
 							// saving page content to new table
 							kvs.put("content", urlHash, "url", url);
 							kvs.put("content", urlHash, "page", processed);
-
-//				String responseHash = Hasher.hash(responseStr);
-//				boolean isDuplicate = false;
-//				int colCount = 0;
-//				if (kvs.existsRow("canonicalURL", responseHash)) {
-//					Row contentRow = kvs.getRow("canonicalURL", responseHash);
-//					for (String contentUrlHash : contentRow.columns()) {
-//						colCount++;
-//						String contentUrl = contentRow.get(contentUrlHash);
-//						if (contentUrl != null && contentUrl.length() > 0){
-//							byte[] otherContent = kvs.get("crawl", Hasher.hash(contentUrl), "page");
-//							if (otherContent != null && Arrays.equals(otherContent, response)) {
-//								kvs.put("crawl", urlHash, "canonicalURL", contentUrl);
-//								// tempRow.put("canonicalURL", contentUrl.getBytes());
-//								isDuplicate = true;
-//								break;
-//							}
-//						}
-//					}
-//				}
-//
-//				if (!isDuplicate && response != null) {
-//					kvs.put("crawl", urlHash, "page", response);
-//					// tempRow.put("page", response); // only add "page" if the current page is not duplicate!
-//					// if not a duplicate, save the current url's content hash to ec1 table
-//					kvs.put("canonicalURL", responseHash, String.valueOf(colCount), url.getBytes()); 
-//					for (String newUrl : findUrl(kvs, responseStr, normalizedOriginal, rules)) {
-//						ret.add(newUrl);
-//					}
-//				}
 						}
 						con.disconnect();
 					}
-
-					// if (!kvs.existsRow("crawl", urlHash)) {
-					// kvs.putRow("crawl", tempRow);
-					// }
 				}
-				// System.out.println(ret);
 				return ret;
 			});
 			// logging crawling round info
 			System.out.println("Finished a round");
 			System.out.println("New table name: " + urlQueue.getTableName());
 			System.out.println("New table count: " + urlQueue.count());
-			fw2.write("Finished a round\n");
+			
+			FileWriter fw2 = new FileWriter("./crawler_log_outside_lambda", true);
+			fw2.write("Finished a round, time at: " + System.currentTimeMillis() + "\n");
 			fw2.write("New table name: " + urlQueue.getTableName() + "\n");
 			fw2.write("New table count: " + urlQueue.count() + "\n");
-			fw2.flush();
+			fw2.close();				
 
-			Thread.sleep(1000);
+//			Thread.sleep(1000);
 		}
-		// Iterator<Row> iter = FlameContext.getKVS().scan("anchorEC", null, null);
-		// if (iter != null){
-		// while (iter.hasNext()){
-		// Row row = iter.next();
-		// if (row == null){
-		// break;
-		// }
-		// // if (FlameContext.getKVS().existsRow("crawl", row.key())){
-		// for (String colName : row.columns()) {
-		// FlameContext.getKVS().put("crawl", Hasher.hash(row.key()), colName,
-		// row.get(colName));
-		// }
-		// // }
-		// }
-		// }
+
 		ctx.output("OK");
 	}
 
@@ -619,9 +570,6 @@ public class Crawler {
 			return null;
 		}
 
-		FileWriter fw = new FileWriter("./url_log", true);
-		fw.write("URL = " + url + "\n");
-
 		if (url.startsWith("http://")) {
 			sb.append(url.substring(0, 7));
 			url = url.substring(7);
@@ -667,7 +615,8 @@ public class Crawler {
 		else if (url.contains("//")) {
 			if (url.contains("?")) {
 				String[] splitURL = url.split("\\?");
-				if (originalUrl.startsWith("http://")) {
+				// Lily 12/5/22
+				if (originalUrl != null && originalUrl.startsWith("http://")) {
 					sb.append(originalUrl.substring(0, 5));
 
 					if (splitURL[0].endsWith("/")) {
@@ -751,8 +700,6 @@ public class Crawler {
 			}
 		}
 
-		fw.write("FINAL URL = " + sb.toString() + "\n");
-		fw.flush();
 		return sb.toString();
 	}
 
