@@ -50,7 +50,7 @@ public class PageRank {
                                         } else {return null;}
                                     });
         int count = 0;
-        Thread.sleep(totalPages*200);
+        // Thread.sleep(totalPages*200);
         // state.saveAsTable("state-" + count);
 
         while (true){
@@ -87,15 +87,17 @@ public class PageRank {
                                             }
                                             return ret;
                                         });
-                Thread.sleep(totalPages*200);
+                // Thread.sleep(totalPages*200);
                 transfer = transfer.foldByKey("0.15", (d1, d2) -> String.valueOf(Double.parseDouble(d1) + Double.parseDouble(d2)));
-                Thread.sleep(totalPages*200);
+            System.out.println("transfer table: "+transfer.getTableName());
+                // Thread.sleep(totalPages*200);
             // Thread.sleep(kvs.count(transfer.getTableName())/10);
             // transfer.saveAsTable("transfer-" + count);
 //            Thread.sleep(kvs.count("transfer-" + count)/10);
 
             state = transfer.join(state);
-            Thread.sleep(totalPages*200);
+            System.out.println("joined table: "+state.getTableName());
+            // Thread.sleep(totalPages*200);
             state = state.flatMapToPair(pair -> {
                                 List<FlamePair> ret = new ArrayList<>();
                                 if (!"".equals(pair._1())){
@@ -112,7 +114,8 @@ public class PageRank {
                                 }
                                 return ret;
                             });
-            Thread.sleep(totalPages*200);
+            System.out.println("next round state: "+state.getTableName());
+            // Thread.sleep(totalPages*200);
             // Thread.sleep(kvs.count(state.getTableName())/10);
             // state.saveAsTable("state-" + count);
 //            Thread.sleep(kvs.count("state-" + count)/10);
@@ -133,7 +136,7 @@ public class PageRank {
                                 }
                                 return ret;
                             });
-            Thread.sleep(totalPages*200);
+            // Thread.sleep(totalPages*200);
             // diffTable.saveAsTable("diff-" + count);
 
             // EC 2 enhanced convergence: converge sooner if percentage is satisfied!
@@ -164,7 +167,7 @@ public class PageRank {
                                     return String.valueOf(s1Double);
                                 }
                             });
-                Thread.sleep(totalPages*200);
+                // Thread.sleep(totalPages*200);
                 System.out.println(maxDiffStr);
                 if (Double.parseDouble(maxDiffStr) < convergence){
                     System.out.println("Checked with regular convergence!");
@@ -191,7 +194,7 @@ public class PageRank {
                 }
                 return ret;
               });
-        Thread.sleep(totalPages*200);
+        // Thread.sleep(totalPages*200);
     //    Thread.sleep(kvs.count(state.getTableName())/10);
        state.saveAsTable("pageranks");
        ctx.output("OK");
