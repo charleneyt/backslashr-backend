@@ -794,10 +794,12 @@ public class Crawler {
 
 	static boolean notBlacklisted(String url, List<String> blacklist) {
 		for (String bl : blacklist) {
-			bl = bl.replace("*", "\\S*");
-			if (Pattern.matches(bl, url)) {
-				// we have a match! should ignore the given url
-				return false;
+			if (bl != null){
+				bl = bl.replace("*", "\\S*");
+				if (Pattern.matches(bl, url)) {
+					// we have a match! should ignore the given url
+					return false;
+				}
 			}
 		}
 		return true;
