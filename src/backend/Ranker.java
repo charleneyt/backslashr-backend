@@ -16,6 +16,9 @@ public class Ranker {
 	public static List<String> rank(KVSClient kvs, String[] searchTerms) throws IOException {
 		// compute cosine similarity for each document that contains at least one search term		
 		// step 1 - map each URL that contains at least one search term to its word count
+		// also, make an outerMap whose keys are words in the search terms, and the corresponding
+		// value of each key is an innerMap, whose keys are URLs that contain the word, and the
+		// corresponding value of each URL is an array of indices at which the word appears in that URL
 		Map<String, Integer> urlToWordCount = new HashMap<>();
 		Map<String, Map<String, String[]>> outerMap = new HashMap<>();
 		for (String term : searchTerms) {
@@ -53,21 +56,16 @@ public class Ranker {
 		
 		for (int i = 0; i < searchTerms.length; i++, cur++) {
 			String term = searchTerms[i];
-			Row row = kvs.getRow("index", term);
-			if (row != null) {
-				String[] urlsAndFreqs = row.get("value").split(",");
-				int n = urlsAndFreqs.length;
+			if (outerMap.containsKey(term)) {
+				int n = outerMap.get(term).size();
 				double idf = N / n;
 				idfArray[cur] = idf;
 				
 				Map<String, Integer> map = new HashMap<>();
-				for (String s : urlsAndFreqs) {
-					int pos = s.lastIndexOf(":");
-					if (pos > 0) {
-						String url = s.substring(0, pos);
-	        			int freq = s.substring(pos+1).split(" ").length;
-	        			map.put(url, freq);
-					}
+				for (Map.Entry<String, String[]> entry : outerMap.get(term).entrySet()) {
+					String url = entry.getKey();
+					int freq = entry.getValue().length;
+					map.put(url, freq);
 				}
 				
 				for (String url : urlToWordCount.keySet()) {
