@@ -413,6 +413,40 @@ public class Worker extends generic.Worker {
 
         // It should make a /ping request to the master every five seconds
         worker.startPingThread();
+        
+        // remove aged rows from the file
+        put("/clean/:table", (req, res) -> {
+        	String tableName = req.params("table");
+        	
+        	if (!worker.tablesWithOffset.containsKey(tableName)) {
+                res.status(404, "Not Found");
+                return "404 Not Found";        		
+        	}
+        	
+			Path currFile = Paths.get(worker.directory + "/" + tableName + ".table");
+			Path tempFile = Paths.get(worker.directory + "/" + tableName + ".table1");
+			
+			// write current row in the table to tempFile
+			BufferedOutputStream newStream = new BufferedOutputStream(Files.newOutputStream(tempFile, CREATE, APPEND));
+			for (String rowName : worker.tablesWithOffset.get(tableName).keySet()) {
+				Row row = worker.findRow(tableName, rowName);
+				if (row == null)
+					continue;
+				
+				newStream.write(toByteArrayWithNewLine(row.toByteArray()));
+			}
+			// close the streams
+			newStream.close();
+			worker.streams.get(tableName).close();
+
+			// atomically replace the current log file
+			Files.move(tempFile, currFile, ATOMIC_MOVE, REPLACE_EXISTING);
+
+			// update the stream in streams
+			worker.streams.put(tableName, new BufferedOutputStream(Files.newOutputStream(currFile, CREATE, APPEND)));
+			return "OK";
+        });
+
 
         // PUT /data/<T>/<R>/<C> should set column C in row R of table T to the
         // (possibly binary) data in the body of the request

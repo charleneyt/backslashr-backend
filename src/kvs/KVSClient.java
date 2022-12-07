@@ -244,6 +244,19 @@ public class KVSClient implements KVS {
 			}
 		}
 	}
+	
+	public void clean(String tableName) throws IOException {
+		if (!haveWorkers)
+			downloadWorkers();
+
+		for (WorkerEntry w : workers) {
+			try {
+				HTTP.doRequest("PUT",
+						"http://" + w.address + "/clean/" + java.net.URLEncoder.encode(tableName, "UTF-8"), null);
+			} catch (Exception e) {
+			}
+		}		
+	}
 
 	public void put(String tableName, String row, String column, byte value[]) throws IOException {
 		if (!haveWorkers)
