@@ -630,7 +630,7 @@ public class Crawler {
 						sb.append(splitURL[i]);
 					}
 
-				} else {
+				} else if (originalUrl != null && originalUrl.startsWith("https://")) {
 					sb.append(originalUrl.substring(0, 6));
 					if (splitURL[0].endsWith("/")) {
 						sb.append(splitURL[0].substring(0, splitURL[0].length() - 1));
