@@ -7,353 +7,367 @@ import tools.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
 public class Indexer {
+	static HashSet<String> dictWords = new HashSet<>();
 	public static void run(FlameContext ctx, String[] args) throws Exception {
-		System.out.println("Executing indexer ...");
+		System.out.println("Executing indexer ...updated as of 12/7");
 		
 //------Lily's updates in progress as of 12/7/22
-//
-//		// create dictionary containing 400k+ valid English words
-//		HashSet<String> dictWords = new HashSet<>();
-//		File f = new File("./words_alpha.txt");
-//		FileReader fr = new FileReader(f);
-//		BufferedReader br = new BufferedReader(fr);
-//		String line;
-//
-//		long startTime = System.currentTimeMillis();
-//		while ((line = br.readLine()) != null) {
-//			dictWords.add(line.toLowerCase().trim());
-//		}
-//		br.close();
-//		long endTime = System.currentTimeMillis();
-//		System.out.println("initialized the dictionary! Took " + (endTime - startTime) + " ms.");
-//
-//		// read through content table, filter out nonvalid words and fill out the index
-//		// table
-//		long startGetTime = System.currentTimeMillis();
-//		System.out.println("Started processing from content table at " + new Date());
-//
-//		FlameRDD transform = ctx.fromTable("content", r -> {
-//			String url = r.get("url");
-//			String page = r.get("page");
+
+		// create dictionary containing 400k+ valid English words
+		File f = new File("./words_alpha.txt");
+		FileReader fr = new FileReader(f);
+		BufferedReader br = new BufferedReader(fr);
+		String line;
+
+		long startTime = System.currentTimeMillis();
+		while ((line = br.readLine()) != null) {
+			dictWords.add(line.toLowerCase().trim());
+		}
+		br.close();
+		long endTime = System.currentTimeMillis();
+		System.out.println("initialized the dictionary! Took " + (endTime - startTime) + " ms.");
+
+		// read through content table, filter out nonvalid words and fill out the index
+		// table
+		long startGetTime = System.currentTimeMillis();
+		System.out.println("Started processing from content table at " + new Date());
+
+		FlameRDD transform = ctx.fromTable("content", r -> {
+			String url = r.get("url");
+			String page = r.get("page");
+			FileWriter fw;
+			try {
+				fw = new FileWriter("indexer_log", true);
+				fw.write("size of dict words is: " + dictWords.size());
+				fw.close();
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+
+			if (r.get("page") != null && r.get("page").length() > 0) {
+				String content = page.replaceAll("[.,:;!\\?\'\"()-]", " ").toLowerCase();
+				String[] words = content.split("\\s+");
+				if (FlameContext.getKVS() == null) {
+					FlameContext.setKVS("localhost:8000");
+				}
+				KVSClient kvs = FlameContext.getKVS();
+
+				HashMap<String, String> wordToPosByUrl = new HashMap<>();
+				for (int i = 0; i < words.length; i++) {
+					// not a valid word, pass
+					if (!dictWords.contains(words[i])) {
+						System.out.println("skipped word");
+						continue;						
+					}
+					System.out.println("not skip word" + System.currentTimeMillis());
+
+					if (!wordToPosByUrl.containsKey(words[i]))
+						wordToPosByUrl.put(words[i], i + 1 + "");
+					else
+						wordToPosByUrl.put(words[i], wordToPosByUrl.get(words[i]) + " " + (i + 1));
+				}
+
+				for (String word : wordToPosByUrl.keySet()) {
+					String pos = wordToPosByUrl.get(word);
+					String combined = url + ":" + pos;
+
+					Row indexRow = null;
+					try {
+						indexRow = kvs.getRow("index", word);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+					if (indexRow == null) {
+						try {
+							kvs.put("index", word, "value", combined);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							System.out.println(
+									"Failed to put row for word " + word + " at pos " + pos + "for url " + url);
+						}
+					} else {
+						String existingPos = indexRow.get("value");
+						existingPos = existingPos + "," + combined;
+						try {
+							kvs.put("index", word, "value", existingPos);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							System.out.println("Row exists and failed to put row for word " + word + " at pos " + pos
+									+ "for url " + url);
+						}
+					}
+				}
+			}
+			return "";
+		});
+		long endGetTime = System.currentTimeMillis();
+		System.out.println("Finished reading from content table! Took " + (endGetTime - startGetTime) + " ms.");
+		
+//-------		
+//		// use fromTable to convert each row to a string of url,page
+//		FlamePairRDD imm = ctx.fromTable("content", r -> {
 //			if (r.get("page") != null && r.get("page").length() > 0) {
-//				String content = page.replaceAll("[.,:;!\\?\'\"()-]", " ").toLowerCase();
-//				String[] words = content.split("\\s+");
-//				if (FlameContext.getKVS() == null) {
-//					FlameContext.setKVS("localhost:8000");
-//				}
-//				KVSClient kvs = FlameContext.getKVS();
-//
-//				HashMap<String, String> wordToPosByUrl = new HashMap<>();
-//				for (int i = 0; i < words.length; i++) {
-//					// not a valid word, pass
-//					if (!dictWords.contains(words[i]))
-//						continue;
-//
-//					if (!wordToPosByUrl.containsKey(words[i]))
-//						wordToPosByUrl.put(words[i], i + 1 + "");
-//					else
-//						wordToPosByUrl.put(words[i], wordToPosByUrl.get(words[i]) + " " + (i + 1));
-//				}
-//
-//				for (String word : wordToPosByUrl.keySet()) {
-//					String pos = wordToPosByUrl.get(word);
-//					String combined = url + ":" + pos;
-//
-//					Row indexRow = null;
-//					try {
-//						indexRow = kvs.getRow("index", word);
-//					} catch (IOException e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					}
-//
-//					if (indexRow == null) {
-//						try {
-//							kvs.put("index", word, "value", combined);
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//							System.out.println(
-//									"Failed to put row for word " + word + " at pos " + pos + "for url " + url);
-//						}
+//				return r.get("url") + "," + r.get("page");
+//			} else
+//				return "";
+//		})
+//				// then split the String into FlamePair
+//				.mapToPair(s -> {
+//					if (s.length() > 0) {
+//						int idx = s.indexOf(",");
+//						return new FlamePair(s.substring(0, idx), s.substring(idx + 1));
 //					} else {
-//						String existingPos = indexRow.get("value");
-//						existingPos = existingPos + "," + combined;
-//						try {
-//							kvs.put("index", word, "value", existingPos);
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//							System.out.println("Row exists and failed to put row for word " + word + " at pos " + pos
-//									+ "for url " + url);
+//						return new FlamePair("", "");
+//					}
+//				});
+//		// use flatMapToPair to create Iterable<FlamePair>
+//
+//		FlamePairRDD urlsTable = imm.flatMapToPair(pair -> {
+//			if (FlameContext.getKVS() == null) {
+//				FlameContext.setKVS("localhost:8000");
+//			}
+//			KVSClient kvs = FlameContext.getKVS();
+//			// KVSClient kvs = new KVSClient("localhost:8000");
+//			List<FlamePair> ret = new ArrayList<FlamePair>();
+//			if (!"".equals(pair._1())) {
+//				String url = pair._1();
+//				String content = pair._2().replaceAll("[.,:;!\\?\'\"()-]", " ").toLowerCase();
+//				String[] words = content.split("\\s+");
+//
+//				kvs.put("crawl", Hasher.hash(url), "wordCount", String.valueOf(words.length));
+//
+//				// example entry: (word, index1 index2 index3)
+//				Map<String, String> original = new HashMap<>();
+//				Map<String, String> stem = new HashMap<>();
+//				for (int i = 0; i < words.length; i++) {
+//					String word = words[i];
+//					if (word != null && word.length() > 0) {
+//						if (!original.containsKey(word)) {
+//							ret.add(new FlamePair(word, url));
+//							original.put(word, String.valueOf(i + 1));
+//						} else {
+//							original.put(word, original.get(word) + " " + (i + 1));
 //						}
+//
+//						// EC 3 add support for stemming
+//						Stemmer stemmer = new Stemmer();
+//						stemmer.add(word.toCharArray(), word.length());
+//						stemmer.stem();
+//						String stemWord = stemmer.toString();
+//						if (stemWord != null && stemWord.length() > 0) {
+//							if (!stem.containsKey(stemWord)) {
+//								if (!stemWord.equals(word)) {
+//									ret.add(new FlamePair(stemWord, url));
+//								}
+//								stem.put(stemWord, String.valueOf(i + 1));
+//							} else {
+//								stem.put(stemWord, stem.get(stemWord) + " " + (i + 1));
+//							}
+//						}
+//					}
+//				}
+//				for (String word : stem.keySet()) {
+//					// ec1: word, url, index1 index2 index3
+//					kvs.put("inverted-hs", word, url, stem.get(word).getBytes());
+//				}
+//				for (String word : original.keySet()) {
+//					if (!stem.containsKey(word)) {
+//						// ec1: word, url, index1 index2 index3
+//						kvs.put("inverted-hs", word, url, original.get(word).getBytes());
 //					}
 //				}
 //			}
-//			return "";
+//			return ret;
+//		}).foldByKey("", (s1, s2) -> {
+//			if ("".equals(s1) && "".equals(s2)) {
+//				return "";
+//			} else if ("".equals(s1)) {
+//				return s2;
+//			} else if ("".equals(s2)) {
+//				return s1;
+//			} else {
+//				return s1 + "," + s2;
+//			}
 //		});
-//		long endGetTime = System.currentTimeMillis();
-//		System.out.println("Finished reading from content table! Took " + (endGetTime - startGetTime) + " ms.");
-//		
-//-------		
-		// use fromTable to convert each row to a string of url,page
-		FlamePairRDD imm = ctx.fromTable("content", r -> {
-			if (r.get("page") != null && r.get("page").length() > 0) {
-				return r.get("url") + "," + r.get("page");
-			} else
-				return "";
-		})
-				// then split the String into FlamePair
-				.mapToPair(s -> {
-					if (s.length() > 0) {
-						int idx = s.indexOf(",");
-						return new FlamePair(s.substring(0, idx), s.substring(idx + 1));
-					} else {
-						return new FlamePair("", "");
-					}
-				});
-		// use flatMapToPair to create Iterable<FlamePair>
-
-		FlamePairRDD urlsTable = imm.flatMapToPair(pair -> {
-			if (FlameContext.getKVS() == null) {
-				FlameContext.setKVS("localhost:8000");
-			}
-			KVSClient kvs = FlameContext.getKVS();
-			// KVSClient kvs = new KVSClient("localhost:8000");
-			List<FlamePair> ret = new ArrayList<FlamePair>();
-			if (!"".equals(pair._1())) {
-				String url = pair._1();
-				String content = pair._2().replaceAll("[.,:;!\\?\'\"()-]", " ").toLowerCase();
-				String[] words = content.split("\\s+");
-
-				kvs.put("crawl", Hasher.hash(url), "wordCount", String.valueOf(words.length));
-
-				// example entry: (word, index1 index2 index3)
-				Map<String, String> original = new HashMap<>();
-				Map<String, String> stem = new HashMap<>();
-				for (int i = 0; i < words.length; i++) {
-					String word = words[i];
-					if (word != null && word.length() > 0) {
-						if (!original.containsKey(word)) {
-							ret.add(new FlamePair(word, url));
-							original.put(word, String.valueOf(i + 1));
-						} else {
-							original.put(word, original.get(word) + " " + (i + 1));
-						}
-
-						// EC 3 add support for stemming
-						Stemmer stemmer = new Stemmer();
-						stemmer.add(word.toCharArray(), word.length());
-						stemmer.stem();
-						String stemWord = stemmer.toString();
-						if (stemWord != null && stemWord.length() > 0) {
-							if (!stem.containsKey(stemWord)) {
-								if (!stemWord.equals(word)) {
-									ret.add(new FlamePair(stemWord, url));
-								}
-								stem.put(stemWord, String.valueOf(i + 1));
-							} else {
-								stem.put(stemWord, stem.get(stemWord) + " " + (i + 1));
-							}
-						}
-					}
-				}
-				for (String word : stem.keySet()) {
-					// ec1: word, url, index1 index2 index3
-					kvs.put("inverted-hs", word, url, stem.get(word).getBytes());
-				}
-				for (String word : original.keySet()) {
-					if (!stem.containsKey(word)) {
-						// ec1: word, url, index1 index2 index3
-						kvs.put("inverted-hs", word, url, original.get(word).getBytes());
-					}
-				}
-			}
-			return ret;
-		}).foldByKey("", (s1, s2) -> {
-			if ("".equals(s1) && "".equals(s2)) {
-				return "";
-			} else if ("".equals(s1)) {
-				return s2;
-			} else if ("".equals(s2)) {
-				return s1;
-			} else {
-				return s1 + "," + s2;
-			}
-		});
-		urlsTable.saveAsTable("index-regular");
-		// urlsTable.saveAsTable("index");
-		// Thread.sleep(FlameContext.getKVS().count("index-regular")/10);
-
-		// EC 1 making a urls2 column that lists url by desc order of occurrences, and
-		// append those occurrence to url
-		FlamePairRDD urls2Table = ctx.fromTable("inverted-hs", row -> {
-			// use treemap with count of indices as key, url1 url2 url3 as value
-			TreeMap<Integer, String> currWordMap = new TreeMap<>(Collections.reverseOrder());
-
-			for (String colName : row.columns()) {
-				int count = row.get(colName).split(" ").length;
-				if (count == 0)
-					continue;
-				currWordMap.put(count,
-						currWordMap.containsKey(count) ? currWordMap.get(count) + " " + colName : colName);
-			}
-
-			StringBuilder sb = new StringBuilder();
-			for (String entry : currWordMap.values()) {
-				String[] splitStr = entry.split(" ");
-				for (String link : splitStr) {
-					if (sb.length() > 0) {
-						sb.append(",");
-					}
-					sb.append(link + ":" + row.get(link));
-				}
-			}
-			if (sb.length() > 0) {
-				return row.key() + "," + sb.toString();
-			} else {
-				return "";
-			}
-		})
-				// then split the String into FlamePair
-				.mapToPair(s -> {
-					if (s.length() > 0) {
-						int idx = s.indexOf(",");
-						return new FlamePair(s.substring(0, idx), s.substring(idx + 1));
-					} else {
-						return new FlamePair("", "");
-					}
-				}).foldByKey("", (s1, s2) -> {
-					if ("".equals(s1) && "".equals(s2)) {
-						return "";
-					} else if ("".equals(s1)) {
-						return s2;
-					} else if ("".equals(s2)) {
-						return s1;
-					} else {
-						return s1 + "," + s2;
-					}
-				});
-		urls2Table.saveAsTable("index");
-		// Thread.sleep(FlameContext.getKVS().count("index")/10);
-
-		// FlamePairRDD urlsJoined = urlsTable.join(ec1);
-		// urlsJoined.saveAsTable("joined");
-		// Thread.sleep(4000);
-
-		// FlamePairRDD output = urlsJoined.flatMapToPair(pair -> {
-		// List<FlamePair> ret = new ArrayList<FlamePair>();
-		// if (pair._2().contains(",")){
-		// String[] strPair = pair._2().split(",");
-		// ret.add(new FlamePair(pair._1(), strPair[0]));
-		// ret.add(new FlamePair(pair._1(), strPair[1]));
-		// return ret;
-		// } else {
-		// return ret;
-		// }
-		// });
-		// output.saveAsTable("result");
-
-		// EC 3 add stemmedWord column to the index table for every index
-		// KVSClient kvs = FlameContext.getKVS();
-		// Iterator<Row> iter = kvs.scan("index", null, null);
-		// String indexColName = null;
-		// if (iter != null){
-		// while (iter.hasNext()){
-		// // row key is word, column is url, value is list of url (separated by comma)
-		// Row row = iter.next();
-		// if (row == null){
-		// break;
-		// }
-		// String word = row.key();
-		// if (word != null && word.length() > 0){
-		// // EC 3 add stemmed version to index
-		// Stemmer stemmer = new Stemmer();
-		// stemmer.add(word.toCharArray(), word.length());
-		// stemmer.stem();
-		// StringBuilder sb = new StringBuilder();
-		// // technically should only has one column
-		// for (String colName : row.columns()){
-		// if (sb.length() > 0){
-		// sb.append(",");
-		// }
-		// sb.append(row.get(colName));
-		// indexColName = colName;
-		// }
-		// kvs.put("ec3", stemmer.toString(), row.key(), sb.toString().getBytes());
-		// }
-		// }
-		// }
-
-		// iter = kvs.scan("ec3", null, null);
-		// if (iter != null){
-		// while (iter.hasNext()){
-		// // row key is stemmedWord, column is word, value is list of url (separated by
-		// comma)
-		// Row row = iter.next();
-		// if (row == null){
-		// break;
-		// }
-		// String stemmedWord = row.key();
-		// if (stemmedWord != null && stemmedWord.length() > 0){
-		// StringBuilder sb = new StringBuilder();
-		// for (String colName : row.columns()){
-		// if (sb.length() > 0){
-		// sb.append(",");
-		// }
-		// sb.append(row.get(colName));
-		// }
-		// Set<String> dedup = new HashSet<>(Arrays.asList(sb.toString().split(",")));
-		// String finalList = String.join(",", dedup);
-		// kvs.put("index", stemmedWord, "acc", finalList.getBytes());
-		// }
-		// }
-		// }
-
-		// EC 1 add urls2 column to the index table that adds :x, and sort by
-		// occurrences in desc order
-		// KVSClient kvs = FlameContext.getKVS();
-		// Iterator<Row> iter = kvs.scan("inverted-hs", null, null);
-		// if (iter != null){
-		// while (iter.hasNext()){
-		// // row key is word, column is url, value is list of indices (separated by
-		// space)
-		// Row row = iter.next();
-		// if (row == null){
-		// break;
-		// }
-
-		// // use treemap with count of indices as key, url1 url2 url3 as value
-		// TreeMap<Integer, String> currWordMap = new
-		// TreeMap<>(Collections.reverseOrder());
-
-		// for (String colName : row.columns()){
-		// int count = row.get(colName).split(" ").length;
-		// if (count == 0) continue;
-		// currWordMap.put(count, currWordMap.containsKey(count) ?
-		// currWordMap.get(count) + " " + colName : colName);
-		// }
-
-		// StringBuilder sb = new StringBuilder();
-		// for (String entry : currWordMap.values()){
-		// String[] splitStr = entry.split(" ");
-		// for (String link : splitStr){
-		// if (sb.length() > 0){
-		// sb.append(",");
-		// }
-		// sb.append(link + ":" + row.get(link));
-		// }
-		// }
-		// if (sb.length() > 0){
-		// kvs.put("index", row.key(), "urls2", sb.toString().getBytes());
-		// }
-		// }
-		// }
-		ctx.output("OK");
+//		urlsTable.saveAsTable("index-regular");
+//		// urlsTable.saveAsTable("index");
+//		// Thread.sleep(FlameContext.getKVS().count("index-regular")/10);
+//
+//		// EC 1 making a urls2 column that lists url by desc order of occurrences, and
+//		// append those occurrence to url
+//		FlamePairRDD urls2Table = ctx.fromTable("inverted-hs", row -> {
+//			// use treemap with count of indices as key, url1 url2 url3 as value
+//			TreeMap<Integer, String> currWordMap = new TreeMap<>(Collections.reverseOrder());
+//
+//			for (String colName : row.columns()) {
+//				int count = row.get(colName).split(" ").length;
+//				if (count == 0)
+//					continue;
+//				currWordMap.put(count,
+//						currWordMap.containsKey(count) ? currWordMap.get(count) + " " + colName : colName);
+//			}
+//
+//			StringBuilder sb = new StringBuilder();
+//			for (String entry : currWordMap.values()) {
+//				String[] splitStr = entry.split(" ");
+//				for (String link : splitStr) {
+//					if (sb.length() > 0) {
+//						sb.append(",");
+//					}
+//					sb.append(link + ":" + row.get(link));
+//				}
+//			}
+//			if (sb.length() > 0) {
+//				return row.key() + "," + sb.toString();
+//			} else {
+//				return "";
+//			}
+//		})
+//				// then split the String into FlamePair
+//				.mapToPair(s -> {
+//					if (s.length() > 0) {
+//						int idx = s.indexOf(",");
+//						return new FlamePair(s.substring(0, idx), s.substring(idx + 1));
+//					} else {
+//						return new FlamePair("", "");
+//					}
+//				}).foldByKey("", (s1, s2) -> {
+//					if ("".equals(s1) && "".equals(s2)) {
+//						return "";
+//					} else if ("".equals(s1)) {
+//						return s2;
+//					} else if ("".equals(s2)) {
+//						return s1;
+//					} else {
+//						return s1 + "," + s2;
+//					}
+//				});
+//		urls2Table.saveAsTable("index");
+//		// Thread.sleep(FlameContext.getKVS().count("index")/10);
+//
+//		// FlamePairRDD urlsJoined = urlsTable.join(ec1);
+//		// urlsJoined.saveAsTable("joined");
+//		// Thread.sleep(4000);
+//
+//		// FlamePairRDD output = urlsJoined.flatMapToPair(pair -> {
+//		// List<FlamePair> ret = new ArrayList<FlamePair>();
+//		// if (pair._2().contains(",")){
+//		// String[] strPair = pair._2().split(",");
+//		// ret.add(new FlamePair(pair._1(), strPair[0]));
+//		// ret.add(new FlamePair(pair._1(), strPair[1]));
+//		// return ret;
+//		// } else {
+//		// return ret;
+//		// }
+//		// });
+//		// output.saveAsTable("result");
+//
+//		// EC 3 add stemmedWord column to the index table for every index
+//		// KVSClient kvs = FlameContext.getKVS();
+//		// Iterator<Row> iter = kvs.scan("index", null, null);
+//		// String indexColName = null;
+//		// if (iter != null){
+//		// while (iter.hasNext()){
+//		// // row key is word, column is url, value is list of url (separated by comma)
+//		// Row row = iter.next();
+//		// if (row == null){
+//		// break;
+//		// }
+//		// String word = row.key();
+//		// if (word != null && word.length() > 0){
+//		// // EC 3 add stemmed version to index
+//		// Stemmer stemmer = new Stemmer();
+//		// stemmer.add(word.toCharArray(), word.length());
+//		// stemmer.stem();
+//		// StringBuilder sb = new StringBuilder();
+//		// // technically should only has one column
+//		// for (String colName : row.columns()){
+//		// if (sb.length() > 0){
+//		// sb.append(",");
+//		// }
+//		// sb.append(row.get(colName));
+//		// indexColName = colName;
+//		// }
+//		// kvs.put("ec3", stemmer.toString(), row.key(), sb.toString().getBytes());
+//		// }
+//		// }
+//		// }
+//
+//		// iter = kvs.scan("ec3", null, null);
+//		// if (iter != null){
+//		// while (iter.hasNext()){
+//		// // row key is stemmedWord, column is word, value is list of url (separated by
+//		// comma)
+//		// Row row = iter.next();
+//		// if (row == null){
+//		// break;
+//		// }
+//		// String stemmedWord = row.key();
+//		// if (stemmedWord != null && stemmedWord.length() > 0){
+//		// StringBuilder sb = new StringBuilder();
+//		// for (String colName : row.columns()){
+//		// if (sb.length() > 0){
+//		// sb.append(",");
+//		// }
+//		// sb.append(row.get(colName));
+//		// }
+//		// Set<String> dedup = new HashSet<>(Arrays.asList(sb.toString().split(",")));
+//		// String finalList = String.join(",", dedup);
+//		// kvs.put("index", stemmedWord, "acc", finalList.getBytes());
+//		// }
+//		// }
+//		// }
+//
+//		// EC 1 add urls2 column to the index table that adds :x, and sort by
+//		// occurrences in desc order
+//		// KVSClient kvs = FlameContext.getKVS();
+//		// Iterator<Row> iter = kvs.scan("inverted-hs", null, null);
+//		// if (iter != null){
+//		// while (iter.hasNext()){
+//		// // row key is word, column is url, value is list of indices (separated by
+//		// space)
+//		// Row row = iter.next();
+//		// if (row == null){
+//		// break;
+//		// }
+//
+//		// // use treemap with count of indices as key, url1 url2 url3 as value
+//		// TreeMap<Integer, String> currWordMap = new
+//		// TreeMap<>(Collections.reverseOrder());
+//
+//		// for (String colName : row.columns()){
+//		// int count = row.get(colName).split(" ").length;
+//		// if (count == 0) continue;
+//		// currWordMap.put(count, currWordMap.containsKey(count) ?
+//		// currWordMap.get(count) + " " + colName : colName);
+//		// }
+//
+//		// StringBuilder sb = new StringBuilder();
+//		// for (String entry : currWordMap.values()){
+//		// String[] splitStr = entry.split(" ");
+//		// for (String link : splitStr){
+//		// if (sb.length() > 0){
+//		// sb.append(",");
+//		// }
+//		// sb.append(link + ":" + row.get(link));
+//		// }
+//		// }
+//		// if (sb.length() > 0){
+//		// kvs.put("index", row.key(), "urls2", sb.toString().getBytes());
+//		// }
+//		// }
+//		// }
+//		ctx.output("OK");
 	}
 
 	public static class Stemmer {

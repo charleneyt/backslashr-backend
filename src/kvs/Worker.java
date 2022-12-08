@@ -132,7 +132,7 @@ public class Worker extends generic.Worker {
         lastRequestReceived = System.currentTimeMillis();
     }
 
-    public void addTable(String tableName) {
+    public synchronized void addTable(String tableName) {
         tablesWithOffset.put(tableName, new ConcurrentSkipListMap<String, Long>());
     }
 

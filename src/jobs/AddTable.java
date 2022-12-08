@@ -13,6 +13,10 @@ public class AddTable {
 			System.out.println("Please specify name of the table and column of the table you want to add.");
 		}
 		
+		if (FlameContext.getKVS() == null) {
+			FlameContext.setKVS("localhost:8000");
+		}
+		
 		KVSClient kvs = FlameContext.getKVS();
 		String tableName = args[0];
 		String colName = args[1];
