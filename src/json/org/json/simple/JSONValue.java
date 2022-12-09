@@ -11,8 +11,8 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import json.org.json.simple.parser.JSONParser;
+import json.org.json.simple.parser.ParseException;
 
 /**
  * @author FangYidong<fangyidong@yahoo.com.cn>

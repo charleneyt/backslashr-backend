@@ -282,7 +282,7 @@ class FlameWorker extends Worker {
 						if (it != null) {
 							int seq = 0;
 							for (FlamePair p : it) {
-								if (!"".equals(p._1())){
+								if (!"".equals(p._1())) {
 									kvs.put(qParamsStrings[1], p._1(), row.key() + seq++, p._2().getBytes());
 								}
 							}
@@ -345,7 +345,7 @@ class FlameWorker extends Worker {
 						if (it != null) {
 							int seq = 0;
 							for (FlamePair p : it) {
-								if (!"".equals(p._1())){
+								if (!"".equals(p._1())) {
 									kvs.put(qParamsStrings[1], p._1(), row.key() + seq++, p._2().getBytes());
 								}
 							}
@@ -419,30 +419,44 @@ class FlameWorker extends Worker {
 
 			KVSClient kvs = new KVSClient(qParamsStrings[2]);
 			String zeroElement = req.queryParams().contains("zeroElement") ? req.queryParams("zeroElement") : "";
-
-			String accumulator = null;
-			String distinguisher = qParamsStrings[3] != null ? qParamsStrings[3] : "null";
-			distinguisher += qParamsStrings[4] != null ? qParamsStrings[4] : "null";
-
 			Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
 			if (iter != null) {
 				while (iter.hasNext()) {
+					String sum = zeroElement;
 					Row row = iter.next();
-					if (row == null) {
-						break;
-					}
-					if (row.columns().contains(FlameWorker.VALUE_STRING)) {
-						String s = row.get(FlameWorker.VALUE_STRING);
-						if (s != null) {
-							accumulator = lambda.op(accumulator == null ? zeroElement : accumulator, s);
-						}
+					for (String col : row.columns()) {
+						sum = lambda.op(sum, row.get(col));
+						kvs.put(qParamsStrings[1], row.key(), "Accumulator", sum.getBytes());
 					}
 				}
 			}
 
-			// check for the special circumstance if a worker was called twice
-			// for example, the highest id responsible for beginning and end range
-			kvs.put(qParamsStrings[1], distinguisher, FlameWorker.VALUE_STRING, accumulator == null ? zeroElement.getBytes() : accumulator.getBytes());
+//			KVSClient kvs = new KVSClient(qParamsStrings[2]);
+//			String zeroElement = req.queryParams().contains("zeroElement") ? req.queryParams("zeroElement") : "";
+//
+//			String accumulator = null;
+//			String distinguisher = qParamsStrings[3] != null ? qParamsStrings[3] : "null";
+//			distinguisher += qParamsStrings[4] != null ? qParamsStrings[4] : "null";
+//
+//			Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
+//			if (iter != null) {
+//				while (iter.hasNext()) {
+//					Row row = iter.next();
+//					if (row == null) {
+//						break;
+//					}
+//					if (row.columns().contains(FlameWorker.VALUE_STRING)) {
+//						String s = row.get(FlameWorker.VALUE_STRING);
+//						if (s != null) {
+//							accumulator = lambda.op(accumulator == null ? zeroElement : accumulator, s);
+//						}
+//					}
+//				}
+//			}
+//
+//			// check for the special circumstance if a worker was called twice
+//			// for example, the highest id responsible for beginning and end range
+//			kvs.put(qParamsStrings[1], distinguisher, FlameWorker.VALUE_STRING, accumulator == null ? zeroElement.getBytes() : accumulator.getBytes());
 
 			return FlameWorker.OK_STRING;
 		});

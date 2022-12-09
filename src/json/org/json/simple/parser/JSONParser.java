@@ -11,8 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import json.org.json.simple.JSONArray;
+import json.org.json.simple.JSONObject;
 
 /**
  * Parser for JSON text. Please note that JSONParser is NOT thread-safe.

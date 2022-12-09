@@ -8,6 +8,7 @@ import tools.HTTP;
 public class KVSClient implements KVS {
 
 	String master;
+	static boolean debug = true;
 
 	static class WorkerEntry implements Comparable<WorkerEntry> {
 		String address;
@@ -127,10 +128,14 @@ public class KVSClient implements KVS {
 						URL url = new URL(ranges.elementAt(currentRangeIndex));
 						HttpURLConnection con = (HttpURLConnection) url.openConnection();
 						con.setRequestMethod("GET");
-						// Update where to put timeout Cindy 12/02
 						con.connect();
-						// con.setConnectTimeout(5000);
-						// con.setReadTimeout(10000);
+						int status = con.getResponseCode();
+						if (debug) {
+							FileWriter fw = new FileWriter("KVSClient_log ", true);
+							fw.write("URL = " + con.getURL() + " Status = " + status + "\n");
+							fw.flush();
+						}
+
 						in = con.getInputStream();
 						Row r = fill();
 						if (r != null) {
@@ -244,7 +249,7 @@ public class KVSClient implements KVS {
 			}
 		}
 	}
-	
+
 	public void clean(String tableName) throws IOException {
 		if (!haveWorkers)
 			downloadWorkers();
@@ -255,7 +260,7 @@ public class KVSClient implements KVS {
 						"http://" + w.address + "/clean/" + java.net.URLEncoder.encode(tableName, "UTF-8"), null);
 			} catch (Exception e) {
 			}
-		}		
+		}
 	}
 
 	public void put(String tableName, String row, String column, byte value[]) throws IOException {
@@ -268,6 +273,21 @@ public class KVSClient implements KVS {
 			// System.out.println(target);
 			byte[] response = HTTP.doRequest("PUT", target, value).body();
 			String result = new String(response);
+
+//			Row r = null;
+//			do {
+//				if (this.existsRow(tableName, row)) {
+//					r = this.getRow(tableName, row);
+//				}
+//			} while (r == null || !r.columns().contains(column) || !Arrays.equals(r.getBytes(column), value));
+
+			if (debug) {
+				FileWriter fw = new FileWriter("KVSClient_log ", true);
+				fw.write("PUT " + " tablename = " + tableName + " row = " + row + " col = " + column + " HTTP res = "
+						+ result + " time = " + System.currentTimeMillis() + "\n");
+				fw.flush();
+			}
+
 			if (!result.equals("OK")) {
 				FileWriter fw = new FileWriter("./KVSClient_log", true);
 				fw.write("PUT returned something other than OK: " + result + "(" + target + ")");
@@ -291,6 +311,14 @@ public class KVSClient implements KVS {
 				"http://" + workers.elementAt(workerIndexForKey(row.key())).address + "/data/" + tableName,
 				row.toByteArray()).body();
 		String result = new String(response);
+
+		if (debug) {
+			FileWriter fw = new FileWriter("KVSClient_log ", true);
+			fw.write("PUT ROW " + " tablename = " + tableName + " row = " + row + " HTTP res = " + result + " time = "
+					+ System.currentTimeMillis() + "\n");
+			fw.flush();
+		}
+
 		if (!result.equals("OK"))
 			throw new RuntimeException("PUT returned something other than OK: " + result);
 	}
@@ -306,6 +334,12 @@ public class KVSClient implements KVS {
 
 		byte[] result = resp.body();
 		try {
+			if (debug) {
+				FileWriter fw = new FileWriter("KVSClient_log ", true);
+				fw.write("GET ROW" + " tablename = " + tableName + " row = " + row + " HTTP res = " + resp.toString()
+						+ " time = " + System.currentTimeMillis() + "\n");
+				fw.flush();
+			}
 			return Row.readFrom(new ByteArrayInputStream(result));
 		} catch (Exception e) {
 			throw new RuntimeException("Decoding error while reading Row from getRow() URL");
@@ -320,6 +354,12 @@ public class KVSClient implements KVS {
 				"http://" + workers.elementAt(workerIndexForKey(row)).address + "/data/" + tableName + "/"
 						+ java.net.URLEncoder.encode(row, "UTF-8") + "/" + java.net.URLEncoder.encode(column, "UTF-8"),
 				null);
+		if (debug) {
+			FileWriter fw = new FileWriter("KVSClient_log ", true);
+			fw.write("GET " + " tablename = " + tableName + " row = " + row + " col = " + column + " HTTP res = " + res
+					+ " time = " + System.currentTimeMillis() + "\n");
+			fw.flush();
+		}
 		return ((res != null) && (res.statusCode() == 200)) ? res.body() : null;
 	}
 

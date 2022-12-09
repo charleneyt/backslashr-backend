@@ -17,7 +17,8 @@ public class Crawler {
 	static boolean restartLog1 = true;
 	static boolean restartLog2 = true;
 	final static Set<String> allowedSuffix = new HashSet<>(Arrays.asList("com", "net", "org", "edu", "gov"));
-	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("cnn.com", "wikipedia.com", "espn.com", "bbc.com", "irs.gov", "cbssports.com", "imdb.com"));
+	final static Set<String> authorityHubs = new HashSet<>(
+			Arrays.asList("cnn.com", "wikipedia.com", "espn.com", "bbc.com", "irs.gov", "cbssports.com", "imdb.com"));
 	static boolean debugMode = false;
 
 	public static void run(FlameContext ctx, String[] args) throws Exception {
@@ -71,7 +72,7 @@ public class Crawler {
 		} else {
 			urlQueue = ctx.fromTable(args[0], r -> r.get("value"));
 		}
-		
+
 		FileWriter fw3 = new FileWriter("./crawler_log_outside_lambda", true);
 		fw3.write("Starting a round, time at: " + System.currentTimeMillis() + "\n");
 		fw3.write("Starting table name: " + urlQueue.getTableName() + "\n");
@@ -94,7 +95,7 @@ public class Crawler {
 				if (debugMode) {
 					FileWriter fw = new FileWriter("./crawler_log_inside_lambda", true);
 					fw.write("working on " + url + " , at time: " + System.currentTimeMillis() + "\n");
-					fw.close();					
+					fw.close();
 				}
 
 				if (FlameContext.getKVS() == null) {
@@ -284,9 +285,9 @@ public class Crawler {
 						if (debugMode) {
 							FileWriter fw = new FileWriter("./crawler_log_inside_lambda", true);
 							fw.write("crawling " + url + ", at time: " + System.currentTimeMillis() + "\n");
-							fw.close();					
+							fw.close();
 						}
-						
+
 						con = (HttpURLConnection) (new URL(url)).openConnection();
 
 						con.setRequestMethod("GET");
@@ -379,14 +380,14 @@ public class Crawler {
 			System.out.println("Finished a round");
 			System.out.println("New table name: " + urlQueue.getTableName());
 			System.out.println("New table count: " + urlQueue.count());
-			
+
 			FileWriter fw2 = new FileWriter("./crawler_log_outside_lambda", true);
 			fw2.write("Finished a round, time at: " + System.currentTimeMillis() + "\n");
 			fw2.write("New table name: " + urlQueue.getTableName() + "\n");
 			fw2.write("New table count: " + urlQueue.count() + "\n");
-			fw2.close();				
+			fw2.close();
 
-//			Thread.sleep(1000);
+			Thread.sleep(1000);
 		}
 
 		ctx.output("OK");
@@ -794,7 +795,7 @@ public class Crawler {
 
 	static boolean notBlacklisted(String url, List<String> blacklist) {
 		for (String bl : blacklist) {
-			if (bl != null){
+			if (bl != null) {
 				bl = bl.replace("*", "\\S*");
 				if (Pattern.matches(bl, url)) {
 					// we have a match! should ignore the given url
