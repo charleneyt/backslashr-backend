@@ -17,7 +17,7 @@ public class Crawler {
 	static boolean restartLog1 = true;
 	static boolean restartLog2 = true;
 	final static Set<String> allowedSuffix = new HashSet<>(Arrays.asList("com", "net", "org", "edu", "gov"));
-	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("cnn.com", "wikipedia.com", "espn.com", "bbc.com", "irs.gov", "cbssports.com", "imdb.com"));
+	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("wikipedia.com", "imdb.com", "nobelprize.org", "investopedia.com", "simplyrecipes.com", "favfamilyrecipes.com"));
 	static boolean debugMode = false;
 
 	public static void run(FlameContext ctx, String[] args) throws Exception {
@@ -319,12 +319,13 @@ public class Crawler {
 									Row domainRow = kvs.getRow("domain", domainHash);
 									crawlCount = Long.valueOf(domainRow.get("count"));
 									if (authorityHubs.contains(domainName)) {
-										if (crawlCount > 5000) {
+										if (crawlCount > 10000) {
 											return Arrays.asList(new String[] {});
 										}
-									} else if (crawlCount > 1000) {
+									} else if (crawlCount > 200) {
 										return Arrays.asList(new String[] {});
 									}
+									// else Arrays.asList(new String[] {});
 								}
 								kvs.put("domain", domainHash, "count", String.valueOf(crawlCount + 1));
 								if (crawlCount == 0) {
@@ -420,6 +421,7 @@ public class Crawler {
 					case ".png":
 					case ".txt":
 					case ".js":
+					case ".pdf":
 						unwantedType = true;
 						break;
 					}
@@ -522,12 +524,13 @@ public class Crawler {
 							Row domainRow = kvs.getRow("domain", domainHash);
 							long crawlCount = Long.valueOf(domainRow.get("count"));
 							if (authorityHubs.contains(domainName)) {
-								if (crawlCount > 5000) {
+								if (crawlCount > 10000) {
 									continue;
 								}
-							} else if (crawlCount > 1000) {
+							} else if (crawlCount > 200) {
 								continue;
 							}
+							// else Arrays.asList(new String[] {});
 						}
 						// check if already crawled, if so, don't add to queue
 						urlToVisit.add(url);

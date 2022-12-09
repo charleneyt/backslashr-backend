@@ -52,9 +52,34 @@ public class AddTable {
 		values.add("*video*");
 		values.add("*waze*");
 		values.add("*spotify*");
-		values.add("*ticketmaster*");
+		values.add("*ticket*");
+		values.add("*store*");
 		values.add("*linkedin*");
 		values.add("*teamworkonline.com*");
+		values.add("*jamsadr.com*");
+		values.add("*wsop.com*");
+		values.add("*disqus*");
+		values.add("*tigweb.org*");
+		values.add("*health*");
+		values.add("*gobrockport.com*");
+		values.add("*pr.nba.com*");
+		values.add("*picks.cbssports.com*");
+		values.add("*footmercato.net*");
+		values.add("*mundodeportivo.com*");
+		values.add("*andro4all.com*");
+		values.add("*nbcuni*");
+		values.add("*meredith.com*");
+		values.add("*shop*");
+		values.add("*comcast*");
+		values.add("*nasdaq.com*");
+		values.add("*childrensplace.com*");
+		values.add("*signup*");
+		values.add("*optout*");
+		values.add("*login*");
+		values.add("*logout*");
+		values.add("*sports.com*");
+		values.add("*/author/*");
+		values.add("*iberdrola.com*");
 		
 		for (String value : values) {
 			kvs.put(tableName, Hasher.hash(value), colName, value.getBytes());
