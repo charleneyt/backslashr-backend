@@ -49,4 +49,7 @@
   - Run npm install 
   - npm start
 
+- Build jar file
+  - jar -cf indexer.jar bin/jobs/Indexer.class
+
 ### TODO
