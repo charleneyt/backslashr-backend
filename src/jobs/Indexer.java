@@ -41,7 +41,8 @@ public class Indexer {
 		long startGetTime = System.currentTimeMillis();
 		System.out.println("Started processing from content table at " + new Date());
 
-		FlameRDD transform = ctx.fromTable("content", r -> {
+		FlameRDD transform = ctx.indexFromTable("content", (r, dict) -> {
+//			System.out.println("start fromTable: " + ProcessHandle.current().pid() + "| " + Thread.currentThread().getName());
 			String url = r.get("url");
 			String page = r.get("page");
 			FileWriter fw;
@@ -66,18 +67,13 @@ public class Indexer {
 				for (int i = 0; i < words.length; i++) {
 //					System.out.println(i + " " + words[i]);
 					// check whether the word is a dictionary word
-					boolean isWord = false;
-//					try {
-//						isWord = kvs.checkDictionary(words[i]);
-//					} catch (Exception e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
+					boolean isWord = dict.contains(words[i]);
 
-//					if (!isWord) {
+
+					if (!isWord) {
 //						System.out.println("skipped word");
-//						continue;						
-//					}
+						continue;						
+					}
 //					System.out.println("not skip word" + System.currentTimeMillis());
 
 					if (!wordToPosByUrl.containsKey(words[i]))
@@ -86,17 +82,20 @@ public class Indexer {
 					wordToPosByUrl.get(words[i]).add(i + 1);
 				}
 				
+//				StringBuilder rowsSb = new StringBuilder();
+				HashMap<String, Row> wordToCombined = new HashMap<>();
+				
 				for (String word : wordToPosByUrl.keySet()) {
-					boolean isWord = false;
-					try {
-						isWord = kvs.checkDictionary(word);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-					if (!isWord)
-						continue;
+//					boolean isWord = false;
+//					try {
+//						isWord = kvs.checkDictionary(word);
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//					
+//					if (!isWord)
+//						continue;
 					
 					StringBuilder sb = new StringBuilder();
 					for (Integer pos : wordToPosByUrl.get(word)) {
@@ -105,6 +104,9 @@ public class Indexer {
 						sb.append(" " + pos);
 					}
 					String combined = url + ":" + sb.toString();
+					Row row = new Row(word);
+					row.put("value", combined);
+					wordToCombined.put(word, row);
 
 //					Row indexRow = null;
 //					try {
@@ -135,16 +137,28 @@ public class Indexer {
 //									+ "for url " + url);
 //						}
 //					}
+					
+//					Row row = new Row(word);
+//					row.put("value", combined);
+//					rowsSb.append(row.toString() + "\n");
 	
-					try {
-						kvs.put("index", word, url, combined);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						System.out.println("Row exists and failed to put row for word " + word + " at pos " + sb.toString()
-								+ "for url " + url);
-					}
+//					try {
+//						kvs.put("index", word, url, combined);
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//						System.out.println("Row exists and failed to put row for word " + word + " at pos " + sb.toString()
+//								+ "for url " + url);
+//					}
 				}	
+				try {
+					kvs.putTable("index", wordToCombined);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
 //				try {
 //					kvs.clean("index");
 //				} catch (IOException e) {
@@ -169,6 +183,7 @@ public class Indexer {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+//			System.out.println("end fromTable: " + ProcessHandle.current().pid() + "| " + Thread.currentThread().getName());
 			return url;
 		});
 		long endGetTime = System.currentTimeMillis();

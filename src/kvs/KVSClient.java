@@ -2,6 +2,7 @@ package kvs;
 
 import java.util.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.io.*;
 import tools.HTTP;
 
@@ -294,6 +295,74 @@ public class KVSClient implements KVS {
 		if (!result.equals("OK"))
 			throw new RuntimeException("PUT returned something other than OK: " + result);
 	}
+	
+	private static byte[] combineTwoByteArrays(byte[] a, byte[] b) {
+        byte[] result = Arrays.copyOf(a, a.length + b.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;	
+	}
+	
+	// added client interface to stream PUT a table
+	public void putTable(String tableName, HashMap<String, Row> wordToRow) throws FileNotFoundException, IOException {
+		if (!haveWorkers)
+			downloadWorkers();
+		
+//		System.out.println(wordToRow.toString());
+		
+		ArrayList<String>[] workerToKeys = new ArrayList[workers.size()];
+		
+		for (String rowName : wordToRow.keySet()) {
+			int workerIdx = workerIndexForKey(rowName);
+			if (workerToKeys[workerIdx] == null)
+				workerToKeys[workerIdx] = new ArrayList<String>();
+			workerToKeys[workerIdx].add(rowName);
+		}
+		
+		for (int i = 0; i < workers.size(); i++) {
+			if (workerToKeys[i] == null)
+				continue;
+			
+			byte[] body = new byte[0];
+			for (String rowName : workerToKeys[i]) {
+				body = combineTwoByteArrays(body, wordToRow.get(rowName).toByteArray());
+				body = combineTwoByteArrays(body, new byte[] { (byte) 0x0a });
+				System.out.println("body length is: " + body.length);
+				if (body.length > 10000) {
+					  FileWriter fw = new FileWriter("over_500000_log", true);
+					  fw.write("from: " + ProcessHandle.current().pid() + "| " + Thread.currentThread().getName() + "\n");
+					  fw.write("worker " + i + ":" + new String(body, StandardCharsets.UTF_8) + "\n");
+					  fw.close();
+					byte[] response = HTTP.doRequest("PUT",
+							"http://" + workers.elementAt(i).address + "/data/" + tableName,
+							body).body();	
+					String result = new String(response);
+					if (!result.equals("OK"))
+						throw new RuntimeException("PUT returned something other than OK: " + result);
+					body = new byte[0];
+				}
+			}
+//			body = combineTwoByteArrays(body, new byte[] { (byte) 0x0a });
+			
+			if (body == null || body.length == 0) {
+				System.out.println("nothing in string builder!");
+				continue;
+			}
+			
+			  FileWriter fw = new FileWriter("send_put_table_log", true);
+			  fw.write("from: " + ProcessHandle.current().pid() + "| " + Thread.currentThread().getName() + "\n");
+			  fw.write("worker " + i + ":" + new String(body, StandardCharsets.UTF_8) + "\n");
+			  fw.close();
+			System.out.println("worker " + i + ":" + new String(body, StandardCharsets.UTF_8));
+			
+			byte[] response = HTTP.doRequest("PUT",
+					"http://" + workers.elementAt(i).address + "/data/" + tableName,
+					body).body();	
+			String result = new String(response);
+			if (!result.equals("OK"))
+				throw new RuntimeException("PUT returned something other than OK: " + result);
+		}
+
+	}
 
 	public Row getRow(String tableName, String row) throws IOException {
 		System.out.println("before download workers");
@@ -364,16 +433,16 @@ public class KVSClient implements KVS {
 		return new KVSIterator(tableName, startRow, endRowExclusive);
 	}
 	
-	public boolean checkDictionary(String word) throws Exception {
-		if (!haveWorkers)
-			downloadWorkers();
-		
-		HTTP.Response r = HTTP.doRequest("GET", "http://" + workers.elementAt(workerIndexForKey(word)).address + "/data/dictionary/" + java.net.URLEncoder.encode(word, "UTF-8"), null);
-		if (r.statusCode() == 200)
-			return true;
-		
-		return false;
-	}
+//	public boolean checkDictionary(String word) throws Exception {
+//		if (!haveWorkers)
+//			downloadWorkers();
+//		
+//		HTTP.Response r = HTTP.doRequest("GET", "http://" + workers.elementAt(workerIndexForKey(word)).address + "/data/dictionary/" + java.net.URLEncoder.encode(word, "UTF-8"), null);
+//		if (r.statusCode() == 200)
+//			return true;
+//		
+//		return false;
+//	}
 
 	public static void main(String args[]) throws Exception {
 		if (args.length < 2) {

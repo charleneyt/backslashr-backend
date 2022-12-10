@@ -3,6 +3,7 @@ package kvs;
 import java.util.*;
 import java.util.concurrent.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class Row implements Serializable {
 
@@ -48,7 +49,7 @@ public class Row implements Serializable {
   }
 
   static String readStringSpace(InputStream in) throws Exception {
-    byte buffer[] = new byte[1024];
+    byte buffer[] = new byte[102400];
     int numRead = 0;
     while (true) {
       if (numRead == buffer.length)
@@ -63,7 +64,7 @@ public class Row implements Serializable {
     }
   }
 
-  public static Row readFrom(InputStream in) throws Exception {
+  public static synchronized Row readFrom(InputStream in) throws Exception {
     String theKey = readStringSpace(in);
     if (theKey == null) 
       return null;
@@ -77,16 +78,30 @@ public class Row implements Serializable {
       int len = Integer.parseInt(readStringSpace(in));
       byte[] theValue = new byte[len];
       int bytesRead = 0;
-      while (bytesRead < len) {
-        int n = in.read(theValue, bytesRead, len - bytesRead);
-        if (n < 0)
-          throw new Exception("Premature end of stream while reading value for key '"+keyOrMarker+"' (read "+bytesRead+" bytes, expecting "+len+")");
-        bytesRead += n;
+      synchronized (in) {
+	      while (bytesRead < len) {
+	    	  FileWriter fw = new FileWriter("row_read_error_log", true);
+//	    	  fw.write("from: " + ProcessHandle.current().pid() + "| " + Thread.currentThread().getName() + "\n");
+	    	  fw.write("bytes read before: " + bytesRead + "\n");
+	        int n = in.read(theValue, bytesRead, len - bytesRead);
+	        if (n < 0)
+	          throw new Exception("Premature end of stream while reading value for key '"+keyOrMarker+"' (read "+bytesRead+" bytes, expecting "+len+")");
+	        bytesRead += n;
+		  	  fw.write("bytes read after: " + bytesRead + "\n");
+	    	  fw.close();
+	      }    	  
       }
 
+
       byte b = (byte)in.read();
-      if (b != ' ')
-        throw new Exception("Expecting a space separator after value for key '"+keyOrMarker+"'");
+      if (b != ' ') {
+    	  FileWriter fw = new FileWriter("row_read_error_log", true);
+    	  fw.write("from: " + ProcessHandle.current().pid() + "| " + Thread.currentThread().getName() + "\n");
+    	  fw.write("b is: " + b + ";len is " + len + "bytes read is " + bytesRead + "; key is: " + theKey +  "; value is: " + new String(theValue, StandardCharsets.UTF_8) + "\n");
+    	  fw.close();
+//    	  System.out.println("b is: " + b + ";len is " + len + "bytes read is " + bytesRead + "; key is: " + theKey +  "; value is: " + new String(theValue, StandardCharsets.UTF_8));
+    	  throw new Exception("Expecting a space separator after value for key '"+keyOrMarker+"'");
+      }
 
       newRow.put(keyOrMarker, theValue);
     }

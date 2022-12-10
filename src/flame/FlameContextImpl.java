@@ -173,7 +173,7 @@ public class FlameContextImpl implements FlameContext {
 		+ java.net.URLEncoder.encode(inputTable, "UTF-8") + "&output="
 		+ java.net.URLEncoder.encode(outputTableName, "UTF-8") + "&kvsMasterIp=" + kvsMaster[0]
 		+ "&kvsMasterPort=" + kvsMaster[1] + zeroElementUrl + secondTableUrl;
-		System.out.println("fixed url is: " + fixedUrl);
+//		System.out.println("fixed url is: " + fixedUrl);
 
 		int operationCount = 0;
 		for (int i = 0; i < latestAssignment.size(); i++) {
@@ -260,6 +260,16 @@ public class FlameContextImpl implements FlameContext {
 	@Override
 	public FlameRDD fromTable(String tableName, RowToString lambda) throws Exception {
 		String outputTable = invokeOperation(tableName, "/rdd/fromTable", Serializer.objectToByteArray(lambda), null,
+				null);
+
+		FlameRDDImpl ret = new FlameRDDImpl(this);
+		ret.saveTable(outputTable);
+		return ret;
+	}
+	
+	@Override
+	public FlameRDD indexFromTable(String tableName, RowMapToString lambda) throws Exception {
+		String outputTable = invokeOperation(tableName, "/rdd/indexFromTable", Serializer.objectToByteArray(lambda), null,
 				null);
 
 		FlameRDDImpl ret = new FlameRDDImpl(this);

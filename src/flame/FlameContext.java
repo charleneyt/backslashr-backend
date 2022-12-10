@@ -16,6 +16,10 @@ public interface FlameContext {
   public interface RowToString extends Serializable {
     String op(Row r);
   };
+  
+  public interface RowMapToString extends Serializable {
+	    String op(Row r, HashSet<String> dict);
+  };
 
 
   // When a job invokes output(), your solution should store the provided string
@@ -40,4 +44,6 @@ public interface FlameContext {
   // workers, just like the RDD/PairRDD operations.
 
   public FlameRDD fromTable(String tableName, RowToString lambda) throws Exception;
+  
+  public FlameRDD indexFromTable(String tableName, RowMapToString lambda) throws Exception;
 }

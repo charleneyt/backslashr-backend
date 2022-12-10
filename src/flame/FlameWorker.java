@@ -22,6 +22,7 @@ class FlameWorker extends Worker {
 	final static String LOWER_STRING = "abcdefghijklmnopqrstuvwxyz";
 	final static String OK_STRING = "OK";
 	final static String VALUE_STRING = "value";
+	static HashSet<String> dictionary;
 
 	public static void main(String args[]) {
 		if (args.length != 2) {
@@ -36,6 +37,24 @@ class FlameWorker extends Worker {
 		fw.startPingThread();
 
 		final File myJAR = new File("__worker" + port + "-current.jar");
+		
+        // load up dictionary
+        dictionary = new HashSet<String>();
+		File file = new File("./words_alpha.txt");
+		FileReader fr;
+		try {
+			fr = new FileReader(file);
+			BufferedReader br = new BufferedReader(fr);
+			String line;
+			while ((line = br.readLine()) != null) {
+				dictionary.add(line.toLowerCase().trim());
+//				break;
+			}
+			br.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		port(port);
 
@@ -247,11 +266,9 @@ class FlameWorker extends Worker {
 
 			Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
 			if (iter != null) {
+				int counter = 0;
 				while (iter.hasNext()) {
 					Row row = iter.next();
-					FileWriter fw1 = new FileWriter("flameworker_fromtable_log", true);
-					fw1.write(row.key() + "\n");
-					fw1.close();
 					if (row == null) {
 						break;
 					}
@@ -259,6 +276,45 @@ class FlameWorker extends Worker {
 					String s = lambda.op(row);
 					if (s != null) {
 						kvs.put(qParamsStrings[1], row.key(), FlameWorker.VALUE_STRING, s.getBytes());
+					}
+					counter++;
+					if (counter == 100)
+						break;
+				}
+			}
+
+			return FlameWorker.OK_STRING;
+		});
+		
+		post("/rdd/indexFromTable", (req, res) -> {
+			String[] qParamsStrings = parseRequestQueryParams(req);
+			RowMapToString lambda = (RowMapToString) Serializer.byteArrayToObject(req.bodyAsBytes(), myJAR);
+
+			KVSClient kvs = new KVSClient(qParamsStrings[2]);
+
+			Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
+			if (iter != null) {
+				int counter = 0;
+				while (iter.hasNext()) {
+					Row row = iter.next();
+					if (row == null) {
+						break;
+					}
+
+					String s = lambda.op(row, dictionary);
+					if (s != null) {
+						kvs.put(qParamsStrings[1], row.key(), FlameWorker.VALUE_STRING, s.getBytes());
+					}
+					counter++;
+					if (counter == 100) {
+						counter = 0;
+						try {
+							kvs.clean("index");
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
 					}
 				}
 			}
