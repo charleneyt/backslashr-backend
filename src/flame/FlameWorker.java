@@ -11,6 +11,7 @@ import kvs.*;
 import webserver.*;
 import java.util.*;
 import java.nio.*;
+import java.awt.datatransfer.SystemFlavorMap;
 import java.io.*;
 
 class FlameWorker extends Worker {
@@ -306,22 +307,83 @@ class FlameWorker extends Worker {
 						kvs.put(qParamsStrings[1], row.key(), FlameWorker.VALUE_STRING, s.getBytes());
 					}
 					counter++;
-					if (counter == 100) {
-						counter = 0;
-						try {
-							kvs.clean("index");
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-					}
+//					if (counter == 100) {
+//						counter = 0;
+//						try {
+//							kvs.clean("index");
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//						
+//					}
 				}
 			}
 
 			return FlameWorker.OK_STRING;
 		});
 
+		post("/rdd/consolidateFromTable", (req, res) -> {
+			String[] qParamsStrings = parseRequestQueryParams(req);
+			String inputTableName = qParamsStrings[0];
+			String outputTableName = qParamsStrings[1];
+			String kvsMaster = qParamsStrings[2];
+			String startKey = qParamsStrings[3];
+			String toKeyExclusive = qParamsStrings[4];
+			System.out.println("start key:  " + startKey + ", end key: " + toKeyExclusive);
+			
+			RowToString lambda = (RowToString) Serializer.byteArrayToObject(req.bodyAsBytes(), myJAR);
+
+			KVSClient kvs = new KVSClient(kvsMaster);
+
+			Iterator<Row> iter = kvs.scanRaw(inputTableName, null, null);
+			if (iter != null) {
+				// word : {url}
+				HashMap<String, ArrayList<String>> consolidatedRows = new HashMap<>();
+			
+				while (iter.hasNext()) {
+					Row row = iter.next();
+//					System.out.println("val of row is: " + row.get("value"));
+					if (row == null) {
+						break;
+					}
+
+					String s = lambda.op(row);
+//					if (row.key().equals("a")) {
+//						System.out.println("read from file: " + row.get("value"));
+//					}
+					if (!consolidatedRows.containsKey(row.key())) {
+						consolidatedRows.put(row.key(), new ArrayList<>());
+					}
+					consolidatedRows.get(row.key()).add(row.get("value"));
+				}
+				
+				HashMap<String, Row> consolidatedFlattenedRows = new HashMap<>();
+				for (String rowName : consolidatedRows.keySet()) {
+					StringBuilder sb = new StringBuilder();
+					for (String val : consolidatedRows.get(rowName)) {
+//						System.out.println("internal is" + sb.toString());						
+						if (sb.length() == 0) {
+							sb.append(val);
+						}
+						else {
+							sb.append("," + val);
+						}
+					}
+					Row row = new Row(rowName);
+//					System.out.println("col is" + sb.toString());
+					row.put("value", sb.toString());
+//					if (row.key().equals("a")) {
+//						System.out.println(sb.toString());
+//					}
+					consolidatedFlattenedRows.put(rowName, row);
+				}
+				kvs.putTable("index_final", consolidatedFlattenedRows);
+			}
+
+			return FlameWorker.OK_STRING;
+		});
+		
 		post("/rdd/flatMapToPair", (req, res) -> {
 			String[] qParamsStrings = parseRequestQueryParams(req);
 			StringToPairIterable lambda = (StringToPairIterable) Serializer.byteArrayToObject(req.bodyAsBytes(), myJAR);

@@ -101,7 +101,9 @@ public class Indexer {
 					for (Integer pos : wordToPosByUrl.get(word)) {
 						if (sb.length() == 0)
 							sb.append(pos + "");
-						sb.append(" " + pos);
+						else {
+							sb.append(" " + pos);							
+						}
 					}
 					String combined = url + ":" + sb.toString();
 					Row row = new Row(word);

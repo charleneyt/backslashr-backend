@@ -276,4 +276,14 @@ public class FlameContextImpl implements FlameContext {
 		ret.saveTable(outputTable);
 		return ret;
 	}
+	
+	@Override
+	public FlameRDD consolidateFromTable(String tableName, RowToString lambda) throws Exception {
+		String outputTable = invokeOperation(tableName, "/rdd/consolidateFromTable", Serializer.objectToByteArray(lambda), null,
+				null);
+
+		FlameRDDImpl ret = new FlameRDDImpl(this);
+		ret.saveTable(outputTable);
+		return ret;
+	}
 }

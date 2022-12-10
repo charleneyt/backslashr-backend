@@ -46,4 +46,6 @@ public interface FlameContext {
   public FlameRDD fromTable(String tableName, RowToString lambda) throws Exception;
   
   public FlameRDD indexFromTable(String tableName, RowMapToString lambda) throws Exception;
+  
+  public FlameRDD consolidateFromTable(String tableName, RowToString lambda) throws Exception;
 }

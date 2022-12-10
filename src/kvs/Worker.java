@@ -44,7 +44,7 @@ public class Worker extends generic.Worker {
         streams = new ConcurrentHashMap<>();
         tablesWithOffset = new ConcurrentHashMap<>();
 
-        initializeTables();
+//        initializeTables();
     }
 
     private void initializeTables() {
@@ -77,6 +77,9 @@ public class Worker extends generic.Worker {
 
 
         for (File tableFile : files) {
+        	if (tableFile.getName().equals("content.table"))
+        		continue;
+        	
             long startByte = 0;
             try {
                 String tableDir = tableFile.getName();
@@ -927,6 +930,134 @@ public class Worker extends generic.Worker {
             return null;
 
         });
+        
+//        for (File tableFile : files) {
+//        	if (tableFile.getName().equals("content.table"))
+//        		continue;
+//        	
+//            long startByte = 0;
+//            try {
+//                String tableDir = tableFile.getName();
+//                if (debugMode) {
+//                    System.out.println("initializing table " + tableDir);
+//                }
+//                FileInputStream input = new FileInputStream(tableFile);
+//                String tableName = tableDir.split(".table")[0];
+//                if (input.available() > 0) {
+//                    addTable(tableName);
+//
+//                    while (input.available() > 0) {
+//                        try {
+//                            Row row = Row.readFrom(input);
+//                            if (row != null) {
+//                                tablesWithOffset.get(tableName).put(row.key(), startByte);
+//                            }
+//                            startByte += row.toByteArray().length + 1;
+//                        }
+//                        catch (Exception e) {
+//                            if (debugMode) {
+//                                FileWriter fw2 = new FileWriter("read_row_error_log", true);
+//                                fw2.write("error in initializing tables, table name is: " + tableName + "; starting byte: " + startByte + "\n");
+//                                fw2.close();                                
+//                            }
+//                        }
+//                    }
+//                    streams.put(tableName, new BufferedOutputStream(new FileOutputStream(tableFile, true)));
+//                }
+//
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                continue;
+//            }
+//        }
+        
+        get("/raw/:table", (req, res) -> {
+        	
+          System.out.println("/raw/:table started");
+            String tableName = req.params("table");
+                          
+            FileInputStream input = new FileInputStream(worker.directory + "/" + tableName + ".table");
+            
+            if (input.available() <= 0) {
+                res.status(404, "Not Found");
+                input.close();
+                return "404 Not Found";
+            }
+
+            // check for startRow and endRowExclusive in query params
+            boolean hasStartRow = req.queryParams() != null && req.queryParams().contains("startRow");
+            String startRow = "";
+            if (hasStartRow) {
+                startRow = req.queryParams("startRow");
+            }
+            boolean hasEndRow = req.queryParams() != null && req.queryParams().contains("endRowExclusive");
+            String endRow = "";
+            if (hasEndRow) {
+                endRow = req.queryParams("endRowExclusive");
+            }
+
+            if (hasStartRow && hasEndRow && startRow.compareTo(endRow) > 0) {
+                res.status(400, "Bad Request");
+                return "400 Bad Request (startRow cannot be larger than endRowExclusive!)";
+            }
+            
+            int rowCount = 0;
+            boolean beginning = false;
+            while (input.available() > 0) {
+                try {
+                    Row row = Row.readFrom(input);
+                    if (row == null)
+                    	continue;
+	                if (!hasStartRow || beginning || row.key().compareTo(startRow) >= 0) {
+	                    beginning = true;                    
+//	                	System.out.println("from get raw, row is: " + row.toString());
+	                	rowCount++;
+	                	System.out.println("row read is: " + row.toString());
+	                    res.write(toByteArrayWithNewLine(row.toByteArray()));        
+	                } else {
+	                	break;
+	                }
+                }
+                catch (Exception e) {
+                	e.printStackTrace();
+                }
+            }
+       
+
+	            
+////	//          System.out.println("endRow: "+endRow);
+////	            Collection<String> rowSet = worker.tablesWithOffset.get(tableName).keySet();
+//	            int rowCount = 0;
+//	            boolean beginning = false;
+//	            for (String rowName : rowSet) {
+//	//              System.out.println("rowName: "+rowName);
+//	                Row row = worker.findRow(tableName, rowName);
+//	                if (row == null) {
+//	//                  System.out.println("from /data/:table " + rowName + "is null!!\n");
+//	                    continue;
+//	                }
+//	                if (!hasStartRow || beginning || rowName.compareTo(startRow) >= 0) {
+//	                    beginning = true;
+//	                    if (!hasEndRow || rowName.compareTo(endRow) < 0) {
+//	//                      System.out.println("row.toByteArray(): "+row.toString());
+//	                        res.write(toByteArrayWithNewLine(row.toByteArray()));
+//	//                      res.write(Worker.LFbyte);
+//	                        rowCount++;
+//	                    } else {
+//	                        break;
+//	                    }
+//	                }
+//	            }
+//	
+            res.write(Worker.LFbyte);
+            // in case no row met the query
+            if (rowCount == 0) {
+                res.write(Worker.LFbyte);
+            }
+            System.out.println("/raw/:table ended");
+            return null;
+
+        });
 
         // the body will contain one or multiple rows, separated by a LF character. The
         // worker should read the rows one by one and insert them into table XXX;
@@ -960,18 +1091,21 @@ public class Worker extends generic.Worker {
 	            while (input.available() > 0) {
 	                Row row = Row.readFrom(input);
 	                if (row != null) {
-	                	String rowName = row.key();
-	                	Row existingRow = worker.findRow(tableName, rowName);
-	                	if (existingRow == null) {
-		                    worker.tablesWithOffset.get(tableName).put(row.key(), bytesRead);	                		
-	                	}
-	                	else {
-	                		String existingPos = existingRow.get("value");
-	                		String currPos = existingPos + "," + row.get("value");
-	                		row.put("value", currPos);
-	                	}
-	                    worker.tablesWithOffset.get(tableName).put(row.key(), bytesRead);
-	                    bytesRead += row.toByteArray().length + 1;
+	                	worker.tablesWithOffset.get(tableName).put(row.key(), bytesRead);	            
+	                	bytesRead += row.toByteArray().length + 1;
+	                	
+//	                	String rowName = row.key();
+//	                	Row existingRow = worker.findRow(tableName, rowName);
+//	                	if (existingRow == null) {
+//		                    worker.tablesWithOffset.get(tableName).put(row.key(), bytesRead);	                		
+//	                	}
+//	                	else {
+//	                		String existingPos = existingRow.get("value");
+//	                		String currPos = existingPos + "," + row.get("value");
+//	                		row.put("value", currPos);
+//	                	}
+//	                    worker.tablesWithOffset.get(tableName).put(row.key(), bytesRead);
+	                    
 	                    
 	                    synchronized(currStream) {
 	                    	currStream.write(toByteArrayWithNewLine(row.toByteArray()));
