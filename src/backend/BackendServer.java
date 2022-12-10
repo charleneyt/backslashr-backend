@@ -14,6 +14,7 @@ import json.org.json.simple.JSONObject;
 public class BackendServer {
 
 	public static void main(String[] args) {
+		System.out.println("Starting Backend ... ");
 		if (args.length != 2) {
 			System.err.println("Syntax: Backend <port> <kvsMaster>");
 			System.exit(1);
@@ -32,16 +33,14 @@ public class BackendServer {
 			String[] searchTerms = query.split("\\s+");
 			JSONObject results = new JSONObject();
 			results.put("results", null);
-			
 			List<String> outputURLs = Ranker.rank(kvs, searchTerms);
-
 			JSONArray list = new JSONArray();
 			for (String url : outputURLs) {
 				try {
 					// Create JSON Object to add attribute URL and content
 					JSONObject data = new JSONObject();
 					String hashURL = Hasher.hash(url);
-					String content = new String(kvs.get("crawl", hashURL, "page"));
+					String content = new String(kvs.get("content", hashURL, "page"));
 					content = content.replaceAll("[.,:;!\\?\'\"()-]", " ").replaceAll("<[^>]*>", "");
 
 					StringBuilder previewContent = new StringBuilder();
@@ -59,7 +58,6 @@ public class BackendServer {
 					System.out.println("Exception: " + e);
 				}
 			}
-
 			results.put("results", list);
 			return results;
 //			return "OK";
