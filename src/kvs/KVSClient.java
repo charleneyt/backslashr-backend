@@ -64,14 +64,14 @@ public class KVSClient implements KVS {
 		Vector<String> ranges;
 
 		KVSIterator(String tableNameArg, String startRowArg, String endRowExclusiveArg, boolean isRaw) throws IOException {
-			System.out.println("from iterator: " + startRowArg + ", end row: " + endRowExclusiveArg);
+//			System.out.println("from iterator: " + startRowArg + ", end row: " + endRowExclusiveArg);
 			
-			if (startRowArg == null) {
-				System.out.println("start row is really null");
-			}
-			if (endRowExclusiveArg == null) {
-				System.out.println("end row is really null");
-			}
+//			if (startRowArg == null) {
+//				System.out.println("start row is really null");
+//			}
+//			if (endRowExclusiveArg == null) {
+//				System.out.println("end row is really null");
+//			}
 			// try to understand
 			in = null;
 			currentRangeIndex = 0;
@@ -80,23 +80,12 @@ public class KVSClient implements KVS {
 			tableName = tableNameArg;
 			startRow = startRowArg;
 			ranges = new Vector<String>();
-//			if (isRaw) {
-//				for (int i = 0; i < numWorkers(); i++) {
-//					String url = getURL(tableNameArg, i, null, null, isRaw);
-//					System.out.println("added url: " + url);
-//					ranges.add(url);
-//				}
-//				
-//				openConnectionAndFill();
-//				return;
-//			}
-			
+
 			if ((startRowArg == null) || (startRowArg.compareTo(getWorkerID(0)) < 0)) {
 				String url = getURL(tableNameArg, numWorkers() - 1, startRowArg,
 						((endRowExclusiveArg != null) && (endRowExclusiveArg.compareTo(getWorkerID(0)) < 0))
 								? endRowExclusiveArg
 								: getWorkerID(0), isRaw);
-				System.out.println("first url: " + url);
 				ranges.add(url);
 			}
 			for (int i = 0; i < numWorkers(); i++) {
@@ -110,12 +99,10 @@ public class KVSClient implements KVS {
 						String url = getURL(tableNameArg, i, useActualStartRow ? startRowArg : getWorkerID(i),
 								useActualEndRow ? endRowExclusiveArg
 										: ((i < numWorkers() - 1) ? getWorkerID(i + 1) : null), isRaw);
-						System.out.println("after first url: " + url);
 						ranges.add(url);
 					}
 				}
 			}
-			System.out.println("from kvs client, " + ranges.toString());
 
 			openConnectionAndFill();
 		}
@@ -290,7 +277,7 @@ public class KVSClient implements KVS {
 		try {
 			String target = "http://" + workers.elementAt(workerIndexForKey(row)).address + "/data/" + tableName + "/"
 					+ java.net.URLEncoder.encode(row, "UTF-8") + "/" + java.net.URLEncoder.encode(column, "UTF-8");
-			// System.out.println(target);
+	
 			byte[] response = HTTP.doRequest("PUT", target, value).body();
 			String result = new String(response);
 			if (!result.equals("OK")) {
@@ -350,48 +337,35 @@ public class KVSClient implements KVS {
 			for (String rowName : workerToKeys[i]) {
 				body = combineTwoByteArrays(body, wordToRow.get(rowName).toByteArray());
 				body = combineTwoByteArrays(body, new byte[] { (byte) 0x0a });
-//				System.out.println("body length is: " + body.length);
 				if (body.length > 10000) {
-//					  FileWriter fw = new FileWriter("over_500000_log", true);
-//					  fw.write("from: " + ProcessHandle.current().pid() + "| " + Thread.currentThread().getName() + "\n");
-//					  fw.write("worker " + i + ":" + new String(body, StandardCharsets.UTF_8) + "\n");
-//					  fw.close();
 					byte[] response = HTTP.doRequest("PUT",
 							"http://" + workers.elementAt(i).address + "/data/" + tableName,
 							body).body();	
 					String result = new String(response);
 					if (!result.equals("OK")) {
-						  FileWriter fw1 = new FileWriter("put_table_failure_log", true);
-						  fw1.write("request body is: " + new String(body, StandardCharsets.UTF_8) + "\n");
-						  fw1.close();
+						FileWriter fw = new FileWriter("KVSClient_log", true);
+						fw.write("from putTable, PUT returned something other than OK: " + result + "(" + "http://" + workers.elementAt(i).address + "/data/" + tableName + ")" + "\n");
+						fw.write("request body is: " + new String(body, StandardCharsets.UTF_8) + "\n");
+						fw.close();
 					}
-//						throw new RuntimeException("PUT returned something other than OK: " + result);
 					body = new byte[0];
 				}
 			}
 //			body = combineTwoByteArrays(body, new byte[] { (byte) 0x0a });
-			
 			if (body == null || body.length == 0) {
-//				System.out.println("nothing in string builder!");
 				continue;
 			}
-			
-//			  FileWriter fw = new FileWriter("send_put_table_log", true);
-//			  fw.write("from: " + ProcessHandle.current().pid() + "| " + Thread.currentThread().getName() + "\n");
-//			  fw.write("worker " + i + ":" + new String(body, StandardCharsets.UTF_8) + "\n");
-//			  fw.close();
-//			System.out.println("worker " + i + ":" + new String(body, StandardCharsets.UTF_8));
-			
+
 			byte[] response = HTTP.doRequest("PUT",
 					"http://" + workers.elementAt(i).address + "/data/" + tableName,
 					body).body();	
 			String result = new String(response);
 			if (!result.equals("OK")) {
-				  FileWriter fw1 = new FileWriter("put_table_failure_log", true);
+				  FileWriter fw1 = new FileWriter("KVSClient_log", true);
+				  fw1.write("from putTable, PUT returned something other than OK: " + result + "(" + "http://" + workers.elementAt(i).address + "/data/" + tableName + ")" + "\n");
 				  fw1.write("request body is: " + new String(body, StandardCharsets.UTF_8) + "\n");
 				  fw1.close();
 			}
-//				throw new RuntimeException("PUT returned something other than OK: " + result);
 		}
 
 	}
@@ -471,17 +445,6 @@ public class KVSClient implements KVS {
 
 		return new KVSIterator(tableName, startRow, endRowExclusive, true);
 	}
-	
-//	public boolean checkDictionary(String word) throws Exception {
-//		if (!haveWorkers)
-//			downloadWorkers();
-//		
-//		HTTP.Response r = HTTP.doRequest("GET", "http://" + workers.elementAt(workerIndexForKey(word)).address + "/data/dictionary/" + java.net.URLEncoder.encode(word, "UTF-8"), null);
-//		if (r.statusCode() == 200)
-//			return true;
-//		
-//		return false;
-//	}
 
 	public static void main(String args[]) throws Exception {
 		if (args.length < 2) {

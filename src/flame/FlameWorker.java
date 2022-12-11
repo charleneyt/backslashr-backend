@@ -41,7 +41,7 @@ class FlameWorker extends Worker {
 		
         // load up dictionary
         dictionary = new HashSet<String>();
-		File file = new File("./words_alpha.txt");
+		File file = new File("./filtered_stop_words.txt");
 		FileReader fr;
 		try {
 			fr = new FileReader(file);
@@ -49,7 +49,6 @@ class FlameWorker extends Worker {
 			String line;
 			while ((line = br.readLine()) != null) {
 				dictionary.add(line.toLowerCase().trim());
-//				break;
 			}
 			br.close();
 		} catch (Exception e) {
@@ -267,7 +266,6 @@ class FlameWorker extends Worker {
 
 			Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
 			if (iter != null) {
-				int counter = 0;
 				while (iter.hasNext()) {
 					Row row = iter.next();
 					if (row == null) {
@@ -278,9 +276,6 @@ class FlameWorker extends Worker {
 					if (s != null) {
 						kvs.put(qParamsStrings[1], row.key(), FlameWorker.VALUE_STRING, s.getBytes());
 					}
-					counter++;
-					if (counter == 100)
-						break;
 				}
 			}
 
@@ -292,7 +287,6 @@ class FlameWorker extends Worker {
 			RowMapToString lambda = (RowMapToString) Serializer.byteArrayToObject(req.bodyAsBytes(), myJAR);
 
 			KVSClient kvs = new KVSClient(qParamsStrings[2]);
-
 			Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
 			if (iter != null) {
 				int counter = 0;
@@ -304,19 +298,20 @@ class FlameWorker extends Worker {
 
 					String s = lambda.op(row, dictionary);
 					if (s != null) {
+						counter++;
 						kvs.put(qParamsStrings[1], row.key(), FlameWorker.VALUE_STRING, s.getBytes());
 					}
-					counter++;
-//					if (counter == 100) {
-//						counter = 0;
+					// clean garbage and print heart beat for every 100 lines
+					if (counter % 100 == 0) {
+						System.out.println("Indexed " + counter + " rows");
 //						try {
-//							kvs.clean("index");
+//							kvs.clean("index_imm");
+//							System.out.println("collecting garbage...");
 //						} catch (IOException e) {
 //							// TODO Auto-generated catch block
 //							e.printStackTrace();
 //						}
-//						
-//					}
+					}
 				}
 			}
 
@@ -336,33 +331,34 @@ class FlameWorker extends Worker {
 
 			KVSClient kvs = new KVSClient(kvsMaster);
 
-			Iterator<Row> iter = kvs.scanRaw(inputTableName, null, null);
+			Iterator<Row> iter = kvs.scanRaw(inputTableName, startKey, toKeyExclusive);
 			if (iter != null) {
 				// word : {url}
 				HashMap<String, ArrayList<String>> consolidatedRows = new HashMap<>();
-			
+				int counter = 0;
 				while (iter.hasNext()) {
+					if (counter % 1000 == 0) {
+						System.out.println("Processed " + counter + " rows");
+					}
 					Row row = iter.next();
-//					System.out.println("val of row is: " + row.get("value"));
+
 					if (row == null) {
 						break;
 					}
 
 					String s = lambda.op(row);
-//					if (row.key().equals("a")) {
-//						System.out.println("read from file: " + row.get("value"));
-//					}
+
 					if (!consolidatedRows.containsKey(row.key())) {
 						consolidatedRows.put(row.key(), new ArrayList<>());
 					}
 					consolidatedRows.get(row.key()).add(row.get("value"));
+					counter++;
 				}
 				
 				HashMap<String, Row> consolidatedFlattenedRows = new HashMap<>();
 				for (String rowName : consolidatedRows.keySet()) {
 					StringBuilder sb = new StringBuilder();
-					for (String val : consolidatedRows.get(rowName)) {
-//						System.out.println("internal is" + sb.toString());						
+					for (String val : consolidatedRows.get(rowName)) {					
 						if (sb.length() == 0) {
 							sb.append(val);
 						}
@@ -371,11 +367,7 @@ class FlameWorker extends Worker {
 						}
 					}
 					Row row = new Row(rowName);
-//					System.out.println("col is" + sb.toString());
 					row.put("value", sb.toString());
-//					if (row.key().equals("a")) {
-//						System.out.println(sb.toString());
-//					}
 					consolidatedFlattenedRows.put(rowName, row);
 				}
 				kvs.putTable("index_final", consolidatedFlattenedRows);

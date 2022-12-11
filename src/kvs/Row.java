@@ -80,15 +80,15 @@ public class Row implements Serializable {
       int bytesRead = 0;
       synchronized (in) {
 	      while (bytesRead < len) {
-	    	  FileWriter fw = new FileWriter("row_read_error_log", true);
-//	    	  fw.write("from: " + ProcessHandle.current().pid() + "| " + Thread.currentThread().getName() + "\n");
-	    	  fw.write("bytes read before: " + bytesRead + "\n");
 	        int n = in.read(theValue, bytesRead, len - bytesRead);
-	        if (n < 0)
-	          throw new Exception("Premature end of stream while reading value for key '"+keyOrMarker+"' (read "+bytesRead+" bytes, expecting "+len+")");
+	        if (n < 0) {
+	      	  FileWriter fw2 = new FileWriter("row_read_error_log", true);
+	    	  fw2.write("from: " + ProcessHandle.current().pid() + "| " + Thread.currentThread().getName() + "\n");
+	    	  fw2.write("Premature end of stream while reading value for key '"+keyOrMarker+"' (read "+bytesRead+" bytes, expecting "+len+")" + "\n");
+	    	  fw2.close();
+//	          throw new Exception("Premature end of stream while reading value for key '"+keyOrMarker+"' (read "+bytesRead+" bytes, expecting "+len+")");
+	        }
 	        bytesRead += n;
-		  	  fw.write("bytes read after: " + bytesRead + "\n");
-	    	  fw.close();
 	      }    	  
       }
 
@@ -100,7 +100,7 @@ public class Row implements Serializable {
     	  fw.write("b is: " + b + ";len is " + len + "bytes read is " + bytesRead + "; key is: " + theKey +  "; value is: " + new String(theValue, StandardCharsets.UTF_8) + "\n");
     	  fw.close();
 //    	  System.out.println("b is: " + b + ";len is " + len + "bytes read is " + bytesRead + "; key is: " + theKey +  "; value is: " + new String(theValue, StandardCharsets.UTF_8));
-    	  throw new Exception("Expecting a space separator after value for key '"+keyOrMarker+"'");
+//    	  throw new Exception("Expecting a space separator after value for key '"+keyOrMarker+"'");
       }
 
       newRow.put(keyOrMarker, theValue);

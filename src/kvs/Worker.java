@@ -5,6 +5,7 @@ import static java.nio.file.StandardOpenOption.*;
 import static java.nio.file.StandardCopyOption.*;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -44,7 +45,7 @@ public class Worker extends generic.Worker {
         streams = new ConcurrentHashMap<>();
         tablesWithOffset = new ConcurrentHashMap<>();
 
-//        initializeTables();
+        initializeTables();
     }
 
     private void initializeTables() {
@@ -75,11 +76,8 @@ public class Worker extends generic.Worker {
             }           
         }
 
-
+        System.out.println("initializing " + directory);
         for (File tableFile : files) {
-        	if (tableFile.getName().equals("content.table"))
-        		continue;
-        	
             long startByte = 0;
             try {
                 String tableDir = tableFile.getName();
@@ -131,7 +129,7 @@ public class Worker extends generic.Worker {
                 return;
             }           
         }
-        System.out.println(directory + "done initializing!");
+        System.out.println(directory + "done!");
     }
 
     public void updateRequestReceived() {
@@ -167,8 +165,13 @@ public class Worker extends generic.Worker {
           }
 
           int b = file.read();
-          if ((b < 0) || (b == 10))
-            return null;
+          if ((b < 0) || (b == 10)) {
+              FileWriter fw = new FileWriter("missing_row_log", true);
+              fw.write("From readStringSpace, b is " + b + "string is " + new String(buffer, StandardCharsets.UTF_8) + "\n");
+              fw.close();         	  
+              return null;        	  
+          }
+
           buffer[numRead++] = (byte)b;
           
           if (b == ' ')
@@ -424,41 +427,9 @@ public class Worker extends generic.Worker {
         // It should make a /ping request to the master every five seconds
         worker.startPingThread();
         
-//        get("/data/dictionary/:word", (req, res) -> {
-//        	if (worker.debugMode) {
-//	        	FileWriter fw = new FileWriter("check_dict_threads_log" + worker.directory, true);
-//	        	fw.write("from check dict: " + worker.getProcessThreadName() + "word is: " + req.params("word") + "\n");
-//	        	fw.flush();
-//	        	System.out.println("from check dict: " + worker.getProcessThreadName() + "word is: " + req.params("word"));        		
-//        	}
-//
-//        	String word = req.params("word");
-//        	
-//        	if (!worker.dictionary.contains(word)) {
-//                res.status(404, "Not Found");
-//                return "404 Not Found";        		
-//        	}
-//        	
-//        	res.status(200, "OK");
-//        	res.body("OK");
-//        	
-//        	if (worker.debugMode) {
-//        		FileWriter fw = new FileWriter("check_dict_threads_log" + worker.directory, true);
-//	        	fw.write("end check dict: " + worker.getProcessThreadName() + "word is: " + req.params("word") + "\n");
-//	        	fw.close();
-//	        	System.out.println("end check dict: " + worker.getProcessThreadName() + "word is: " + req.params("word")); 		
-//        	}
-//
-//        	return null;
-//        });
-        
         // remove aged rows from the file
         put("/clean/:table", (req, res) -> {
         	synchronized(worker.tablesWithOffset) {
-//        		if (worker.debugMode) {
-//		        	System.out.println("from clean: " + worker.getProcessThreadName());        			
-//        		}
-
 	        	String tableName = req.params("table");
 	        	
 	        	if (!worker.tablesWithOffset.containsKey(tableName)) {
@@ -492,13 +463,9 @@ public class Worker extends generic.Worker {
 				// also update the offset mapping
 				Files.move(tempFile, currFile, ATOMIC_MOVE, REPLACE_EXISTING);
 				worker.tablesWithOffset.put(tableName, newRowToOffSets);
-//				System.out.println("new mapping: " + newRowToOffSets.toString());
 	
 				// update the stream in streams
 				worker.streams.put(tableName, new BufferedOutputStream(Files.newOutputStream(currFile, CREATE, APPEND)));
-//				if (worker.debugMode) {
-//		        	System.out.println("end clean: " + worker.getProcessThreadName());					
-//				}
 				return "OK";        		
         	}
 
@@ -508,8 +475,7 @@ public class Worker extends generic.Worker {
         // PUT /data/<T>/<R>/<C> should set column C in row R of table T to the
         // (possibly binary) data in the body of the request
         put("/data/:table/:row/:col", (req, res) -> {
-        	synchronized(worker.tablesWithOffset) {
-//            	System.out.println("from put: " + worker.getProcessThreadName());        	
+        	synchronized(worker.tablesWithOffset) {       	
                 String tableName = req.params("table");
                 String rowName = req.params("row");
                 String colName = req.params("col");
@@ -559,125 +525,9 @@ public class Worker extends generic.Worker {
                     fw.write("put /data/:table/:row/:col: table is: " + tableName + ", row is: " + rowName + ", col is: " + colName + "at time " + System.currentTimeMillis() + "\n");
                     fw.close();             
                 }
-//            	System.out.println("end put: " + worker.getProcessThreadName()); 
             	
                 return "OK";
         	}
-//        	System.out.println("from put: " + worker.getProcessThreadName());        	
-//            String tableName = req.params("table");
-//            String rowName = req.params("row");
-//            String colName = req.params("col");
-//          System.out.println("from put /data/:table/:row/:col, table name is: " + tableName + ", rowName is: " + rowName + ", colName is: " + colName + "\n");
-            
-//            // EC 1
-//            worker.updateRequestReceived();
-//
-//            if (req.queryParams() != null && !req.queryParams().contains("forwarded") && worker.workersCount >= 3) {
-//                HTTP.doRequest("PUT",
-//                        "http://" + worker.nextHigherIpAndPort + "/data/"
-//                                + java.net.URLEncoder.encode(tableName, "UTF-8") + "/"
-//                                + java.net.URLEncoder.encode(rowName, "UTF-8") + "/"
-//                                + java.net.URLEncoder.encode(colName, "UTF-8") + "?forwarded=true",
-//                        req.bodyAsBytes());
-//                HTTP.doRequest("PUT",
-//                        "http://" + worker.nextTwoHigherIpAndPort + "/data/"
-//                                + java.net.URLEncoder.encode(tableName, "UTF-8") + "/"
-//                                + java.net.URLEncoder.encode(rowName, "UTF-8") + "/"
-//                                + java.net.URLEncoder.encode(colName, "UTF-8") + "?forwarded=true",
-//                        req.bodyAsBytes());
-//            }
-            
-//            worker.putAndClean(tableName, rowName, colName, args[1]);
-            
-            
-//            if (!worker.tablesWithOffset.containsKey(tableName)) {
-//                worker.addTable(tableName);
-//            }
-//
-//            if (!worker.streams.containsKey(tableName)) {
-//                Path outputFile = Paths.get(args[1] + "/" + tableName + ".table");
-//                worker.streams.put(tableName,
-//                        new BufferedOutputStream(Files.newOutputStream(outputFile, CREATE, APPEND)));
-//            }
-//            BufferedOutputStream currStream = worker.streams.get(tableName);
-//
-//            Map<String, Long> currTable = worker.tablesWithOffset.get(tableName);
-//            Row row;
-//            if (!currTable.containsKey(rowName)) {
-//                row = new Row(rowName);
-//            } else {
-//                row = worker.findRow(tableName, rowName);
-//            }
-//            
-//            if (row == null) {
-//                if (worker.debugMode) {
-//                    FileWriter fw = new FileWriter("missing_row_log", true);
-//                    fw.write("Table: " + tableName +", row: " + rowName + ", colName: " + colName + "\n");
-//                    fw.close();                 
-//                }
-//
-//                row = new Row(rowName);
-//            }
-//            
-//            currStream.flush();
-//            long currByteCount = Files.size(Paths.get(worker.directory, tableName + ".table"));
-//            
-//            currTable.put(rowName, currByteCount);
-//            row.put(colName, req.bodyAsBytes());
-//            
-//            synchronized(currStream) {
-//            	currStream.write(toByteArrayWithNewLine(row.toByteArray()));
-//            };
-//            	
-//            currStream.flush();
-//            
-//            if (worker.debugMode) {
-//                FileWriter fw = new FileWriter("put_row_log", true);
-//                fw.write("put /data/:table/:row/:col: table is: " + tableName + ", row is: " + rowName + ", col is: " + colName + "at time " + System.currentTimeMillis() + "\n");
-//                fw.close();             
-//            }
-//        	System.out.println("end put: " + worker.getProcessThreadName()); 
-//        	
-//        	System.out.println("from clean: " + worker.getProcessThreadName());
-//        	
-//        	if (!worker.tablesWithOffset.containsKey(tableName)) {
-//                res.status(404, "Not Found");
-//                return "404 Not Found";        		
-//        	}
-//        	
-//			Path currFile = Paths.get(worker.directory + "/" + tableName + ".table");
-//			Path tempFile = Paths.get(worker.directory + "/" + tableName + ".table1");
-//			
-//			// write current row in the table to tempFile
-//			BufferedOutputStream newStream = new BufferedOutputStream(Files.newOutputStream(tempFile, CREATE, APPEND));
-//			long offSetCounter = 0;
-//			ConcurrentSkipListMap<String, Long> newRowToOffSets = new ConcurrentSkipListMap<>();
-//			for (String name : worker.tablesWithOffset.get(tableName).keySet()) {
-//				Row currRow = worker.findRow(tableName, name);
-//				if (currRow == null)
-//					continue;
-//				
-//				synchronized(newStream) {
-//					newStream.write(toByteArrayWithNewLine(currRow.toByteArray()));
-//				}
-//				newRowToOffSets.put(name, offSetCounter);
-//				offSetCounter += currRow.toByteArray().length + 1;
-//			}
-//			// close the streams
-//			newStream.close();
-//			worker.streams.get(tableName).close();
-//
-//			// atomically replace the current log file
-//			// also update the offset mapping
-//			Files.move(tempFile, currFile, ATOMIC_MOVE, REPLACE_EXISTING);
-//			worker.tablesWithOffset.put(tableName, newRowToOffSets);
-//			System.out.println("new mapping: " + newRowToOffSets.toString());
-//
-//			// update the stream in streams
-//			worker.streams.put(tableName, new BufferedOutputStream(Files.newOutputStream(currFile, CREATE, APPEND)));
-//        	System.out.println("end clean: " + worker.getProcessThreadName());
-//        	
-//            return "OK";
         });
 
         // GET /data/<T>/<R>/<C> should return the data in column C of row R in table T
@@ -689,8 +539,6 @@ public class Worker extends generic.Worker {
 
             // EC 1
             worker.updateRequestReceived();
-            
-//          System.out.println("from get /data/:table/:row/:col, " + tableName + ", " + rowName +", " + colName + "\n");
 
             Row targetRow = worker.findRow(tableName, rowName);
             if (targetRow == null) {
@@ -850,10 +698,9 @@ public class Worker extends generic.Worker {
 
             // EC 1
             worker.updateRequestReceived();
-//            System.out.println("url is: " + req.url());
-//            System.out.println("before find row");
+
             Row targetRow = worker.findRow(tableName, rowName);
-//            System.out.println("after find row");
+
             if (targetRow != null) {
                 res.bodyAsBytes(targetRow.toByteArray());
                 return null;
@@ -869,7 +716,6 @@ public class Worker extends generic.Worker {
         // character (ASCII code 10). After the last entry, there should be another LF
         // character to indicate the end of the stream.
         get("/data/:table", (req, res) -> {
-//          System.out.println("/data/:table"+ req.queryParams()+" " + req.url());
             String tableName = req.params("table");
 
             // EC 1
@@ -931,49 +777,8 @@ public class Worker extends generic.Worker {
 
         });
         
-//        for (File tableFile : files) {
-//        	if (tableFile.getName().equals("content.table"))
-//        		continue;
-//        	
-//            long startByte = 0;
-//            try {
-//                String tableDir = tableFile.getName();
-//                if (debugMode) {
-//                    System.out.println("initializing table " + tableDir);
-//                }
-//                FileInputStream input = new FileInputStream(tableFile);
-//                String tableName = tableDir.split(".table")[0];
-//                if (input.available() > 0) {
-//                    addTable(tableName);
-//
-//                    while (input.available() > 0) {
-//                        try {
-//                            Row row = Row.readFrom(input);
-//                            if (row != null) {
-//                                tablesWithOffset.get(tableName).put(row.key(), startByte);
-//                            }
-//                            startByte += row.toByteArray().length + 1;
-//                        }
-//                        catch (Exception e) {
-//                            if (debugMode) {
-//                                FileWriter fw2 = new FileWriter("read_row_error_log", true);
-//                                fw2.write("error in initializing tables, table name is: " + tableName + "; starting byte: " + startByte + "\n");
-//                                fw2.close();                                
-//                            }
-//                        }
-//                    }
-//                    streams.put(tableName, new BufferedOutputStream(new FileOutputStream(tableFile, true)));
-//                }
-//
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                continue;
-//            }
-//        }
-        
         get("/raw/:table", (req, res) -> {
-        	
-          System.out.println("/raw/:table started");
+//          System.out.println("/raw/:table started");
             String tableName = req.params("table");
                           
             FileInputStream input = new FileInputStream(worker.directory + "/" + tableName + ".table");
@@ -1011,50 +816,26 @@ public class Worker extends generic.Worker {
 	                if (!hasStartRow || beginning || row.key().compareTo(startRow) >= 0) {
 	                    beginning = true;                    
 //	                	System.out.println("from get raw, row is: " + row.toString());
-	                	rowCount++;
-	                	System.out.println("row read is: " + row.toString());
-	                    res.write(toByteArrayWithNewLine(row.toByteArray()));        
-	                } else {
-	                	break;
+	                    if (!hasEndRow || row.key().compareTo(endRow) < 0) {
+		                	rowCount++;
+//		                	System.out.println("url is: " + req.url() + ", row read is: " + row.toString());
+		                    res.write(toByteArrayWithNewLine(row.toByteArray()));        
+		                } else {
+		                	break;
+		                }
 	                }
                 }
                 catch (Exception e) {
                 	e.printStackTrace();
                 }
             }
-       
 
-	            
-////	//          System.out.println("endRow: "+endRow);
-////	            Collection<String> rowSet = worker.tablesWithOffset.get(tableName).keySet();
-//	            int rowCount = 0;
-//	            boolean beginning = false;
-//	            for (String rowName : rowSet) {
-//	//              System.out.println("rowName: "+rowName);
-//	                Row row = worker.findRow(tableName, rowName);
-//	                if (row == null) {
-//	//                  System.out.println("from /data/:table " + rowName + "is null!!\n");
-//	                    continue;
-//	                }
-//	                if (!hasStartRow || beginning || rowName.compareTo(startRow) >= 0) {
-//	                    beginning = true;
-//	                    if (!hasEndRow || rowName.compareTo(endRow) < 0) {
-//	//                      System.out.println("row.toByteArray(): "+row.toString());
-//	                        res.write(toByteArrayWithNewLine(row.toByteArray()));
-//	//                      res.write(Worker.LFbyte);
-//	                        rowCount++;
-//	                    } else {
-//	                        break;
-//	                    }
-//	                }
-//	            }
-//	
             res.write(Worker.LFbyte);
             // in case no row met the query
             if (rowCount == 0) {
                 res.write(Worker.LFbyte);
             }
-            System.out.println("/raw/:table ended");
+//            System.out.println("/raw/:table ended");
             return null;
 
         });
@@ -1064,7 +845,6 @@ public class Worker extends generic.Worker {
         // existing entries with the same key should be overwritten.
         put("/data/:table", (req, res) -> {
         	synchronized(worker.tablesWithOffset) {
-//	        	System.out.println("from /data/:table");
 	            String tableName = req.params("table");
 	
 	            if (!worker.tablesWithOffset.containsKey(tableName)) {
@@ -1086,36 +866,36 @@ public class Worker extends generic.Worker {
 	                worker.addTable(tableName);
 	            }
 	            
-            	currStream.flush();	 
-	            long bytesRead = Files.size(Paths.get(worker.directory, tableName + ".table"));
-	            while (input.available() > 0) {
-	                Row row = Row.readFrom(input);
-	                if (row != null) {
-	                	worker.tablesWithOffset.get(tableName).put(row.key(), bytesRead);	            
-	                	bytesRead += row.toByteArray().length + 1;
-	                	
-//	                	String rowName = row.key();
-//	                	Row existingRow = worker.findRow(tableName, rowName);
-//	                	if (existingRow == null) {
-//		                    worker.tablesWithOffset.get(tableName).put(row.key(), bytesRead);	                		
-//	                	}
-//	                	else {
-//	                		String existingPos = existingRow.get("value");
-//	                		String currPos = existingPos + "," + row.get("value");
-//	                		row.put("value", currPos);
-//	                	}
-//	                    worker.tablesWithOffset.get(tableName).put(row.key(), bytesRead);
-	                    
-	                    
-	                    synchronized(currStream) {
-	                    	currStream.write(toByteArrayWithNewLine(row.toByteArray()));
-	                    }
-	                }
-//		                else {
-//		                	System.out.println("row is null");
-//		                }
+	            synchronized(currStream) {
+	            	currStream.flush();	 
+	//            	System.out.println(Paths.get(args[1] + "/" + tableName + ".table"));
+		            long bytesRead = Files.size(Paths.get(args[1] + "/" + tableName + ".table"));
+		            while (input.available() > 0) {
+		                Row row = Row.readFrom(input);
+		                if (row != null) {
+		                	// appened only mode;
+		                	worker.tablesWithOffset.get(tableName).put(row.key(), bytesRead);	            
+		                	bytesRead += row.toByteArray().length + 1;
+		                	
+//		                	// conditional put - append if the cell already has value
+//		                	String rowName = row.key();
+//		                	worker.tablesWithOffset.get(tableName).put(rowName, bytesRead);
+//		                	Row existingRow = worker.findRow(tableName, rowName);
+//		                	if (existingRow != null) {
+//		                		String existingPos = existingRow.get("value");
+//		                		String currPos = existingPos + "," + row.get("value");
+//		                		row.put("value", currPos);                		
+//		                	}
+//		                	bytesRead += row.toByteArray().length + 1;
+		                    
+		                    // both choice needs to do this
+//		                    synchronized(currStream) {
+		                    	currStream.write(toByteArrayWithNewLine(row.toByteArray()));
+//		                    }
+		                }
+		            }
+		            currStream.flush();		            	
 	            }
-	            currStream.flush();	           
 	            
 	            return "OK";        		
         	}

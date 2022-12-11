@@ -12,8 +12,6 @@ public class Consolidator {
 		System.out.println("Executing consolidator ...updated as of 12/9 at " + new Date());
 		long startGetTime = System.currentTimeMillis();
 		
-		HashMap<String, ArrayList<String>> consolidatedRows = new HashMap<>();
-		
 		FlameRDD transform = ctx.consolidateFromTable("index", (r) -> {
 			return r.get("value");
 		});
