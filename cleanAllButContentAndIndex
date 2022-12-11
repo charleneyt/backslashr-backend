@@ -1,6 +1,6 @@
 #! /bin/bash
 
 # delete all files in worker folders except for content.table
-find worker*/* -not  \( -name content.table -o -name id -o -name . \) -exec rm -rf {} \;
+find worker*/* -not  \( -name content.table -o -name index.table -o -name id -o -name . \) -exec rm -rf {} \;
 
 echo "All files except for content table have been removed!"

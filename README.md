@@ -36,10 +36,17 @@
     - Step 1:
       1. jar -cf indexer.jar bin/jobs/Indexer.class
       2. java -cp bin flame.FlameSubmit localhost:9000 indexer.jar jobs.Indexer
-    - After step 1 is done, you should get an index_imm table, submit the second job:
+    - Step 2: 
+      1. After step 1 is done, you should get an index_imm table, from root folder, run:
+        a. ./sortIndex worker1 index_imm.table
+        b. ./sortIndex worker2 index_imm.table
+        c. ./sortIndex worker3 index_imm.table
+        d. ./sortIndex worker4 index_imm.table
+        e. ./sortIndex worker5 index_imm.table
+    - Step 3: After step 1 is done, you should get sorted_index_imm table under each worker folder, submit the second job:
       1. jar -cf consolidator.jar bin/jobs/Consolidator.class
-      2. java -cp bin flame.FlameSubmit localhost:9000 consolidator.jar jobs.Consolidator index_imm
-    - Combining several tables from different batch of indexers
+      2. java -cp bin flame.FlameSubmit localhost:9000 consolidator.jar jobs.Consolidator sorted_index_imm
+    - Step 4: Combining several tables from different batch of indexers
       1. Place all indexer tables under one directory (you'll need it for step 3)
       2. Place dict.txt (saved in split_dictionary folder by worker ID) under the same directory
       3. java -cp bin jobs.CombineByKey directory_to_run
