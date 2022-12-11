@@ -173,6 +173,7 @@ public class FlameContextImpl implements FlameContext {
 		+ java.net.URLEncoder.encode(inputTable, "UTF-8") + "&output="
 		+ java.net.URLEncoder.encode(outputTableName, "UTF-8") + "&kvsMasterIp=" + kvsMaster[0]
 		+ "&kvsMasterPort=" + kvsMaster[1] + zeroElementUrl + secondTableUrl;
+		System.out.println("fixed url is: " + fixedUrl);
 
 		int operationCount = 0;
 		for (int i = 0; i < latestAssignment.size(); i++) {

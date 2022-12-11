@@ -8,6 +8,8 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
+
+import flame.FlameContext;
 import tools.HTTP;
 
 public class Worker extends generic.Worker {
@@ -29,7 +31,10 @@ public class Worker extends generic.Worker {
 
     String nextLowerIpAndPort;
     String nextTwoLowerIpAndPort;
-    boolean debugMode = false;
+    
+    HashSet<String> dictionary;
+    
+    boolean debugMode = true;
 
     public Worker(String id, int port, String masterAddr, String directory) {
         super(id, port);
@@ -37,6 +42,23 @@ public class Worker extends generic.Worker {
         lastRequestReceived = System.currentTimeMillis();
         this.updateMasterIpAndPort(masterAddr);
         this.directory = directory;
+        
+        // load up dictionary
+        dictionary = new HashSet<String>();
+		File f = new File("./words_alpha.txt");
+		FileReader fr;
+		try {
+			fr = new FileReader(f);
+			BufferedReader br = new BufferedReader(fr);
+			String line;
+			while ((line = br.readLine()) != null) {
+				dictionary.add(line.toLowerCase().trim());
+			}
+			br.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         streams = new ConcurrentHashMap<>();
         tablesWithOffset = new ConcurrentHashMap<>();
@@ -365,7 +387,7 @@ public class Worker extends generic.Worker {
         return row.get(colName);
     }
     
-    private static byte[] toByteArrayWithNewLine(byte[] rowBytes)  {
+    private synchronized static byte[] toByteArrayWithNewLine(byte[] rowBytes)  {
         byte[] result = Arrays.copyOf(rowBytes, rowBytes.length + LFbyte.length);
         System.arraycopy(LFbyte, 0, result, rowBytes.length, LFbyte.length);
         return result;
@@ -414,6 +436,19 @@ public class Worker extends generic.Worker {
         // It should make a /ping request to the master every five seconds
         worker.startPingThread();
         
+        get("/data/dictionary/:word", (req, res) -> {
+        	String word = req.params("word");
+        	
+        	if (!worker.dictionary.contains(word)) {
+                res.status(404, "Not Found");
+                return "404 Not Found";        		
+        	}
+        	
+        	res.status(200, "OK");
+        	res.body("OK");
+        	return null;
+        });
+        
         // remove aged rows from the file
         put("/clean/:table", (req, res) -> {
         	String tableName = req.params("table");
@@ -433,7 +468,10 @@ public class Worker extends generic.Worker {
 				if (row == null)
 					continue;
 				
-				newStream.write(toByteArrayWithNewLine(row.toByteArray()));
+				synchronized(newStream) {
+					newStream.write(toByteArrayWithNewLine(row.toByteArray()));
+				}
+				
 			}
 			// close the streams
 			newStream.close();
@@ -456,23 +494,23 @@ public class Worker extends generic.Worker {
             String colName = req.params("col");
 //          System.out.println("from put /data/:table/:row/:col, table name is: " + tableName + ", rowName is: " + rowName + ", colName is: " + colName + "\n");
             
-            // EC 1
-            worker.updateRequestReceived();
-
-            if (req.queryParams() != null && !req.queryParams().contains("forwarded") && worker.workersCount >= 3) {
-                HTTP.doRequest("PUT",
-                        "http://" + worker.nextHigherIpAndPort + "/data/"
-                                + java.net.URLEncoder.encode(tableName, "UTF-8") + "/"
-                                + java.net.URLEncoder.encode(rowName, "UTF-8") + "/"
-                                + java.net.URLEncoder.encode(colName, "UTF-8") + "?forwarded=true",
-                        req.bodyAsBytes());
-                HTTP.doRequest("PUT",
-                        "http://" + worker.nextTwoHigherIpAndPort + "/data/"
-                                + java.net.URLEncoder.encode(tableName, "UTF-8") + "/"
-                                + java.net.URLEncoder.encode(rowName, "UTF-8") + "/"
-                                + java.net.URLEncoder.encode(colName, "UTF-8") + "?forwarded=true",
-                        req.bodyAsBytes());
-            }
+//            // EC 1
+//            worker.updateRequestReceived();
+//
+//            if (req.queryParams() != null && !req.queryParams().contains("forwarded") && worker.workersCount >= 3) {
+//                HTTP.doRequest("PUT",
+//                        "http://" + worker.nextHigherIpAndPort + "/data/"
+//                                + java.net.URLEncoder.encode(tableName, "UTF-8") + "/"
+//                                + java.net.URLEncoder.encode(rowName, "UTF-8") + "/"
+//                                + java.net.URLEncoder.encode(colName, "UTF-8") + "?forwarded=true",
+//                        req.bodyAsBytes());
+//                HTTP.doRequest("PUT",
+//                        "http://" + worker.nextTwoHigherIpAndPort + "/data/"
+//                                + java.net.URLEncoder.encode(tableName, "UTF-8") + "/"
+//                                + java.net.URLEncoder.encode(rowName, "UTF-8") + "/"
+//                                + java.net.URLEncoder.encode(colName, "UTF-8") + "?forwarded=true",
+//                        req.bodyAsBytes());
+//            }
 
             if (!worker.tablesWithOffset.containsKey(tableName)) {
                 worker.addTable(tableName);
@@ -508,7 +546,11 @@ public class Worker extends generic.Worker {
             
             currTable.put(rowName, currByteCount);
             row.put(colName, req.bodyAsBytes());
-            currStream.write(toByteArrayWithNewLine(row.toByteArray()));
+            
+            synchronized(currStream) {
+            	currStream.write(toByteArrayWithNewLine(row.toByteArray()));
+            };
+            	
             currStream.flush();
             
             if (worker.debugMode) {
@@ -690,9 +732,10 @@ public class Worker extends generic.Worker {
 
             // EC 1
             worker.updateRequestReceived();
-            
+            System.out.println("url is: " + req.url());
+            System.out.println("before find row");
             Row targetRow = worker.findRow(tableName, rowName);
-            
+            System.out.println("after find row");
             if (targetRow != null) {
                 res.bodyAsBytes(targetRow.toByteArray());
                 return null;
@@ -814,8 +857,11 @@ public class Worker extends generic.Worker {
                     worker.tablesWithOffset.get(tableName).put(row.key(), bytesRead);
                     bytesRead += row.toByteArray().length + 1;
                     
-                    currStream.write(row.toByteArray());
-                    currStream.write(Worker.LFbyte);
+                    synchronized(currStream) {
+                    	currStream.write(toByteArrayWithNewLine(row.toByteArray()));
+                    }
+//                    currStream.write(row.toByteArray());
+//                    currStream.write(Worker.LFbyte);
                 }
             }
             currStream.flush();

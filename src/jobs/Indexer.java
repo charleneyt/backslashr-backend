@@ -12,25 +12,29 @@ import java.io.IOException;
 import java.util.*;
 
 public class Indexer {
-	static HashSet<String> dictWords = new HashSet<>();
+//	static HashSet<String> dictWords = new HashSet<>();
 	public static void run(FlameContext ctx, String[] args) throws Exception {
-		System.out.println("Executing indexer ...updated as of 12/7");
+		System.out.println("Executing indexer ...updated as of 12/8 at " + new Date());
 		
 //------Lily's updates in progress as of 12/7/22
 
-		// create dictionary containing 400k+ valid English words
-		File f = new File("./words_alpha.txt");
-		FileReader fr = new FileReader(f);
-		BufferedReader br = new BufferedReader(fr);
-		String line;
-
-		long startTime = System.currentTimeMillis();
-		while ((line = br.readLine()) != null) {
-			dictWords.add(line.toLowerCase().trim());
-		}
-		br.close();
-		long endTime = System.currentTimeMillis();
-		System.out.println("initialized the dictionary! Took " + (endTime - startTime) + " ms.");
+		// create dictionary table containing ~400k valid English words
+//		File f = new File("./words_alpha.txt");
+//		FileReader fr = new FileReader(f);
+//		BufferedReader br = new BufferedReader(fr);
+//		String line;
+//		
+//		KVSClient kvsDict = FlameContext.getKVS();
+//
+//		long startTime = System.currentTimeMillis();
+//		while ((line = br.readLine()) != null) {
+//			kvsDict.put("dictionary", line.toLowerCase().trim(), "value", "");
+////			break;
+////			dictWords.add(line.toLowerCase().trim());
+//		}
+//		br.close();
+//		long endTime = System.currentTimeMillis();
+//		System.out.println("initialized the dictionary! Took " + (endTime - startTime) + " ms.");
 
 		// read through content table, filter out nonvalid words and fill out the index
 		// table
@@ -43,14 +47,14 @@ public class Indexer {
 			FileWriter fw;
 			try {
 				fw = new FileWriter("indexer_log", true);
-				fw.write("size of dict words is: " + dictWords.size());
+				fw.write("url operated: " + url + "\n");
 				fw.close();
-			} catch (IOException e2) {
+			} catch (IOException e1) {
 				// TODO Auto-generated catch block
-				e2.printStackTrace();
+				e1.printStackTrace();
 			}
 
-			if (r.get("page") != null && r.get("page").length() > 0) {
+			if (page != null && page.length() > 0) {
 				String content = page.replaceAll("[.,:;!\\?\'\"()-]", " ").toLowerCase();
 				String[] words = content.split("\\s+");
 				if (FlameContext.getKVS() == null) {
@@ -58,57 +62,114 @@ public class Indexer {
 				}
 				KVSClient kvs = FlameContext.getKVS();
 
-				HashMap<String, String> wordToPosByUrl = new HashMap<>();
+				HashMap<String, ArrayList<Integer>> wordToPosByUrl = new HashMap<>();
 				for (int i = 0; i < words.length; i++) {
-					// not a valid word, pass
-					if (!dictWords.contains(words[i])) {
-						System.out.println("skipped word");
-						continue;						
-					}
-					System.out.println("not skip word" + System.currentTimeMillis());
+//					System.out.println(i + " " + words[i]);
+					// check whether the word is a dictionary word
+					boolean isWord = false;
+//					try {
+//						isWord = kvs.checkDictionary(words[i]);
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+
+//					if (!isWord) {
+//						System.out.println("skipped word");
+//						continue;						
+//					}
+//					System.out.println("not skip word" + System.currentTimeMillis());
 
 					if (!wordToPosByUrl.containsKey(words[i]))
-						wordToPosByUrl.put(words[i], i + 1 + "");
-					else
-						wordToPosByUrl.put(words[i], wordToPosByUrl.get(words[i]) + " " + (i + 1));
+						wordToPosByUrl.put(words[i], new ArrayList<Integer>());
+					
+					wordToPosByUrl.get(words[i]).add(i + 1);
 				}
-
+				
 				for (String word : wordToPosByUrl.keySet()) {
-					String pos = wordToPosByUrl.get(word);
-					String combined = url + ":" + pos;
-
-					Row indexRow = null;
+					boolean isWord = false;
 					try {
-						indexRow = kvs.getRow("index", word);
-					} catch (IOException e1) {
+						isWord = kvs.checkDictionary(word);
+					} catch (Exception e) {
 						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						e.printStackTrace();
 					}
+					
+					if (!isWord)
+						continue;
+					
+					StringBuilder sb = new StringBuilder();
+					for (Integer pos : wordToPosByUrl.get(word)) {
+						if (sb.length() == 0)
+							sb.append(pos + "");
+						sb.append(" " + pos);
+					}
+					String combined = url + ":" + sb.toString();
 
-					if (indexRow == null) {
-						try {
-							kvs.put("index", word, "value", combined);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							System.out.println(
-									"Failed to put row for word " + word + " at pos " + pos + "for url " + url);
-						}
-					} else {
-						String existingPos = indexRow.get("value");
-						existingPos = existingPos + "," + combined;
-						try {
-							kvs.put("index", word, "value", existingPos);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							System.out.println("Row exists and failed to put row for word " + word + " at pos " + pos
-									+ "for url " + url);
-						}
+//					Row indexRow = null;
+//					try {
+//						indexRow = kvs.getRow("index", word);
+//					} catch (IOException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+//
+//					if (indexRow == null) {
+//						try {
+//							kvs.put("index", word, "value", combined);
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//							System.out.println(
+//									"Failed to put row for word " + word + " at pos " + pos + "for url " + url);
+//						}
+//					} else {
+//						String existingPos = indexRow.get("value");
+//						existingPos = existingPos + "," + combined;
+//						try {
+//							kvs.put("index", word, "value", existingPos);
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//							System.out.println("Row exists and failed to put row for word " + word + " at pos " + pos
+//									+ "for url " + url);
+//						}
+//					}
+	
+					try {
+						kvs.put("index", word, url, combined);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						System.out.println("Row exists and failed to put row for word " + word + " at pos " + sb.toString()
+								+ "for url " + url);
 					}
-				}
+				}	
+//				try {
+//					kvs.clean("index");
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//					FileWriter fw2;
+//					try {
+//						fw2 = new FileWriter("clean_error_log", true);
+//						fw2.write("failed to clean after url " + url);
+//						fw2.close();
+//					} catch (IOException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+//				}	
 			}
-			return "";
+			try {
+				fw = new FileWriter("indexer_log", true);
+				fw.write("url finished: " + url + "\n");
+				fw.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return url;
 		});
 		long endGetTime = System.currentTimeMillis();
 		System.out.println("Finished reading from content table! Took " + (endGetTime - startGetTime) + " ms.");

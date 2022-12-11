@@ -296,11 +296,15 @@ public class KVSClient implements KVS {
 	}
 
 	public Row getRow(String tableName, String row) throws IOException {
+		System.out.println("before download workers");
 		if (!haveWorkers)
 			downloadWorkers();
-
+		System.out.println("after download workers");
+		System.out.println("request is: " + "http://" + workers.elementAt(workerIndexForKey(row)).address
+				+ "/data/" + tableName + "/" + java.net.URLEncoder.encode(row, "UTF-8"));
 		HTTP.Response resp = HTTP.doRequest("GET", "http://" + workers.elementAt(workerIndexForKey(row)).address
 				+ "/data/" + tableName + "/" + java.net.URLEncoder.encode(row, "UTF-8"), null);
+		System.out.println("after get request");
 		if (resp.statusCode() == 404)
 			return null;
 
@@ -358,6 +362,17 @@ public class KVSClient implements KVS {
 			downloadWorkers();
 
 		return new KVSIterator(tableName, startRow, endRowExclusive);
+	}
+	
+	public boolean checkDictionary(String word) throws Exception {
+		if (!haveWorkers)
+			downloadWorkers();
+		
+		HTTP.Response r = HTTP.doRequest("GET", "http://" + workers.elementAt(workerIndexForKey(word)).address + "/data/dictionary/" + java.net.URLEncoder.encode(word, "UTF-8"), null);
+		if (r.statusCode() == 200)
+			return true;
+		
+		return false;
 	}
 
 	public static void main(String args[]) throws Exception {
