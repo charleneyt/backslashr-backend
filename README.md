@@ -36,7 +36,12 @@
     
 - Analytics job
   - Indexer
-    - java -cp bin flame.FlameSubmit localhost:9000 indexer.jar jobs.Indexer
+    - Step 1:
+      1. jar -cf indexer.jar bin/jobs/Indexer.class
+      2. java -cp bin flame.FlameSubmit localhost:9000 indexer.jar jobs.Indexer
+    - After step 1 is done, you should get an index_imm table, submit the second job:
+      1. jar -cf indexer.jar bin/jobs/Consolidator.class
+      2. java -cp bin flame.FlameSubmit localhost:9000 indexer.jar jobs.Consolidator
     
 - Pagerank (1 worker with outdegrees)
     - java -cp bin flame.FlameSubmit localhost:9000 pagerank.jar cis5550.jobs.PageRank 0.01
