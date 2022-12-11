@@ -51,8 +51,7 @@ public class PageRank {
 				System.out.println("TRANSFER = " + pair._1() + " ===> " + pair._2());
 				List<FlamePair> ret = new ArrayList<FlamePair>();
 				if (!"".equals(pair._1())) {
-					String url = pair._1();
-					ret.add(new FlamePair(url, "0.0"));
+					ret.add(new FlamePair(pair._1(), "0.0"));
 					
 					int firstComma = pair._2().indexOf(",");
 					int secondComma = pair._2().indexOf(",", firstComma + 1);
