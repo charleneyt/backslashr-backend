@@ -37,8 +37,8 @@
       1. jar -cf indexer.jar bin/jobs/Indexer.class
       2. java -cp bin flame.FlameSubmit localhost:9000 indexer.jar jobs.Indexer
     - After step 1 is done, you should get an index_imm table, submit the second job:
-      1. jar -cf indexer.jar bin/jobs/Consolidator.class
-      2. java -cp bin flame.FlameSubmit localhost:9000 indexer.jar jobs.Consolidator index_imm
+      1. jar -cf consolidator.jar bin/jobs/Consolidator.class
+      2. java -cp bin flame.FlameSubmit localhost:9000 consolidator.jar jobs.Consolidator index_imm
     - Combining several tables from different batch of indexers
       1. Place all indexer tables under one directory (you'll need it for step 3)
       2. Place dict.txt (saved in split_dictionary folder by worker ID) under the same directory
