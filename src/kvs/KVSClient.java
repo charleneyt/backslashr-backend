@@ -371,15 +371,15 @@ public class KVSClient implements KVS {
 	}
 
 	public Row getRow(String tableName, String row) throws IOException {
-		System.out.println("before download workers");
+		// System.out.println("before download workers");
 		if (!haveWorkers)
 			downloadWorkers();
-		System.out.println("after download workers");
-		System.out.println("request is: " + "http://" + workers.elementAt(workerIndexForKey(row)).address
-				+ "/data/" + tableName + "/" + java.net.URLEncoder.encode(row, "UTF-8"));
+		// System.out.println("after download workers");
+		// System.out.println("request is: " + "http://" + workers.elementAt(workerIndexForKey(row)).address
+		// 		+ "/data/" + tableName + "/" + java.net.URLEncoder.encode(row, "UTF-8"));
 		HTTP.Response resp = HTTP.doRequest("GET", "http://" + workers.elementAt(workerIndexForKey(row)).address
 				+ "/data/" + tableName + "/" + java.net.URLEncoder.encode(row, "UTF-8"), null);
-		System.out.println("after get request");
+		// System.out.println("after get request");
 		if (resp.statusCode() == 404)
 			return null;
 
