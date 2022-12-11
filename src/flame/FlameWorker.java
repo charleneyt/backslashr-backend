@@ -38,9 +38,9 @@ class FlameWorker extends Worker {
 		fw.startPingThread();
 
 		final File myJAR = new File("__worker" + port + "-current.jar");
-		
-        // load up dictionary
-        dictionary = new HashSet<String>();
+
+		// load up dictionary
+		dictionary = new HashSet<String>();
 		File file = new File("./filtered_stop_words.txt");
 		FileReader fr;
 		try {
@@ -284,7 +284,7 @@ class FlameWorker extends Worker {
 
 			return FlameWorker.OK_STRING;
 		});
-		
+
 		post("/rdd/indexFromTable", (req, res) -> {
 			String[] qParamsStrings = parseRequestQueryParams(req);
 			RowMapToString lambda = (RowMapToString) Serializer.byteArrayToObject(req.bodyAsBytes(), myJAR);
@@ -329,7 +329,7 @@ class FlameWorker extends Worker {
 			String startKey = qParamsStrings[3];
 			String toKeyExclusive = qParamsStrings[4];
 			System.out.println("start key:  " + startKey + ", end key: " + toKeyExclusive);
-			
+
 			RowToString lambda = (RowToString) Serializer.byteArrayToObject(req.bodyAsBytes(), myJAR);
 
 			KVSClient kvs = new KVSClient(kvsMaster);
@@ -338,43 +338,44 @@ class FlameWorker extends Worker {
 			if (iter == null) {
 				return FlameWorker.OK_STRING;
 			}
-				
+
 			String lastRowKey = "";
 			StringBuilder sb = new StringBuilder();
+			int counter = 0;
 			while (iter.hasNext()) {
+				if (counter % 5000 == 0) {
+					System.out.println(counter + "processed");
+					
+				}
+				counter++;
 				Row row = iter.next();
 				if (row == null) {
 					break;
 				}
+
 				if (row.key().equals(lastRowKey)) {
 					sb.append("," + row.get("value"));
 				} else {
 					if (lastRowKey.length() > 0) {
-						System.out.println(lastRowKey + sb.toString());
 						Row rowToWrite = new Row(lastRowKey);
-						rowToWrite.put("value", sb.toString());	
-						HashMap<String, Row> wordToRow = new HashMap<>();
-						wordToRow.put(rowToWrite.key(), rowToWrite);
-						kvs.putTable("index_final", wordToRow);
+						rowToWrite.put("value", sb.toString());
+						kvs.putRow("index", rowToWrite);
 					}
-					
+
 					sb.setLength(0);
 					sb.append(row.get("value"));
 				}
 
 				lastRowKey = row.key();
 			}
-			
-			HashMap<String, Row> wordToRow = new HashMap<>();
+
 			Row row = new Row(lastRowKey);
 			row.put("value", sb.toString());
-			wordToRow.put(row.key(), row);
-			kvs.putTable("index_final", wordToRow);
-	
-
+			kvs.putRow("index", row);
+			
 			return FlameWorker.OK_STRING;
 		});
-		
+
 		post("/rdd/flatMapToPair", (req, res) -> {
 			String[] qParamsStrings = parseRequestQueryParams(req);
 			StringToPairIterable lambda = (StringToPairIterable) Serializer.byteArrayToObject(req.bodyAsBytes(), myJAR);

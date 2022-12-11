@@ -15,7 +15,7 @@ echo "split file..."
 split -l 1000000 /tmp/sort/huge-file /tmp/sort/small-chunk
 
 echo "sort file..."
-for X in /tmp/sort/small-chunk* ; do sort -t'|' -k2 -nr < $X > $X-sorted; done
+for X in /tmp/sort/small-chunk* ; do sort -t'|' -k2 -n < $X > $X-sorted; done
 
 echo "merge file..."
 sort -t'|' -k2 -nr -m /tmp/sort/small-chunk*-sorted > /tmp/sort/sorted-huge-file
