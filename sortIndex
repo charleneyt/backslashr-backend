@@ -1,0 +1,29 @@
+#! /bin/bash
+
+echo "sort index file..."
+
+dir=$1
+file=$2
+
+mkdir /tmp/sort
+rm -rf /tmp/sort/*
+
+echo "copy file..."
+cp $dir/$file /tmp/sort/huge-file
+
+echo "split file..."
+split -l 1000000 /tmp/sort/huge-file /tmp/sort/small-chunk
+
+echo "sort file..."
+for X in /tmp/sort/small-chunk* ; do sort -t'|' -k2 -nr < $X > $X-sorted; done
+
+echo "merge file..."
+sort -t'|' -k2 -nr -m /tmp/sort/small-chunk*-sorted > /tmp/sort/sorted-huge-file
+
+echo "move file back..."
+cp /tmp/sort/sorted-huge-file $dir/sorted_$file
+
+echo "clean up..."
+rm -rf /tmp/sort/
+
+echo "done"
