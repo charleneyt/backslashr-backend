@@ -445,6 +445,17 @@ public class KVSClient implements KVS {
 
 		return new KVSIterator(tableName, startRow, endRowExclusive, true);
 	}
+	
+	public boolean checkDictionary(String word) throws Exception {
+		if (!haveWorkers)
+			downloadWorkers();
+		
+		HTTP.Response r = HTTP.doRequest("GET", "http://" + workers.elementAt(workerIndexForKey(word)).address + "/data/dictionary/" + java.net.URLEncoder.encode(word, "UTF-8"), null);
+		if (r.statusCode() == 200)
+			return true;
+		
+		return false;
+	}
 
 	public static void main(String args[]) throws Exception {
 		if (args.length < 2) {
