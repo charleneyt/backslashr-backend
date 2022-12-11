@@ -303,8 +303,13 @@ public class KVSClient implements KVS {
 				"http://" + workers.elementAt(workerIndexForKey(row.key())).address + "/data/" + tableName,
 				row.toByteArray()).body();
 		String result = new String(response);
-		if (!result.equals("OK"))
-			throw new RuntimeException("PUT returned something other than OK: " + result);
+		if (!result.equals("OK")) {
+			FileWriter fw = new FileWriter("KVSClient_log", true);
+			fw.write("from putRow, PUT returned something other than OK: " + result + "(" + "http://" + workers.elementAt(workerIndexForKey(row.key())).address + "/data/" + tableName + ")" + "\n");
+			fw.write("request body is: " + row.toString() + "\n");
+			fw.close();
+//			throw new RuntimeException("PUT returned something other than OK: " + result);			
+		}
 	}
 	
 	private static byte[] combineTwoByteArrays(byte[] a, byte[] b) {
