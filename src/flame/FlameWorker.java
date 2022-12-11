@@ -268,6 +268,9 @@ class FlameWorker extends Worker {
 			if (iter != null) {
 				while (iter.hasNext()) {
 					Row row = iter.next();
+					FileWriter fw1 = new FileWriter("flameworker_fromtable_log", true);
+					fw1.write(row.key() + "\n");
+					fw1.close();
 					if (row == null) {
 						break;
 					}
