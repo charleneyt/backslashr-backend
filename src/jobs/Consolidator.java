@@ -12,7 +12,7 @@ public class Consolidator {
 		System.out.println("Executing consolidator ...updated as of 12/9 at " + new Date());
 		long startGetTime = System.currentTimeMillis();
 		
-		FlameRDD transform = ctx.consolidateFromTable("index", (r) -> {
+		FlameRDD transform = ctx.consolidateFromTable("sorted_index_imm_simple", (r) -> {
 			return r.get("value");
 		});
 		

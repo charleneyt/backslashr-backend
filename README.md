@@ -56,5 +56,6 @@
 
 - Build jar file
   - jar -cf indexer.jar bin/jobs/Indexer.class
+  - jar -cf consolidator.jar bin/jobs/Consolidator.class
 
 ### TODO

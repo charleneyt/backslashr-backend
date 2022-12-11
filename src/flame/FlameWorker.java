@@ -335,46 +335,42 @@ class FlameWorker extends Worker {
 			KVSClient kvs = new KVSClient(kvsMaster);
 
 			Iterator<Row> iter = kvs.scanRaw(inputTableName, startKey, toKeyExclusive);
-			if (iter != null) {
-				// word : {url}
-				HashMap<String, ArrayList<String>> consolidatedRows = new HashMap<>();
-				int counter = 0;
-				while (iter.hasNext()) {
-					if (counter % 1000 == 0) {
-						System.out.println("Processed " + counter + " rows");
-					}
-					Row row = iter.next();
-
-					if (row == null) {
-						break;
-					}
-
-					String s = lambda.op(row);
-
-					if (!consolidatedRows.containsKey(row.key())) {
-						consolidatedRows.put(row.key(), new ArrayList<>());
-					}
-					consolidatedRows.get(row.key()).add(row.get("value"));
-					counter++;
-				}
-				
-				HashMap<String, Row> consolidatedFlattenedRows = new HashMap<>();
-				for (String rowName : consolidatedRows.keySet()) {
-					StringBuilder sb = new StringBuilder();
-					for (String val : consolidatedRows.get(rowName)) {					
-						if (sb.length() == 0) {
-							sb.append(val);
-						}
-						else {
-							sb.append("," + val);
-						}
-					}
-					Row row = new Row(rowName);
-					row.put("value", sb.toString());
-					consolidatedFlattenedRows.put(rowName, row);
-				}
-				kvs.putTable("index_final", consolidatedFlattenedRows);
+			if (iter == null) {
+				return FlameWorker.OK_STRING;
 			}
+				
+			String lastRowKey = "";
+			StringBuilder sb = new StringBuilder();
+			while (iter.hasNext()) {
+				Row row = iter.next();
+				if (row == null) {
+					break;
+				}
+				if (row.key().equals(lastRowKey)) {
+					sb.append("," + row.get("value"));
+				} else {
+					if (lastRowKey.length() > 0) {
+						System.out.println(lastRowKey + sb.toString());
+						Row rowToWrite = new Row(lastRowKey);
+						rowToWrite.put("value", sb.toString());	
+						HashMap<String, Row> wordToRow = new HashMap<>();
+						wordToRow.put(rowToWrite.key(), rowToWrite);
+						kvs.putTable("index_final", wordToRow);
+					}
+					
+					sb.setLength(0);
+					sb.append(row.get("value"));
+				}
+
+				lastRowKey = row.key();
+			}
+			
+			HashMap<String, Row> wordToRow = new HashMap<>();
+			Row row = new Row(lastRowKey);
+			row.put("value", sb.toString());
+			wordToRow.put(row.key(), row);
+			kvs.putTable("index_final", wordToRow);
+	
 
 			return FlameWorker.OK_STRING;
 		});
