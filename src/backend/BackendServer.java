@@ -10,6 +10,9 @@ import tools.Hasher;
 //import org.json.simple.JSONObject;
 import json.org.json.simple.JSONArray;
 import json.org.json.simple.JSONObject;
+import org.jsoup.*;
+import org.jsoup.nodes.*;
+import org.jsoup.select.*;
 
 public class BackendServer {
 
@@ -39,20 +42,39 @@ public class BackendServer {
 				try {
 					// Create JSON Object to add attribute URL and content
 					JSONObject data = new JSONObject();
+
+//					Document doc = Jsoup.connect(url).get();
+//					String title = doc.title();
+//					StringBuilder previewContent = new StringBuilder();
+//					int len = 0;
+//
+//					String text = doc.body().text();
+//					previewContent.append(text);
+
+//					Elements paragraphs = doc.select("p");
+//					for (Element p : paragraphs) {
+//						if (len > 100) {
+//							break;
+//						}
+//						previewContent.append(p.text());
+//						len++;
+//					}
 					String hashURL = Hasher.hash(url);
-					String content = new String(kvs.get("content", hashURL, "page"));
-					content = content.replaceAll("[.,:;!\\?\'\"()-]", " ").replaceAll("<[^>]*>", "");
-
 					StringBuilder previewContent = new StringBuilder();
-					String[] splitContent = content.split("\\s+");
+					if (kvs.get("content", hashURL, "page") != null) {
+						String content = new String(kvs.get("content", hashURL, "page"));
+						content = content.replaceAll("[.,:;!\\?\'\"()-]", " ").replaceAll("<[^>]*>", "");
+						String[] splitContent = content.split("\\s+");
 
-					// Add only a small preview of the content
-					for (int i = 0; i < Math.min(100, splitContent.length); i++) {
-						previewContent.append(splitContent[i] + " ");
+						// Add only a small preview of the content
+						for (int i = 0; i < Math.min(100, splitContent.length); i++) {
+							previewContent.append(splitContent[i] + " ");
+						}
 					}
 
 					data.put("URL", url);
 					data.put("content", previewContent.toString());
+//					data.put("title", title);
 					list.add(data);
 				} catch (Exception e) {
 					System.out.println("Exception: " + e);

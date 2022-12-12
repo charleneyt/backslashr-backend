@@ -2,6 +2,7 @@ package backend;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,15 +17,20 @@ import tools.Hasher;
 
 public class Ranker {
 	public static List<String> rank(KVSClient kvs, String[] searchTerms) throws IOException {
-		// step 1 - map each URL that contains at least one search term to its word count
-		// also, make an outerMap whose keys are words in the search terms, and the corresponding
-		// value of each key is an innerMap, whose keys are URLs that contain the word, and the
-		// corresponding value of each URL is an array of indices at which the word appears in that URL
+		// step 1 - map each URL that contains at least one search term to its word
+		// count
+		// also, make an outerMap whose keys are words in the search terms, and the
+		// corresponding
+		// value of each key is an innerMap, whose keys are URLs that contain the word,
+		// and the
+		// corresponding value of each URL is an array of indices at which the word
+		// appears in that URL
 		Map<String, Integer> urlToWordCount = new HashMap<>();
 		Map<String, Map<String, String[]>> outerMap = new HashMap<>();
 		for (String term : searchTerms) {
 			Map<String, String[]> innerMap = new HashMap<>();
-			Row row = kvs.getRow("index", term);
+			Row row = kvs.getRow("index_final", term);
+
 			if (row != null) {
 //				System.out.println("value for row " + row.key() + " is: " + row.get("value"));
 				String[] urlsAndFreqs = row.get("value").split(",");
@@ -35,8 +41,12 @@ public class Ranker {
 						String[] positions = s.substring(pos + 1).split(" ");
 						innerMap.put(url, positions);
 						if (!urlToWordCount.containsKey(url)) {
-							String wordCount = new String(kvs.get("content", Hasher.hash(url), "wordCount"));
-							urlToWordCount.put(url, Integer.valueOf(wordCount));
+							if (kvs.get("content", Hasher.hash(url), "wordCount") != null) {
+								String wordCount = new String(kvs.get("content", Hasher.hash(url), "wordCount"));
+								urlToWordCount.put(url, Integer.valueOf(wordCount));
+							} else {
+								urlToWordCount.put(url, 1000);
+							}
 						}
 					}
 				}
@@ -67,7 +77,6 @@ public class Ranker {
 						int freq = entry.getValue().length;
 						map.put(url, freq);
 					}
-
 					for (String url : urlToWordCount.keySet()) {
 						int freq = map.containsKey(url) ? map.get(url) : 0;
 						if (urlToFrequencies.containsKey(url)) {
@@ -86,7 +95,7 @@ public class Ranker {
 				}
 			}
 		}
-
+//		System.out.println("urlToFrequencies = " + urlToFrequencies);
 		// step 3 - map each URL that contains at least one search term to the number of
 		// unique search terms in that URL
 		Map<String, Integer> urlToSearchTermCounts = new TreeMap<>(Collections.reverseOrder());
@@ -101,11 +110,15 @@ public class Ranker {
 			}
 			urlToSearchTermCounts.put(url, count);
 		}
-
-		// step 4 - perform phrase search and find URLs that contain the exact match of the search terms,
-		// and also URLs that contain a near exact match (defined as terms which have one less word than
-		// the original search terms, but otherwise maintain the same word order, e.g. the original search
-		// term is "hello world cup", and its near exact matches are "hello world", "hello cup" and "world cup")
+//		System.out.println("urlToSearchTermCounts = " + urlToSearchTermCounts);
+		// step 4 - perform phrase search and find URLs that contain the exact match of
+		// the search terms,
+		// and also URLs that contain a near exact match (defined as terms which have
+		// one less word than
+		// the original search terms, but otherwise maintain the same word order, e.g.
+		// the original search
+		// term is "hello world cup", and its near exact matches are "hello world",
+		// "hello cup" and "world cup")
 		List<String> urlsWithExactMatch = new ArrayList<>();
 		List<String> urlsWithNearExactMatch = new ArrayList<>();
 		for (Map.Entry<String, Integer> entry : urlToSearchTermCounts.entrySet()) {
@@ -134,12 +147,13 @@ public class Ranker {
 				}
 			}
 		}
-
+//
 //		System.out.println("urlsWithExactMatch: " + urlsWithExactMatch);
 //		System.out.println("urlsWithNearExactMatch: " + urlsWithNearExactMatch);
 
 		// step 5 - compute TF-IDF cosine scores for each URL that contains at least one
-		// search term, and compute the final scores by combining cosine scores with page ranks
+		// search term, and compute the final scores by combining cosine scores with
+		// page ranks
 		Map<String, Double> finalScores = new TreeMap<>(Collections.reverseOrder());
 		for (Map.Entry<String, int[]> entry : urlToFrequencies.entrySet()) {
 			String url = entry.getKey();
@@ -156,6 +170,7 @@ public class Ranker {
 			// compute the final scores by multiplying cosine scores and page ranks
 			double finalScore = cosineScore * 1000;
 			Row row = kvs.getRow("pageranks", Hasher.hash(url));
+
 			if (row != null && row.get(Hasher.hash(url) + "0") != null) {
 //				System.out.println("page rank for url " + Hasher.hash(url) + " is: " + row.get(Hasher.hash(url) + "0"));
 				double pageRank = Double.valueOf(row.get(Hasher.hash(url) + "0"));
@@ -168,7 +183,7 @@ public class Ranker {
 					}
 				}
 			}
-			
+
 			if (urlsWithExactMatch.contains(url)) {
 				finalScore += 1000;
 //					System.out.println("bumped score for url " + url + " is: " + finalScore);
@@ -180,7 +195,8 @@ public class Ranker {
 			finalScores.put(url, finalScore);
 		}
 
-		// step 6 - rank URLs first by searchTermCount, then by finalScore, both in descending order
+		// step 6 - rank URLs first by searchTermCount, then by finalScore, both in
+		// descending order
 		List<URLWithScores> list = new ArrayList<>();
 		for (String url : urlToFrequencies.keySet()) {
 			Integer searchTermCount = urlToSearchTermCounts.get(url);
@@ -219,7 +235,8 @@ public class Ranker {
 			String[] positions2 = termPositions.get(i + 1);
 			while (array[i] < positions1.length && array[i + 1] < positions2.length) {
 				if (Integer.valueOf(positions1[array[i]]) + 1 == Integer.valueOf(positions2[array[i + 1]])) {
-					// the URL contains the current pair of terms contiguously, so we keep checking the next pair
+					// the URL contains the current pair of terms contiguously, so we keep checking
+					// the next pair
 					break;
 				} else if (Integer.valueOf(positions1[array[i]]) + 1 < Integer.valueOf(positions2[array[i + 1]])) {
 					array[i]++;
