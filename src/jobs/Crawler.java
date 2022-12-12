@@ -17,7 +17,7 @@ public class Crawler {
 	static boolean restartLog1 = true;
 	static boolean restartLog2 = true;
 	final static Set<String> allowedSuffix = new HashSet<>(Arrays.asList("com", "net", "org", "edu", "gov"));
-	final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("wikipedia.com", "baeldung.com", "w3schools.com", "geeksforgeeks.org"));
+	public final static Set<String> authorityHubs = new HashSet<>(Arrays.asList("wikipedia.com", "baeldung.com", "w3schools.com", "geeksforgeeks.org"));
 	static boolean debugMode = false;
 
 	public static void run(FlameContext ctx, String[] args) throws Exception {
