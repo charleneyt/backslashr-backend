@@ -39,9 +39,11 @@ public class Ranker {
 						String[] positions = s.substring(pos + 1).split(" ");
 						innerMap.put(url, positions);
 						
-						String previewIndex = positions[0];
-						if (!urlToPreviewIndex.containsKey(url)) {
-							urlToPreviewIndex.put(url, Integer.valueOf(previewIndex));
+						if (positions.length > 0) {
+							String previewIndex = positions[0];
+							if (!urlToPreviewIndex.containsKey(url)) {
+								urlToPreviewIndex.put(url, Integer.valueOf(previewIndex));
+							}
 						}
 						
 						if (!urlToWordCount.containsKey(url)) {
