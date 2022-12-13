@@ -3,6 +3,7 @@ package backend;
 import static webserver.Server.*;
 
 import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.List;
 import kvs.KVSClient;
 import tools.Hasher;
@@ -10,9 +11,6 @@ import tools.Hasher;
 //import org.json.simple.JSONObject;
 import json.org.json.simple.JSONArray;
 import json.org.json.simple.JSONObject;
-import org.jsoup.*;
-import org.jsoup.nodes.*;
-import org.jsoup.select.*;
 
 public class BackendServer {
 
@@ -62,19 +60,22 @@ public class BackendServer {
 //					}
 //					data.put("title", title);
 					String hashURL = Hasher.hash(url);
-					StringBuilder previewContent = new StringBuilder();
+					String[] previewContent = {};
 					if (kvs.get("content", hashURL, "page") != null) {
 						String content = new String(kvs.get("content", hashURL, "page"));
-						content = content.replaceAll("[.,:;!\\?\'\"()-]", " ").replaceAll("<[^>]*>", "");
+						content = content.replaceAll("[.,:;!\\?\'\"()-]", " ");
 						String[] splitContent = content.split("\\s+");
 
-						// Add only a small preview of the content
-						for (int i = 0; i < Math.min(100, splitContent.length); i++) {
-							previewContent.append(splitContent[i] + " ");
-						}
+						int firstLocation = Ranker.urlToPreviewIndex.get(url);
+						int start = Math.max(0, firstLocation - 10);
+						int end = Math.min(firstLocation + 90, splitContent.length);
+
+						previewContent = Arrays.copyOfRange(splitContent, start, end);
 					}
-					String preview = previewContent.length() > 0 ? previewContent.toString()
-							: "No preview content available ";
+					String preview = "No preview content available ";
+					if (previewContent.length > 0){
+						preview = String.join(" ", previewContent);
+					}
 					data.put("URL", url);
 					data.put("content", preview);
 					list.add(data);
