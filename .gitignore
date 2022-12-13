@@ -8,3 +8,5 @@ job*
 bin/
 *.zip
 test*
+*.table
+id

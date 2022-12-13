@@ -324,7 +324,7 @@ class FlameWorker extends Worker {
 		post("/rdd/consolidateFromTable", (req, res) -> {
 			String[] qParamsStrings = parseRequestQueryParams(req);
 			String inputTableName = qParamsStrings[0];
-			String outputTableName = qParamsStrings[1];
+			String outputTableName = inputTableName+"-output";
 			String kvsMaster = qParamsStrings[2];
 			String startKey = qParamsStrings[3];
 			String toKeyExclusive = qParamsStrings[4];
@@ -359,7 +359,7 @@ class FlameWorker extends Worker {
 					if (lastRowKey.length() > 0) {
 						Row rowToWrite = new Row(lastRowKey);
 						rowToWrite.put("value", sb.toString());
-						kvs.putRow("index", rowToWrite);
+						kvs.putRow(outputTableName, rowToWrite);
 					}
 
 					sb.setLength(0);
@@ -371,7 +371,7 @@ class FlameWorker extends Worker {
 
 			Row row = new Row(lastRowKey);
 			row.put("value", sb.toString());
-			kvs.putRow("index", row);
+			kvs.putRow(outputTableName, row);
 			
 			return FlameWorker.OK_STRING;
 		});
