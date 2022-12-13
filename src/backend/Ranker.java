@@ -2,7 +2,6 @@ package backend;
 
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -178,10 +177,6 @@ public class Ranker {
 		// one search term, and compute the final scores by combining cosine scores
 		// with page ranks
 		Map<String, Double> finalScores = new TreeMap<>(Collections.reverseOrder());
-		
-		
-		
-		
 		Thread threads[] = new Thread[urlToFrequencies.size()];
 		int i = 0;
 	    for (Map.Entry<String, int[]> entry : urlToFrequencies.entrySet()) {
