@@ -17,18 +17,23 @@ import tools.Hasher;
 
 public class Ranker {
 	public static Map<String, Integer> urlToPreviewIndex = new HashMap<>();
-	
-	public static List<String> rank(KVSClient kvs, String[] searchTerms) throws IOException {
+
+	public static List<String> rank(KVSClient kvs, String[] searchTerms) {
 		// step 1 - map each URL that contains at least one search term to its word
 		// count; also, make an outerMap whose keys are words in the search terms,
-		// and the corresponding value of each key is an innerMap, whose keys are 
-		// URLs that contain the word, and the corresponding value of each URL is 
+		// and the corresponding value of each key is an innerMap, whose keys are
+		// URLs that contain the word, and the corresponding value of each URL is
 		// an array of indices at which the word appears in that URL
 		Map<String, Integer> urlToWordCount = new HashMap<>();
 		Map<String, Map<String, String[]>> outerMap = new HashMap<>();
 		for (String term : searchTerms) {
 			Map<String, String[]> innerMap = new HashMap<>();
-			Row row = kvs.getRow("index_final", term);
+			Row row = null;
+			try {
+				row = kvs.getRow("index_final", term);
+			} catch (IOException e1) {
+
+			}
 			if (row != null) {
 //				System.out.println("value for row " + row.key() + " is: " + row.get("value"));
 				String[] urlsAndFreqs = row.get("value").split(",");
@@ -114,7 +119,7 @@ public class Ranker {
 				}
 			}
 		}
-//		System.out.println("urlToFrequencies = " + urlToFrequencies);
+//		System).out.println("urlToFrequencies = " + urlToFrequencies);
 		// step 3 - map each URL that contains at least one search term to the number of
 		// unique search terms in that URL
 		Map<String, Integer> urlToSearchTermCounts = new TreeMap<>(Collections.reverseOrder());
@@ -130,11 +135,11 @@ public class Ranker {
 			urlToSearchTermCounts.put(url, count);
 		}
 //		System.out.println("urlToSearchTermCounts = " + urlToSearchTermCounts);
-		
+
 		// step 4 - perform phrase search and find URLs that contain the exact match of
 		// the search terms, and also URLs that contain a near exact match (defined as
-		// terms which have one less word than the original search terms, but otherwise 
-		// maintain the same word order, e.g. the original search term is 
+		// terms which have one less word than the original search terms, but otherwise
+		// maintain the same word order, e.g. the original search term is
 		// "hello world cup", and its near exact matches are "hello world",
 		// "hello cup" and "world cup")
 		List<String> urlsWithExactMatch = new ArrayList<>();
@@ -169,8 +174,8 @@ public class Ranker {
 //		System.out.println("urlsWithExactMatch: " + urlsWithExactMatch);
 //		System.out.println("urlsWithNearExactMatch: " + urlsWithNearExactMatch);
 
-		// step 5 - compute TF-IDF cosine scores for each URL that contains at least 
-		// one search term, and compute the final scores by combining cosine scores 
+		// step 5 - compute TF-IDF cosine scores for each URL that contains at least
+		// one search term, and compute the final scores by combining cosine scores
 		// with page ranks
 		Map<String, Double> finalScores = new TreeMap<>(Collections.reverseOrder());
 		
@@ -269,14 +274,19 @@ public class Ranker {
 			String[] positions1 = termPositions.get(i);
 			String[] positions2 = termPositions.get(i + 1);
 			while (array[i] < positions1.length && array[i + 1] < positions2.length) {
-				if (Integer.valueOf(positions1[array[i]]) + 1 == Integer.valueOf(positions2[array[i + 1]])) {
-					// the URL contains the current pair of terms contiguously, so we keep checking
-					// the next pair
-					break;
-				} else if (Integer.valueOf(positions1[array[i]]) + 1 < Integer.valueOf(positions2[array[i + 1]])) {
-					array[i]++;
-				} else {
-					array[i + 1]++;
+				try {
+					if (Integer.valueOf(positions1[array[i]]) + 1 == Integer.valueOf(positions2[array[i + 1]])) {
+						// the URL contains the current pair of terms contiguously, so we keep checking
+						// the next pair
+						break;
+					} else if (Integer.valueOf(positions1[array[i]]) + 1 < Integer.valueOf(positions2[array[i + 1]])) {
+						array[i]++;
+					} else {
+						array[i + 1]++;
+					}
+				} catch (Exception e) {
+//					System.out.println("Integer.valueof Error");
+					return false;
 				}
 			}
 //			System.out.println("array for url " + url + " is: " + Arrays.toString(array));

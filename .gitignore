@@ -8,3 +8,6 @@ job*
 bin/
 *.zip
 test*
+*.table
+id
+*.jar

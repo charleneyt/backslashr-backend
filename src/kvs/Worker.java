@@ -166,9 +166,11 @@ public class Worker extends generic.Worker {
 
           int b = file.read();
           if ((b < 0) || (b == 10)) {
-              FileWriter fw = new FileWriter("missing_row_log", true);
-              fw.write("From readStringSpace, b is " + b + "string is " + new String(buffer, StandardCharsets.UTF_8) + "\n");
-              fw.close();             
+        	  if (debugMode) {
+	              FileWriter fw = new FileWriter("missing_row_log", true);
+	              fw.write("From readStringSpace, b is " + b + "string is " + new String(buffer, StandardCharsets.UTF_8) + "\n");
+	              fw.close();         		  
+        	  }
               return null;            
           }
 
