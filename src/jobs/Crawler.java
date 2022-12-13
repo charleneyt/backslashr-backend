@@ -26,8 +26,7 @@ public class Crawler {
 		// if it does not. If it does, output a success message, maybe "OK"
 		System.out.println("Executing crawler ...");
 		if (args.length < 1 || args.length > 2) {
-			ctx.output(
-					"Invalid Argument! There must have one String for seed URL, and one optional argument for blacklist table name");
+			ctx.output("Invalid Argument! There must have one String for seed URL, and one optional argument for blacklist table name");
 			return;
 		}
 
