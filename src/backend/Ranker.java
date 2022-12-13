@@ -1,8 +1,9 @@
 package backend;
 
+
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import jobs.Crawler;
-//import static jobs.Crawler.authorityHubs;
 import kvs.KVSClient;
 import kvs.Row;
 import tools.Hasher;
@@ -32,30 +32,44 @@ public class Ranker {
 			if (row != null) {
 //				System.out.println("value for row " + row.key() + " is: " + row.get("value"));
 				String[] urlsAndFreqs = row.get("value").split(",");
-				for (String s : urlsAndFreqs) {
-					int pos = s.lastIndexOf(":");
-					if (pos > 0) {
-						String url = s.substring(0, pos);
-						String[] positions = s.substring(pos + 1).split(" ");
-						innerMap.put(url, positions);
-						
-						if (positions.length > 0) {
-							String previewIndex = positions[0];
-							if (!urlToPreviewIndex.containsKey(url)) {
-								urlToPreviewIndex.put(url, Integer.valueOf(previewIndex));
+				Thread threads[] = new Thread[urlsAndFreqs.length];
+			    for (int i = 0; i < urlsAndFreqs.length; i++) {
+			    	String s = urlsAndFreqs[i];
+			        threads[i] = new Thread() {
+			            public void run() {
+			            	int pos = s.lastIndexOf(":");
+							if (pos > 0) {
+								String url = s.substring(0, pos);
+								String[] positions = s.substring(pos + 1).split(" ");
+								innerMap.put(url, positions);
+								
+								if (positions.length > 0) {
+									String previewIndex = positions[0];
+									if (!urlToPreviewIndex.containsKey(url)) {
+										urlToPreviewIndex.put(url, Integer.valueOf(previewIndex));
+									}
+								}
+								
+								if (!urlToWordCount.containsKey(url)) {
+									try {
+										byte[] wordCount;
+										if ((wordCount = kvs.get("content", Hasher.hash(url), "wordCount")) != null) {
+											urlToWordCount.put(url, Integer.valueOf(new String(wordCount)));
+										} else {
+											urlToWordCount.put(url, 1000);
+										}
+									} catch (NumberFormatException e) {
+										e.printStackTrace();
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								}
 							}
-						}
-						
-						if (!urlToWordCount.containsKey(url)) {
-							if (kvs.get("content", Hasher.hash(url), "wordCount") != null) {
-								String wordCount = new String(kvs.get("content", Hasher.hash(url), "wordCount"));
-								urlToWordCount.put(url, Integer.valueOf(wordCount));
-							} else {
-								urlToWordCount.put(url, 1000);
-							}
-						}
-					}
-				}
+			            }
+			        };
+			        
+			        threads[i].start();
+			    }
 			}
 			outerMap.put(term, innerMap);
 		}
@@ -159,45 +173,62 @@ public class Ranker {
 		// one search term, and compute the final scores by combining cosine scores 
 		// with page ranks
 		Map<String, Double> finalScores = new TreeMap<>(Collections.reverseOrder());
-		for (Map.Entry<String, int[]> entry : urlToFrequencies.entrySet()) {
-			String url = entry.getKey();
-			int[] freqs = entry.getValue();
-//			System.out.println("freqs for url " + url + " is: " + Arrays.toString(freqs));
-			double cosineScore = 0.0;
-			for (int i = 0; i < searchTerms.length; i++) {
-				cosineScore += freqs[i] * idfArray[i];
-			}
-			int wordCount = urlToWordCount.get(url);
-			cosineScore /= wordCount;
-//			System.out.println("cosine score for url " + url + " is: " + cosineScore);
+		
+		
+		
+		
+		Thread threads[] = new Thread[urlToFrequencies.size()];
+		int i = 0;
+	    for (Map.Entry<String, int[]> entry : urlToFrequencies.entrySet()) {
+	        threads[i] = new Thread() {
+	            public void run() {
+	            	String url = entry.getKey();
+	    			int[] freqs = entry.getValue();
+//	    			System.out.println("freqs for url " + url + " is: " + Arrays.toString(freqs));
+	    			double cosineScore = 0.0;
+	    			for (int i = 0; i < searchTerms.length; i++) {
+	    				cosineScore += freqs[i] * idfArray[i];
+	    			}
+	    			int wordCount = urlToWordCount.get(url);
+	    			cosineScore /= wordCount;
+//	    			System.out.println("cosine score for url " + url + " is: " + cosineScore);
 
-			// compute the final scores by multiplying cosine scores and page ranks
-			double finalScore = cosineScore * 1000;
-			Row row = kvs.getRow("pageranks", Hasher.hash(url));
-
-			if (row != null && row.get(Hasher.hash(url) + "0") != null) {
-//				System.out.println("page rank for url " + Hasher.hash(url) + " is: " + row.get(Hasher.hash(url) + "0"));
-				double pageRank = Double.valueOf(row.get(Hasher.hash(url) + "0"));
-//					System.out.println("page rank for url " + url + " is: " + pageRank);
-				finalScore += pageRank;
-			} else {
-				for (String hub : Crawler.authorityHubs) {
-					if (url.contains(hub)) {
-						finalScore += 1;
+	    			// compute the final scores by multiplying cosine scores and page ranks
+	    			double finalScore = cosineScore * 1000;
+	    			Row row;
+					try {
+						row = kvs.getRow("pageranks", Hasher.hash(url));
+						if (row != null && row.get(Hasher.hash(url) + "0") != null) {
+//		    				System.out.println("page rank for url " + Hasher.hash(url) + " is: " + row.get(Hasher.hash(url) + "0"));
+		    				double pageRank = Double.valueOf(row.get(Hasher.hash(url) + "0"));
+//		    					System.out.println("page rank for url " + url + " is: " + pageRank);
+		    				finalScore += pageRank;
+		    			} else {
+		    				for (String hub : Crawler.authorityHubs) {
+		    					if (url.contains(hub)) {
+		    						finalScore += 1;
+		    					}
+		    				}
+		    			}
+						
+						if (urlsWithExactMatch.contains(url)) {
+		    				finalScore += 1000;
+//		    					System.out.println("bumped score for url " + url + " is: " + finalScore);
+		    			} else if (urlsWithNearExactMatch.contains(url)) {
+		    				finalScore += 600;
+//		    					System.out.println("bumped score for url " + url + " is: " + finalScore);
+		    			}
+//		    				System.out.println("final score for url " + url + " is: " + finalScore);
+		    			finalScores.put(url, finalScore);
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
-				}
-			}
-
-			if (urlsWithExactMatch.contains(url)) {
-				finalScore += 1000;
-//					System.out.println("bumped score for url " + url + " is: " + finalScore);
-			} else if (urlsWithNearExactMatch.contains(url)) {
-				finalScore += 600;
-//					System.out.println("bumped score for url " + url + " is: " + finalScore);
-			}
-//				System.out.println("final score for url " + url + " is: " + finalScore);
-			finalScores.put(url, finalScore);
-		}
+	            }
+	        };
+	        
+	        threads[i].start();
+	        i++;
+	    }
 
 		// step 6 - rank URLs first by searchTermCount, then by finalScore, both in
 		// descending order
@@ -216,9 +247,9 @@ public class Ranker {
 		// step 7 - choose K highest ranking URLs to display on front end
 		int K = 100;
 		List<String> outputURLs = new ArrayList<>();
-		for (int i = 0; i < K; i++) {
-			if (i < list.size()) {
-				outputURLs.add(list.get(i).getURL());
+		for (int j = 0; j < K; j++) {
+			if (j < list.size()) {
+				outputURLs.add(list.get(j).getURL());
 			}
 		}
 		return outputURLs;

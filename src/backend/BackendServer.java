@@ -6,13 +6,9 @@ import java.net.URLDecoder;
 import java.util.List;
 import kvs.KVSClient;
 import tools.Hasher;
-//import org.json.simple.JSONArray;
-//import org.json.simple.JSONObject;
+
 import json.org.json.simple.JSONArray;
 import json.org.json.simple.JSONObject;
-import org.jsoup.*;
-import org.jsoup.nodes.*;
-import org.jsoup.select.*;
 
 public class BackendServer {
 
