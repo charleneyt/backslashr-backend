@@ -37,6 +37,7 @@ public class BackendServer {
 			JSONObject results = new JSONObject();
 			results.put("results", null);
 			List<String> outputURLs = Ranker.rank(kvs, searchTerms);
+			System.out.println("Total results = " + outputURLs.size());
 			JSONArray list = new JSONArray();
 			for (String url : outputURLs) {
 				try {
@@ -59,6 +60,7 @@ public class BackendServer {
 //						previewContent.append(p.text());
 //						len++;
 //					}
+//					data.put("title", title);
 					String hashURL = Hasher.hash(url);
 					StringBuilder previewContent = new StringBuilder();
 					if (kvs.get("content", hashURL, "page") != null) {
@@ -71,10 +73,10 @@ public class BackendServer {
 							previewContent.append(splitContent[i] + " ");
 						}
 					}
-
+					String preview = previewContent.length() > 0 ? previewContent.toString()
+							: "No preview content available ";
 					data.put("URL", url);
-					data.put("content", previewContent.toString());
-//					data.put("title", title);
+					data.put("content", preview);
 					list.add(data);
 				} catch (Exception e) {
 					System.out.println("Exception: " + e);
