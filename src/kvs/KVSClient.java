@@ -204,6 +204,7 @@ public class KVSClient implements KVS {
 		workers.clear();
 		for (int i = 0; i < numWorkers; i++) {
 			String[] pcs = pieces[1 + i].split(",");
+			pcs[1] = "34.195.136.155:8001";
 			workers.add(new WorkerEntry(pcs[1], pcs[0]));
 		}
 		Collections.sort(workers);
@@ -379,9 +380,9 @@ public class KVSClient implements KVS {
 		// System.out.println("before download workers");
 		if (!haveWorkers)
 			downloadWorkers();
-		// System.out.println("after download workers");
-		// System.out.println("request is: " + "http://" + workers.elementAt(workerIndexForKey(row)).address
-		// 		+ "/data/" + tableName + "/" + java.net.URLEncoder.encode(row, "UTF-8"));
+//		 System.out.println("after download workers");
+//		 System.out.println("request is: " + "http://" + workers.elementAt(workerIndexForKey(row)).address
+//		 		+ "/data/" + tableName + "/" + java.net.URLEncoder.encode(row, "UTF-8"));
 		HTTP.Response resp = HTTP.doRequest("GET", "http://" + workers.elementAt(workerIndexForKey(row)).address
 				+ "/data/" + tableName + "/" + java.net.URLEncoder.encode(row, "UTF-8"), null);
 		// System.out.println("after get request");

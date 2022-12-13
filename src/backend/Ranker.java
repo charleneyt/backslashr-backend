@@ -16,6 +16,8 @@ import tools.Hasher;
 
 public class Ranker {
 	public static Map<String, Integer> urlToPreviewIndex = new HashMap<>();
+	public static final int MAX_THREAD_COUNT = 20;
+	public static final int MAX_URL = 500;// 19 22 21 340
 
 	public static List<String> rank(KVSClient kvs, String[] searchTerms) {
 		// step 1 - map each URL that contains at least one search term to its word
@@ -23,26 +25,42 @@ public class Ranker {
 		// and the corresponding value of each key is an innerMap, whose keys are
 		// URLs that contain the word, and the corresponding value of each URL is
 		// an array of indices at which the word appears in that URL
+		System.out.println("in ranker");
 		Map<String, Integer> urlToWordCount = new HashMap<>();
 		Map<String, Map<String, String[]>> outerMap = new HashMap<>();
 		for (String term : searchTerms) {
+			System.out.println("term is: " + term);
 			Map<String, String[]> innerMap = new HashMap<>();
 			Row row = null;
 			try {
 				row = kvs.getRow("index_final", term);
 			} catch (IOException e1) {
-
+				System.out.println("failed to get row for " + term);
 			}
-			if (row != null) {
-//				System.out.println("value for row " + row.key() + " is: " + row.get("value"));
-				String[] urlsAndFreqs = row.get("value").split(",");
-				Thread threads[] = new Thread[urlsAndFreqs.length];
-			    for (int i = 0; i < urlsAndFreqs.length; i++) {
-			    	String s = urlsAndFreqs[i];
-			        threads[i] = new Thread() {
-			            public void run() {
-			            	int pos = s.lastIndexOf(":");
-							if (pos > 0) {
+//			System.out.println("row is: " + row.key());
+			if (row == null) {
+				continue;
+			}
+			
+			String[] urlsAndFreqs = row.get("value").split(",");
+			int thread_count = Math.min(MAX_THREAD_COUNT, urlsAndFreqs.length);
+			int url_per_thread = Math.min(MAX_URL, urlsAndFreqs.length) / thread_count;
+			int extra_url_thread_index = Math.min(MAX_URL, urlsAndFreqs.length) % thread_count;
+//			System.out.println("url_per_thread " + url_per_thread + " extra_url_thread_index " + extra_url_thread_index);
+			Thread threads[] = new Thread[thread_count];
+		    for (int i = 0; i < thread_count; i++) {
+		    	final int k = i;
+		    	final int extar_url_count = i < extra_url_thread_index ? 1 : 0;
+		    	final int total_extar_url_count = i < extra_url_thread_index ? i : extra_url_thread_index;
+		        threads[i] = new Thread() {
+		            public void run() {
+		            	for (int j = total_extar_url_count+k*url_per_thread; j < extar_url_count + Math.min(total_extar_url_count+(k+1)*url_per_thread, urlsAndFreqs.length); j++) {
+		            		try {
+			            		String s = urlsAndFreqs[j];
+				            	int pos = s.lastIndexOf(":");
+								if (pos <= 0) 
+									continue;
+								
 								String url = s.substring(0, pos);
 								String[] positions = s.substring(pos + 1).split(" ");
 								innerMap.put(url, positions);
@@ -54,32 +72,42 @@ public class Ranker {
 									}
 								}
 								
-								if (!urlToWordCount.containsKey(url)) {
-									try {
-										byte[] wordCount;
-										if ((wordCount = kvs.get("content", Hasher.hash(url), "wordCount")) != null) {
-											urlToWordCount.put(url, Integer.valueOf(new String(wordCount)));
-										} else {
-											urlToWordCount.put(url, 1000);
-										}
-									} catch (NumberFormatException e) {
-										e.printStackTrace();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
+								if (urlToWordCount.containsKey(url)) 
+									continue;
+
+				
+								byte[] wordCount;
+								if ((wordCount = kvs.get("content", Hasher.hash(url), "wordCount")) != null) {
+									urlToWordCount.put(url, Integer.valueOf(new String(wordCount)));
+								} else {
+									urlToWordCount.put(url, 1000);
 								}
+							} catch (NumberFormatException e) {
+								e.printStackTrace();
+							} catch (IOException e) {
+								e.printStackTrace();
 							}
 			            }
-			        };
-			        
-			        threads[i].start();
-			    }
+		            }
+		        };
+		        
+		        threads[i].start();
+		    }
+			for (int i = 0; i < threads.length; i++) {
+				try {
+					threads[i].join();
+				} catch (InterruptedException ie) {
+					System.out.println("Failed to join thread " + i);
+				}
 			}
+			
 			outerMap.put(term, innerMap);
 		}
 
 		// N is the total number of URLs that contain at least one search term
 		int N = urlToWordCount.size();
+		System.out.println("N is: " + N);
+		
 
 		// step 2 - map each URL that contains at least one search term to an array of
 		// integers, which represents the frequencies of each search term in that URL
@@ -176,59 +204,78 @@ public class Ranker {
 		// step 5 - compute TF-IDF cosine scores for each URL that contains at least
 		// one search term, and compute the final scores by combining cosine scores
 		// with page ranks
+		
+		ArrayList<String> urlList = new ArrayList<String>(urlToFrequencies.keySet());
+		
+		int thread_count = Math.min(MAX_THREAD_COUNT, urlList.size());
+		int url_per_thread = Math.min(MAX_URL, urlList.size()) / thread_count;
+		int extra_url_thread_index = Math.min(MAX_URL, urlList.size()) % thread_count;
+		
 		Map<String, Double> finalScores = new TreeMap<>(Collections.reverseOrder());
-		Thread threads[] = new Thread[urlToFrequencies.size()];
-		int i = 0;
-	    for (Map.Entry<String, int[]> entry : urlToFrequencies.entrySet()) {
+		Thread threads[] = new Thread[thread_count];
+//	    for (Map.Entry<String, int[]> entry : urlToFrequencies.entrySet()) {
+	    for (int i = 0; i < thread_count; i++) {
+	    	final int k = i;
+	    	final int extar_url_count = i < extra_url_thread_index ? 1 : 0;
+	    	final int total_extar_url_count = i < extra_url_thread_index ? i : extra_url_thread_index;
 	        threads[i] = new Thread() {
 	            public void run() {
-	            	String url = entry.getKey();
-	    			int[] freqs = entry.getValue();
-//	    			System.out.println("freqs for url " + url + " is: " + Arrays.toString(freqs));
-	    			double cosineScore = 0.0;
-	    			for (int i = 0; i < searchTerms.length; i++) {
-	    				cosineScore += freqs[i] * idfArray[i];
-	    			}
-	    			int wordCount = urlToWordCount.get(url);
-	    			cosineScore /= wordCount;
-//	    			System.out.println("cosine score for url " + url + " is: " + cosineScore);
-
-	    			// compute the final scores by multiplying cosine scores and page ranks
-	    			double finalScore = cosineScore * 1000;
-	    			Row row;
-					try {
-						row = kvs.getRow("pageranks", Hasher.hash(url));
-						if (row != null && row.get(Hasher.hash(url) + "0") != null) {
-//		    				System.out.println("page rank for url " + Hasher.hash(url) + " is: " + row.get(Hasher.hash(url) + "0"));
-		    				double pageRank = Double.valueOf(row.get(Hasher.hash(url) + "0"));
-//		    					System.out.println("page rank for url " + url + " is: " + pageRank);
-		    				finalScore += pageRank;
-		    			} else {
-		    				for (String hub : Crawler.authorityHubs) {
-		    					if (url.contains(hub)) {
-		    						finalScore += 1;
-		    					}
-		    				}
+	            	for (int j = total_extar_url_count+k*url_per_thread; j < extar_url_count + Math.min(total_extar_url_count+(k+1)*url_per_thread, urlList.size()); j++) { 
+		            	String url = urlList.get(j);
+		    			int[] freqs = urlToFrequencies.get(url);
+//		    			System.out.println("freqs for url " + url );
+		    			double cosineScore = 0.0;
+		    			for (int i = 0; i < searchTerms.length; i++) {
+		    				cosineScore += freqs[i] * idfArray[i];
 		    			}
-						
-						if (urlsWithExactMatch.contains(url)) {
-		    				finalScore += 1000;
-//		    					System.out.println("bumped score for url " + url + " is: " + finalScore);
-		    			} else if (urlsWithNearExactMatch.contains(url)) {
-		    				finalScore += 600;
-//		    					System.out.println("bumped score for url " + url + " is: " + finalScore);
-		    			}
-//		    				System.out.println("final score for url " + url + " is: " + finalScore);
-		    			finalScores.put(url, finalScore);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+		    			int wordCount = urlToWordCount.get(url);
+		    			cosineScore /= wordCount;
+	//	    			System.out.println("cosine score for url " + url + " is: " + cosineScore);
+	
+		    			// compute the final scores by multiplying cosine scores and page ranks
+		    			double finalScore = cosineScore * 1000;
+		    			Row row;
+						try {
+							row = kvs.getRow("pageranks", Hasher.hash(url));
+							if (row != null && row.get(Hasher.hash(url) + "0") != null) {
+	//		    				System.out.println("page rank for url " + Hasher.hash(url) + " is: " + row.get(Hasher.hash(url) + "0"));
+			    				double pageRank = Double.valueOf(row.get(Hasher.hash(url) + "0"));
+	//		    					System.out.println("page rank for url " + url + " is: " + pageRank);
+			    				finalScore += pageRank;
+			    			} else {
+			    				for (String hub : Crawler.authorityHubs) {
+			    					if (url.contains(hub)) {
+			    						finalScore += 1;
+			    					}
+			    				}
+			    			}
+							
+							if (urlsWithExactMatch.contains(url)) {
+			    				finalScore += 1000;
+	//		    					System.out.println("bumped score for url " + url + " is: " + finalScore);
+			    			} else if (urlsWithNearExactMatch.contains(url)) {
+			    				finalScore += 600;
+	//		    					System.out.println("bumped score for url " + url + " is: " + finalScore);
+			    			}
+	//		    				System.out.println("final score for url " + url + " is: " + finalScore);
+			    			finalScores.put(url, finalScore);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+	            	}
 	            }
 	        };
 	        
 	        threads[i].start();
-	        i++;
 	    }
+	    
+		for (int i = 0; i < threads.length; i++) {
+			try {
+				threads[i].join();
+			} catch (InterruptedException ie) {
+				System.out.println("Failed to join thread " + i);
+			}
+		}
 
 		// step 6 - rank URLs first by searchTermCount, then by finalScore, both in
 		// descending order
@@ -259,9 +306,12 @@ public class Ranker {
 			Map<String, Map<String, String[]>> outerMap) {
 		List<String[]> termPositions = new ArrayList<>();
 		for (String term : searchTerms) {
-			String[] positions = outerMap.get(term).get(url);
-			termPositions.add(positions);
-//			System.out.println("positions for term " + term + " is: " + Arrays.toString(positions));
+			// Wangxing to double check
+			if (outerMap.containsKey(term) && outerMap.get(term).containsKey(url)) {
+				String[] positions = outerMap.get(term).get(url);
+				termPositions.add(positions);
+	//			System.out.println("positions for term " + term + " is: " + Arrays.toString(positions));				
+			}
 		}
 
 		int[] array = new int[searchTerms.length];
