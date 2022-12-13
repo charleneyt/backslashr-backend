@@ -60,7 +60,7 @@ public class BackendServer {
 					data.put("content", preview);
 					list.add(data);
 				} catch (Exception e) {
-					System.out.println("Exception: " + e);
+//					System.out.println("Exception: " + e);
 				}
 			}
 			results.put("results", list);

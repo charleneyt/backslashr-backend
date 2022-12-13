@@ -18,7 +18,7 @@ import tools.Hasher;
 public class Ranker {
 	public static Map<String, Integer> urlToPreviewIndex = new HashMap<>();
 
-	public static List<String> rank(KVSClient kvs, String[] searchTerms) throws IOException {
+	public static List<String> rank(KVSClient kvs, String[] searchTerms) {
 		// step 1 - map each URL that contains at least one search term to its word
 		// count; also, make an outerMap whose keys are words in the search terms,
 		// and the corresponding value of each key is an innerMap, whose keys are
@@ -28,7 +28,12 @@ public class Ranker {
 		Map<String, Map<String, String[]>> outerMap = new HashMap<>();
 		for (String term : searchTerms) {
 			Map<String, String[]> innerMap = new HashMap<>();
-			Row row = kvs.getRow("index_final", term);
+			Row row = null;
+			try {
+				row = kvs.getRow("index_final", term);
+			} catch (IOException e1) {
+
+			}
 			if (row != null) {
 //				System.out.println("value for row " + row.key() + " is: " + row.get("value"));
 				String[] urlsAndFreqs = row.get("value").split(",");
@@ -44,17 +49,23 @@ public class Ranker {
 							try {
 								urlToPreviewIndex.put(url, Integer.valueOf(previewIndex));
 							} catch (Exception e) {
-								System.out.println("Number format = " + previewIndex);
+//								System.out.println("Number format = " + previewIndex);
 							}
 
 						}
 
 						if (!urlToWordCount.containsKey(url)) {
-							if (kvs.get("content", Hasher.hash(url), "wordCount") != null) {
-								String wordCount = new String(kvs.get("content", Hasher.hash(url), "wordCount"));
-								urlToWordCount.put(url, Integer.valueOf(wordCount));
-							} else {
-								urlToWordCount.put(url, 1000);
+							try {
+								if (kvs.get("content", Hasher.hash(url), "wordCount") != null) {
+									String wordCount = new String(kvs.get("content", Hasher.hash(url), "wordCount"));
+									urlToWordCount.put(url, Integer.valueOf(wordCount));
+								} else {
+									urlToWordCount.put(url, 1000);
+								}
+							} catch (NumberFormatException e) {
+
+							} catch (IOException e) {
+
 							}
 						}
 					}
@@ -176,7 +187,12 @@ public class Ranker {
 
 			// compute the final scores by multiplying cosine scores and page ranks
 			double finalScore = cosineScore * 1000;
-			Row row = kvs.getRow("pageranks", Hasher.hash(url));
+			Row row = null;
+			try {
+				row = kvs.getRow("pageranks", Hasher.hash(url));
+			} catch (IOException e) {
+
+			}
 
 			if (row != null && row.get(Hasher.hash(url) + "0") != null) {
 //				System.out.println("page rank for url " + Hasher.hash(url) + " is: " + row.get(Hasher.hash(url) + "0"));
@@ -241,14 +257,19 @@ public class Ranker {
 			String[] positions1 = termPositions.get(i);
 			String[] positions2 = termPositions.get(i + 1);
 			while (array[i] < positions1.length && array[i + 1] < positions2.length) {
-				if (Integer.valueOf(positions1[array[i]]) + 1 == Integer.valueOf(positions2[array[i + 1]])) {
-					// the URL contains the current pair of terms contiguously, so we keep checking
-					// the next pair
-					break;
-				} else if (Integer.valueOf(positions1[array[i]]) + 1 < Integer.valueOf(positions2[array[i + 1]])) {
-					array[i]++;
-				} else {
-					array[i + 1]++;
+				try {
+					if (Integer.valueOf(positions1[array[i]]) + 1 == Integer.valueOf(positions2[array[i + 1]])) {
+						// the URL contains the current pair of terms contiguously, so we keep checking
+						// the next pair
+						break;
+					} else if (Integer.valueOf(positions1[array[i]]) + 1 < Integer.valueOf(positions2[array[i + 1]])) {
+						array[i]++;
+					} else {
+						array[i + 1]++;
+					}
+				} catch (Exception e) {
+//					System.out.println("Integer.valueof Error");
+					return false;
 				}
 			}
 //			System.out.println("array for url " + url + " is: " + Arrays.toString(array));
