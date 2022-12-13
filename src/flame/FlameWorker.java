@@ -11,7 +11,6 @@ import kvs.*;
 import webserver.*;
 import java.util.*;
 import java.nio.*;
-import java.awt.datatransfer.SystemFlavorMap;
 import java.io.*;
 
 class FlameWorker extends Worker {

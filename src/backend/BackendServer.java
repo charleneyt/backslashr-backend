@@ -3,8 +3,7 @@ package backend;
 import static webserver.Server.*;
 
 import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import kvs.KVSClient;
 import tools.Hasher;
 //import org.json.simple.JSONArray;
@@ -86,6 +85,52 @@ public class BackendServer {
 			results.put("results", list);
 			return results;
 //			return "OK";
+		});
+		
+		// make it only supports single word search, and purely look at the position count?
+		get("/image-search", (req, res) -> {
+			// this header is needed to for CORS
+			res.header("Access-Control-Allow-Origin", "*");
+			String query = URLDecoder.decode(req.queryParams("query").toLowerCase(), "UTF-8");
+			System.out.println("Query is: " + query);
+			String[] searchTerms = query.split("\\s+");
+			JSONObject results = new JSONObject();
+			results.put("results", null);
+
+			if (kvs.existsRow("images_output", searchTerms[0])){
+				JSONArray list = new JSONArray();
+				String[] urls = new String(kvs.get("images_output", searchTerms[0], "value")).split(",");
+				Map<Integer, List<String>> counts = new TreeMap<>(Collections.reverseOrder());
+				Set<String> seenUrls = new HashSet<>();
+				for (String url : urls){
+					String[] urlSplit = url.split(":");
+					String[] positions = urlSplit[1].split(" ");
+					if (!seenUrls.contains(urlSplit[0])){
+						List<String> curr = counts.getOrDefault(urlSplit[0], new ArrayList<>());
+						curr.add(urlSplit[0]);
+						counts.put(positions.length, curr);
+						seenUrls.add(urlSplit[0]);
+					}
+				}
+				int needed = 10;
+				for (int count : counts.keySet()){
+					for (String url : counts.get(count)){
+						JSONObject data = new JSONObject();
+						String hashURL = Hasher.hash(url);
+						data.put("URL", url);
+						data.put("content", kvs.get("images", hashURL, "altText"));
+						list.add(data);
+						needed--;
+						if (needed == 0){
+							break;
+						}
+					}
+					
+				}
+				results.put("results", list);
+			}
+			
+			return results;
 		});
 	}
 }
