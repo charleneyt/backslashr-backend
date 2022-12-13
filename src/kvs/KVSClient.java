@@ -204,7 +204,8 @@ public class KVSClient implements KVS {
 		workers.clear();
 		for (int i = 0; i < numWorkers; i++) {
 			String[] pcs = pieces[1 + i].split(",");
-			pcs[1] = "34.195.136.155:8001";
+			// overwrite for local backend to connect to EC2 KVS
+//			pcs[1] = "34.195.136.155:8001";
 			workers.add(new WorkerEntry(pcs[1], pcs[0]));
 		}
 		Collections.sort(workers);
