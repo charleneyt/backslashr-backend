@@ -267,9 +267,6 @@ class FlameWorker extends Worker {
 			if (iter != null) {
 				while (iter.hasNext()) {
 					Row row = iter.next();
-					FileWriter fw1 = new FileWriter("flameworker_fromtable_log", true);
-					fw1.write(row.key() + "\n");
-					fw1.close();
 					if (row == null) {
 						break;
 					}
@@ -444,7 +441,9 @@ class FlameWorker extends Worker {
 			KVSClient kvs = new KVSClient(qParamsStrings[2]);
 
 			Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
+			String outputTable = qParamsStrings[1];
 			if (iter != null) {
+				int counter = 0;
 				while (iter.hasNext()) {
 					Row row = iter.next();
 					if (row == null) {
@@ -462,6 +461,11 @@ class FlameWorker extends Worker {
 								}
 							}
 						}
+					}
+					counter++;
+					if (counter % 100 == 0) {
+						System.out.println("Processed " + counter + " rows. Cleaning " + outputTable + "...");
+						kvs.clean(outputTable);
 					}
 				}
 			}
