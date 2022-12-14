@@ -101,7 +101,7 @@ class ImagePage extends React.Component {
                         {/* Shows the user what they've searched  */}
                         <FormInput style={{ fontSize: "30px", color: "#adadad", textAlign: "center" }}
                             type="text"
-                            placeholder="Search"
+                            placeholder={this.state.query}
                             onChange={this.handleInput}
                             onKeyPress={(event) => {
                                 const code = event.keyCode || event.which;

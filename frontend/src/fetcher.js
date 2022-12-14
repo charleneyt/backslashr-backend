@@ -1,8 +1,8 @@
 import config from './config.json'
 
 const getSearchResults = async (query) => {
-    console.log("Request is: ", `http://${config.server_host}:${config.server_port}/search?query=${query}`)
-    const results = fetch(`http://${config.server_host}:${config.server_port}/search?query=${query}`, {
+    console.log("Request is: ", `https://${config.server_host}:${config.server_port}/search?query=${query}`)
+    const results = fetch(`https://${config.server_host}:${config.server_port}/search?query=${query}`, {
         method: 'GET',
     })
         .then(resp => resp.json())
@@ -15,8 +15,8 @@ const getSearchResults = async (query) => {
 }
 
 const getImageResults = async (query) => {
-    console.log("Request is: ", `http://${config.server_host}:${config.server_port}/image-search?query=${query}`)
-    const results = fetch(`http://${config.server_host}:${config.server_port}/image-search?query=${query}`, {
+    console.log("Request is: ", `https://${config.server_host}:${config.server_port}/image-search?query=${query}`)
+    const results = fetch(`https://${config.server_host}:${config.server_port}/image-search?query=${query}`, {
         method: 'GET',
     })
         .then(resp => resp.json())
