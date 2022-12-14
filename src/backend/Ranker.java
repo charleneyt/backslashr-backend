@@ -208,7 +208,13 @@ public class Ranker {
 
 		ArrayList<String> urlList = new ArrayList<String>(urlToFrequencies.keySet());
 
-		int thread_count = Math.min(MAX_THREAD_COUNT, urlList.size());
+//		int thread_count = Math.min(MAX_THREAD_COUNT, urlList.size());
+		int thread_count = 1;
+		if (MAX_THREAD_COUNT < urlList.size()) {
+			thread_count = MAX_THREAD_COUNT;
+		} else if (urlList.size() > 0) {
+			thread_count = urlList.size();
+		}
 		int url_per_thread = Math.min(MAX_URL, urlList.size()) / thread_count;
 		int extra_url_thread_index = Math.min(MAX_URL, urlList.size()) % thread_count;
 

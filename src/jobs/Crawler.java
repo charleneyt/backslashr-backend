@@ -23,7 +23,7 @@ public class Crawler {
 					"nerdwallet.com", "investopedia.com", "espn.com", "cbssport.com", "nbcsports.com", "foxnews.com",
 					"abcnews.com", "nytimes.com", "steampowered.com", "w3schools.com", "upenn.edu", "usnews.com",
 					"quora.com", "reddit.com", "bing.com", "usa.gov", "kbb.com", "craiglist.com", "webmd.com",
-					"mayoclinic.org", "simplyrecipes.com", "allrecipes.com"));
+					"mayoclinic.org", "simplyrecipes.com", "allrecipes.com", "etsy.com"));
 	static boolean debugMode = false;
 
 	public static void run(FlameContext ctx, String[] args) throws Exception {
