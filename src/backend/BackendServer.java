@@ -25,6 +25,11 @@ public class BackendServer {
 
 		get("/test", (req, res) -> "hello!");
 
+		get("/", (req, res) -> {
+			res.redirect("https://backslashr.cis5550.net/");
+			return null;
+		});
+
 		get("/search", (req, res) -> {
 			// this header is needed to for CORS
 			res.header("Access-Control-Allow-Origin", "*");
