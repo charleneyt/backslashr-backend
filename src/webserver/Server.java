@@ -33,7 +33,6 @@ public class Server implements Runnable {
 	static Map<String, SessionImpl> sessions = new HashMap<>();
 	public static Map<String, HostRecord> hostTable = new HashMap<>();
 
-	// Increased the number of workers Cindy 12/02
 	public static int NUM_WORKERS = 25;
 	static String CRLF = "\r\n";
 	static String BOUNDARY = "A_FANCY_SEPARATOR_MADE_BY_CHARLENE_TAM";
@@ -83,7 +82,6 @@ public class Server implements Runnable {
 				// ssock = getServerSocket("src/cis5550/keystore.jks", "secret", securePort);
 				// EC implementation: use regular serversocket, then get SNI Inspector to
 				// connect
-//                // System.out.println(securePort);
 				ssock = new ServerSocket(securePort);
 			} else {
 				ssock = new ServerSocket(port);
@@ -335,7 +333,6 @@ public class Server implements Runnable {
 			} else {
 				br = new BufferedInputStream(sock.getInputStream());
 			}
-			// br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 			pw = new PrintWriter(sock.getOutputStream());
 			bw = new BufferedOutputStream(sock.getOutputStream());
 
@@ -402,23 +399,15 @@ public class Server implements Runnable {
 
 				// start process request when received double CRLF
 				requestString = sb.toString();
-//                FileWriter fw = new FileWriter("./server_log", true);
-//                fw.write("request string is: " + requestString);
-//                fw.flush();
-				// System.out.print("request string is: " + requestString);
 
-//				synchronized(queue) {
-					parseRequest();
-					if (r != null) {
-						useRouteAndSendResponse();
-						if (sock.isClosed())
-							break; // quit the read loop is connection is closed!
-					} else {
-						sendStaticResponse();
-					}					
-//				}
-
-				// System.out.println("\n");
+				parseRequest();
+				if (r != null) {
+					useRouteAndSendResponse();
+					if (sock.isClosed())
+						break; // quit the read loop is connection is closed!
+				} else {
+					sendStaticResponse();
+				}
 
 				// reset the sb and flags and restart the reading (from same socket)
 				sb = new StringBuilder();
@@ -470,7 +459,6 @@ public class Server implements Runnable {
 			// request;
 			if (headerInLines.length <= 1 || headerParts.length != 3) {
 				System.out.println("400 triggered, v1");
-//            	System.out.println("request string is: " + requestString);
 				statusCode = 400;
 				reasonPhrase = "400 Bad Request";
 				return;
@@ -682,13 +670,8 @@ public class Server implements Runnable {
 						String name = URLDecoder.decode(pairSplit[0], "UTF-8");
 						String value = URLDecoder.decode(pairSplit[1], "UTF-8");
 						// Ed post #180
-						// if (qparams.containsKey(name)){
-						// qparams.put(name, qparams.get(name) + ", " + value);
-						// } else {
 						qparams.put(name, value);
-						// }
 					} catch (Exception e) {
-						// System.out.println("Failed to parse query parameter, invalid input!");
 						e.printStackTrace();
 					}
 				}
@@ -817,16 +800,10 @@ public class Server implements Runnable {
 		 */
 		public void sendDynamicResponse(boolean calledFromWrite) throws IOException {
 			if (!response.headers.containsKey("Content-Type")) {
-				// response.type("text/plain");
-				// if (response.statusCode != 200) {
-					response.type("text/plain");
-				// } else {
-				// 	response.type("application/octet-stream");
-				// }
+				response.type("text/plain");
 			}
 
 			String messageHead = response.protocol + " " + response.statusCode + " " + response.reasonPhrase + CRLF;
-			// System.out.print(messageHead);
 			pw.write(messageHead);
 			for (Map.Entry<String, Set<String>> entry : response.headers.entrySet()) {
 				String key = entry.getKey();
@@ -835,11 +812,9 @@ public class Server implements Runnable {
 					continue;
 				}
 				for (String value : entry.getValue()) {
-					// System.out.print(key + ": " + value + CRLF);
 					pw.write(key + ": " + value + CRLF);
 				}
 			}
-			// System.out.print(CRLF);
 			pw.write(CRLF);
 			pw.flush();
 
@@ -927,7 +902,6 @@ public class Server implements Runnable {
 								+ range[1] + "/" + contentLength + CRLF + CRLF;
 						pw.write(partialHeader);
 						pw.flush();
-						// System.out.print(partialHeader);
 						sendPartialMessage(fileStream, range, contentLength, 0, false);
 					} else {
 						// for loop to write 206 with bw, with Content-Range "bytes range/contentLength"
@@ -957,22 +931,18 @@ public class Server implements Runnable {
 								+ "Content-Type: multipart/byteranges; boundary=" + BOUNDARY + CRLF + CRLF;
 						pw.write(partialHeader);
 						pw.flush();
-						// System.out.print(partialHeader);
 
 						for (Integer[] range : ranges) {
 							pw.write(BOUNDARY_DELIMITER + CRLF);
-							// System.out.print(BOUNDARY_DELIMITER + CRLF);
 							index = sendPartialMessage(fileStream, range, contentLength, index, true);
 						}
 						pw.write(BOUNDARY_DELIMITER + DELIMITER);
 						pw.flush();
-						// System.out.print(BOUNDARY_DELIMITER + DELIMITER);
 					}
 				} else {
 					// same header for GET or HEAD
 					String message = protocol + " " + reasonPhrase + CRLF + "Server: " + serverName + CRLF
 							+ "Content-Type: " + contentType + CRLF + "Content-Length: " + contentLength + CRLF + CRLF;
-					// System.out.print(message);
 					pw.write(message);
 					pw.flush();
 
@@ -981,7 +951,6 @@ public class Server implements Runnable {
 						int read = 0;
 						while ((read = fileStream.read()) != -1) {
 							bw.write(read);
-							// System.out.print((char) read);
 						}
 						bw.flush();
 					}
@@ -1081,7 +1050,6 @@ public class Server implements Runnable {
 			if (multi) {
 				String rangeHeader = "Content-Type: " + contentType + CRLF + "Content-Range: bytes " + range[0] + "-"
 						+ range[1] + "/" + contentLength + CRLF + CRLF;
-				// System.out.print(rangeHeader);
 				pw.write(rangeHeader);
 				pw.flush();
 			}
@@ -1095,7 +1063,6 @@ public class Server implements Runnable {
 			int read = 0;
 			while (index <= range[1] && (read = fileStream.read()) != -1) {
 				bw.write(read);
-				// System.out.print((char) read);
 				index++;
 			}
 			bw.flush();

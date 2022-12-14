@@ -12,13 +12,12 @@ public class SessionImpl implements Session {
 	Map<String, Object> pairs;
 	public boolean valid = true;
 
-	public SessionImpl(String sessionId){
+	public SessionImpl(String sessionId) {
 		id = sessionId;
 		creationTime = System.currentTimeMillis();
 		lastAccessedTime = creationTime;
 		pairs = new HashMap<>();
 	}
-
 
 	@Override
 	public String id() {
@@ -52,7 +51,7 @@ public class SessionImpl implements Session {
 
 	@Override
 	public Object attribute(String name) {
-		if (valid){
+		if (valid) {
 			return pairs.getOrDefault(name, null);
 		}
 		return null;

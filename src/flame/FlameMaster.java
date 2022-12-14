@@ -19,7 +19,6 @@ class FlameMaster extends Master {
 	public static void main(String args[]) {
 
 		// Check the command-line arguments
-
 		if (args.length != 2) {
 			System.err.println("Syntax: FlameMaster <port> <kvsMaster>");
 			System.exit(1);
@@ -37,7 +36,6 @@ class FlameMaster extends Master {
 		 * Set up a little info page that can be used to see the list of registered
 		 * workers
 		 */
-
 		get("/", (request, response) -> {
 			response.type("text/html");
 			return "<html><head><title>Flame Master</title></head><body><h3>Flame Master</h3>\n" + workerTable()
@@ -47,7 +45,6 @@ class FlameMaster extends Master {
 		/*
 		 * Set up the main route for job submissions. This is invoked from FlameSubmit.
 		 */
-
 		post("/submit", (request, response) -> {
 
 			// Extract the parameters from the query string. The 'class' parameter, which
@@ -55,7 +52,6 @@ class FlameMaster extends Master {
 			// we'll send a 400 Bad Request error if it isn't present. The 'arg1', 'arg2',
 			// ..., arguments contain command-line
 			// arguments for the job and are optional.
-
 			String className = request.queryParams("class");
 			if (className == null) {
 				response.status(400, "Bad request");
@@ -69,7 +65,6 @@ class FlameMaster extends Master {
 			// We begin by uploading the JAR to each of the workers. This should be done in
 			// parallel, so we'll use a separate
 			// thread for each upload.
-
 			Thread threads[] = new Thread[getWorkers().size()];
 			String results[] = new String[getWorkers().size()];
 			for (int i = 0; i < getWorkers().size(); i++) {
@@ -102,7 +97,6 @@ class FlameMaster extends Master {
 			// is submitted from a machine other than the master, the master won't have a
 			// local copy of the JAR file. We'll use
 			// a different file name each time.
-
 			int id = nextJobID++;
 			String jarName = "job-" + id + ".jar";
 			File jarFile = new File(jarName);
