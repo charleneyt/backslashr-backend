@@ -115,28 +115,44 @@ public class PageRank {
 
 			// EC 2 enhanced convergence: converge sooner if percentage is satisfied!
 			boolean converged = false;
-			String maxDiffStr = diffTable.fold("0.0", (s1, s2) -> {
-				double s1Double = Double.parseDouble(s1);
-				double s2Double = Double.parseDouble(s2);
-				if (s1Double < s2Double) {
-					return s2;
-				} else {
-					return s1;
+
+			if (inputThreshold) {
+				List<String> diffList = diffTable.collect();
+				int needed = (int) (diffList.size() * thres / 100 + 0.5);
+				for (String diff : diffList) {
+					if (Double.parseDouble(diff) <= convergence) {
+						needed--;
+					}
+					if (needed == 0) {
+						System.out.println("Checked with enhanced convergence!");
+						converged = true;
+						break;
+					}
 				}
-			});
-			System.out.println("Check max difference => " + maxDiffStr + " : " + convergence);
-			
-			if (Double.parseDouble(maxDiffStr) < convergence) {
-				System.out.println("Checked with regular convergence!");
-				break;
+			} else {
+				String maxDiffStr = diffTable.fold("0.0", (s1, s2) -> {
+					double s1Double = Double.parseDouble(s1);
+					double s2Double = Double.parseDouble(s2);
+					if (s1Double < s2Double) {
+						return s2;
+					} else {
+						return s1;
+					}
+				});
+				System.out.println("Check max difference => " + maxDiffStr + " : " + convergence);
+
+				if (Double.parseDouble(maxDiffStr) < convergence) {
+					System.out.println("Checked with regular convergence!");
+					break;
+				}
 			}
-			
+
 			if (converged) {
 				break;
 			}
 			System.out.println("Round " + count + ", not converged");
 		}
-		
+
 		System.out.println("Total iteration: " + count);
 
 		state = state.flatMapToPair(pair -> {
