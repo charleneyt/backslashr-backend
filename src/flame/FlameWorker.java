@@ -311,7 +311,7 @@ class FlameWorker extends Worker {
 		post("/rdd/consolidateFromTable", (req, res) -> {
 			String[] qParamsStrings = parseRequestQueryParams(req);
 			String inputTableName = qParamsStrings[0];
-			String outputTableName = inputTableName + "-output";
+			String outputTableName = "index";
 			String kvsMaster = qParamsStrings[2];
 			String startKey = qParamsStrings[3];
 			String toKeyExclusive = qParamsStrings[4];

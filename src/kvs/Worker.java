@@ -837,9 +837,11 @@ public class Worker extends generic.Worker {
 				BufferedOutputStream currStream = worker.streams.get(tableName);
 
 				InputStream input = new ByteArrayInputStream(req.bodyAsBytes());
-				FileWriter fw = new FileWriter("put_data_table_log", true);
-				fw.write(req.body());
-				fw.close();
+				if (worker.debugMode) {
+					FileWriter fw = new FileWriter("put_data_table_log", true);
+					fw.write(req.body());
+					fw.close();					
+				}
 				if (!worker.tablesWithOffset.containsKey(tableName)) {
 					worker.addTable(tableName);
 				}

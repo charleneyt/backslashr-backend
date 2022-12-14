@@ -16,10 +16,6 @@
   - java -cp bin flame.FlameWorker 9004 localhost:9000 
   - java -cp bin flame.FlameWorker 9005 localhost:9000 
 
-- Build jar file
-  - jar -cf indexer.jar bin/jobs/Indexer.class
-  - jar -cf consolidator.jar bin/jobs/Consolidator.class
-
 - Add blackList table which contains a list of website that we blackListed
   - jar -cf addTable.jar bin/jobs/AddTable.class
   - java -cp bin flame.FlameSubmit localhost:9000 addTable.jar jobs.AddTable blackList pattern
@@ -35,9 +31,9 @@
     - Step 1:
       1. jar -cf indexer.jar bin/jobs/Indexer.class
       2. java -cp bin flame.FlameSubmit localhost:9000 indexer.jar jobs.Indexer
-    - Step 2: After step 2 is done, you should get sorted_index_imm table under each worker folder, submit the second job:
+    - Step 2: After step 1 is done, you should get index_imm table under each worker folder, submit the second job:
       1. jar -cf consolidator.jar bin/jobs/Consolidator.class
-      2. java -cp bin flame.FlameSubmit localhost:9000 consolidator.jar jobs.Consolidator sorted_index_imm
+      2. java -cp bin flame.FlameSubmit localhost:9000 consolidator.jar jobs.Consolidator index_imm
 	- Pagerank
 	  - java -cp bin flame.FlameSubmit localhost:9000 pagerank.jar jobs.PageRank 0.01
 	  - java -cp bin flame.FlameSubmit localhost:9000 pagerank.jar jobs.PageRank 0.1 75 (enhanced convergence)
