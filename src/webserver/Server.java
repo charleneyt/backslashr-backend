@@ -818,11 +818,11 @@ public class Server implements Runnable {
 		public void sendDynamicResponse(boolean calledFromWrite) throws IOException {
 			if (!response.headers.containsKey("Content-Type")) {
 				// response.type("text/plain");
-				if (response.statusCode != 200) {
+				// if (response.statusCode != 200) {
 					response.type("text/plain");
-				} else {
-					response.type("application/octet-stream");
-				}
+				// } else {
+				// 	response.type("application/octet-stream");
+				// }
 			}
 
 			String messageHead = response.protocol + " " + response.statusCode + " " + response.reasonPhrase + CRLF;

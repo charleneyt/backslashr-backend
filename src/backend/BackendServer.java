@@ -20,8 +20,10 @@ public class BackendServer {
 		int myPort = Integer.valueOf(args[0]);
 		KVSClient kvs = new KVSClient(args[1]);
 
-		port(myPort);
+		securePort(myPort);
 		System.out.println("Backend listening on " + myPort + " ... ");
+
+		get("/test", (req, res) -> "hello!");
 
 		get("/search", (req, res) -> {
 			// this header is needed to for CORS
