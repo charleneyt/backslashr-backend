@@ -21,9 +21,10 @@
   - java -cp bin flame.FlameSubmit localhost:9000 addTable.jar jobs.AddTable blackList pattern
 
 - Crawler job
-  - (using a seed url)
+  - jar -cf crawler.jar bin/jobs/Crawler.class
+  - Using a seed url:
     - java -cp bin flame.FlameSubmit localhost:9000 crawler.jar jobs.Crawler http://simple.crawltest.cis5550.net/
-  - (using a table where we stopped before)
+  - Using a table where we stopped before:
     - java -cp bin flame.FlameSubmit localhost:9000 crawler.jar jobs.Crawler izdfw1668749294044
 
 - Analytics job
