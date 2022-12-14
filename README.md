@@ -36,6 +36,7 @@
       1. jar -cf consolidator.jar bin/jobs/Consolidator.class
       2. java -cp bin flame.FlameSubmit localhost:9000 consolidator.jar jobs.Consolidator index_imm
   2. Pagerank
+   	  - jar -cf pagerank.jar bin/jobs/PageRank.class
 	  - java -cp bin flame.FlameSubmit localhost:9000 pagerank.jar jobs.PageRank 0.01
 	  - java -cp bin flame.FlameSubmit localhost:9000 pagerank.jar jobs.PageRank 0.1 75 (enhanced convergence)
 
