@@ -1,6 +1,5 @@
 package backend;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,17 +25,16 @@ public class Ranker {
 		// and the corresponding value of each key is an innerMap, whose keys are
 		// URLs that contain the word, and the corresponding value of each URL is
 		// an array of indices at which the word appears in that URL
-		System.out.println("in ranker");
 		Map<String, Integer> urlToWordCount = new HashMap<>();
 		Map<String, Map<String, String[]>> outerMap = new HashMap<>();
 		for (String term : searchTerms) {
-			System.out.println("term is: " + term);
+//			System.out.println("Term is: " + term);
 			Map<String, String[]> innerMap = new HashMap<>();
 			Row row = null;
 			try {
 				row = kvs.getRow("index_final", term);
 			} catch (IOException e1) {
-				System.out.println("failed to get row for " + term);
+				System.out.println("Failed to get row for " + term);
 			}
 //			System.out.println("row is: " + row.key());
 			if (row != null) {
@@ -98,7 +96,7 @@ public class Ranker {
 					}
 				}
 			}
-			
+
 			outerMap.put(term, innerMap);
 		}
 
@@ -207,25 +205,32 @@ public class Ranker {
 		// step 5 - compute TF-IDF cosine scores for each URL that contains at least
 		// one search term, and compute the final scores by combining cosine scores
 		// with page ranks
-		
+
 		ArrayList<String> urlList = new ArrayList<String>(urlToFrequencies.keySet());
-		
-		int thread_count = Math.min(MAX_THREAD_COUNT, urlList.size());
+
+//		int thread_count = Math.min(MAX_THREAD_COUNT, urlList.size());
+		int thread_count = 1;
+		if (MAX_THREAD_COUNT < urlList.size()) {
+			thread_count = MAX_THREAD_COUNT;
+		} else if (urlList.size() > 0) {
+			thread_count = urlList.size();
+		}
 		int url_per_thread = Math.min(MAX_URL, urlList.size()) / thread_count;
 		int extra_url_thread_index = Math.min(MAX_URL, urlList.size()) % thread_count;
-		
+
 		Map<String, Double> finalScores = new TreeMap<>(Collections.reverseOrder());
 		Thread threads[] = new Thread[thread_count];
 //	    for (Map.Entry<String, int[]> entry : urlToFrequencies.entrySet()) {
-	    for (int i = 0; i < thread_count; i++) {
-	    	final int k = i;
-	    	final int extar_url_count = i < extra_url_thread_index ? 1 : 0;
-	    	final int total_extar_url_count = i < extra_url_thread_index ? i : extra_url_thread_index;
-	        threads[i] = new Thread() {
-	            public void run() {
-	            	for (int j = total_extar_url_count+k*url_per_thread; j < extar_url_count + Math.min(total_extar_url_count+(k+1)*url_per_thread, urlList.size()); j++) { 
-		            	String url = urlList.get(j);
-		    			int[] freqs = urlToFrequencies.get(url);
+		for (int i = 0; i < thread_count; i++) {
+			final int k = i;
+			final int extar_url_count = i < extra_url_thread_index ? 1 : 0;
+			final int total_extar_url_count = i < extra_url_thread_index ? i : extra_url_thread_index;
+			threads[i] = new Thread() {
+				public void run() {
+					for (int j = total_extar_url_count + k * url_per_thread; j < extar_url_count
+							+ Math.min(total_extar_url_count + (k + 1) * url_per_thread, urlList.size()); j++) {
+						String url = urlList.get(j);
+						int[] freqs = urlToFrequencies.get(url);
 //		    			System.out.println("freqs for url " + url );
 		    			double cosineScore = 0.0;
 		    			for (int i = 0; i < searchTerms.length; i++) {
@@ -241,37 +246,38 @@ public class Ranker {
 						try {
 							row = kvs.getRow("pageranks", Hasher.hash(url));
 							if (row != null && row.get(Hasher.hash(url) + "0") != null) {
-	//		    				System.out.println("page rank for url " + Hasher.hash(url) + " is: " + row.get(Hasher.hash(url) + "0"));
-			    				double pageRank = Double.valueOf(row.get(Hasher.hash(url) + "0"));
-	//		    					System.out.println("page rank for url " + url + " is: " + pageRank);
-			    				finalScore += pageRank;
-			    			} else {
-			    				for (String hub : Crawler.authorityHubs) {
-			    					if (url.contains(hub)) {
-			    						finalScore += 1;
-			    					}
-			    				}
-			    			}
-							
+								// System.out.println("page rank for url " + Hasher.hash(url) + " is: " +
+								// row.get(Hasher.hash(url) + "0"));
+								double pageRank = Double.valueOf(row.get(Hasher.hash(url) + "0"));
+								// System.out.println("page rank for url " + url + " is: " + pageRank);
+								finalScore += pageRank;
+							} else {
+								for (String hub : Crawler.authorityHubs) {
+									if (url.contains(hub)) {
+										finalScore += 1;
+									}
+								}
+							}
+
 							if (urlsWithExactMatch.contains(url)) {
-			    				finalScore += 1000;
-	//		    					System.out.println("bumped score for url " + url + " is: " + finalScore);
-			    			} else if (urlsWithNearExactMatch.contains(url)) {
-			    				finalScore += 600;
-	//		    					System.out.println("bumped score for url " + url + " is: " + finalScore);
-			    			}
-	//		    				System.out.println("final score for url " + url + " is: " + finalScore);
-			    			finalScores.put(url, finalScore);
+								finalScore += 1000;
+								// System.out.println("bumped score for url " + url + " is: " + finalScore);
+							} else if (urlsWithNearExactMatch.contains(url)) {
+								finalScore += 600;
+								// System.out.println("bumped score for url " + url + " is: " + finalScore);
+							}
+							// System.out.println("final score for url " + url + " is: " + finalScore);
+							finalScores.put(url, finalScore);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
-	            	}
-	            }
-	        };
-	        
-	        threads[i].start();
-	    }
-	    
+					}
+				}
+			};
+
+			threads[i].start();
+		}
+
 		for (int i = 0; i < threads.length; i++) {
 			try {
 				threads[i].join();
@@ -313,7 +319,8 @@ public class Ranker {
 			if (outerMap.containsKey(term) && outerMap.get(term).containsKey(url)) {
 				String[] positions = outerMap.get(term).get(url);
 				termPositions.add(positions);
-	//			System.out.println("positions for term " + term + " is: " + Arrays.toString(positions));				
+				// System.out.println("positions for term " + term + " is: " +
+				// Arrays.toString(positions));
 			}
 		}
 
