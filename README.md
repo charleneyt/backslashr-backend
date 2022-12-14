@@ -62,6 +62,7 @@
     - npm i shards-react
     - npm i react-dom
     - npm i react-router-dom
+  - The config file in the package is using the localhost. If you want to use it on EC2, rename the config-EC2 to config
   - npm start
 
 - Build jar file
