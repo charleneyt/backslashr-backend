@@ -1,0 +1,68 @@
+.App {
+  text-align: center;
+  background-color: #212529;
+  min-height: 100vh;
+}
+
+.Center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.Homepage-header {
+  align-items: center;
+  justify-content: center;
+  font-size: calc(50px + 2vmin);
+  color: white;
+  padding: 100px 50px 30px;
+  font-family: "Lucida Console", "Courier New", monospace;
+}
+
+.Searchresult-header {
+  align-items: center;
+  justify-content: center;
+  font-size: calc(20px + 2vmin);
+  color: white;
+  padding: 30px 50px 30px;
+  font-family: "Lucida Console", "Courier New", monospace;
+}
+
+.SearchNumber {
+  font-size: calc(5px + 1vmin);
+  padding: 0px 25px 0px;
+  color: white;
+  font-family: "Lucida Console", "Courier New", monospace;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.Pagination {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.CardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  row-gap: 1em;
+  gap: 2rem;
+}
+
+.ListGrid {
+  display: center;
+  background-color: #212529;
+  padding: 2vh;
+  text-align: left;
+}
+
+.SearchGrid {
+  display: inline-block;
+  padding: 1rem 1rem;
+  vertical-align: middle;
+}
