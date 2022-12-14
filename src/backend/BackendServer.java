@@ -32,7 +32,6 @@ public class BackendServer {
 			JSONObject results = new JSONObject();
 			results.put("results", null);
 			List<String> outputURLs = Ranker.rank(kvs, searchTerms);
-			System.out.println("Total results = " + outputURLs.size());
 			JSONArray list = new JSONArray();
 			for (String url : outputURLs) {
 				try {
@@ -64,6 +63,7 @@ public class BackendServer {
 				}
 			}
 			results.put("results", list);
+			System.out.println("Returning " + outputURLs.size() + " results ...");
 			return results;
 //			return "OK";
 		});
