@@ -1,3 +1,22 @@
+### Project demo
+Link to the demo video: https://youtu.be/E5phfMkpwVI
+
+### Screenshots of the final product
+- Home page
+<img src="report_demo_screenshots/Screenshots/HomePage.png" alt="info" height="200">
+
+- Search of a single word
+<img src="report_demo_screenshots/Screenshots/food.png" alt="info" height="200">
+
+- Search of a phrase
+<img src="report_demo_screenshots/Screenshots/credit-card.png" alt="info" height="200">
+
+- Shopping search
+<img src="report_demo_screenshots/Screenshots/upenn-tshirt.png" alt="info" height="200">
+
+- Image search
+<img src="report_demo_screenshots/Screenshots/soup.png" alt="info" height="200">
+
 ### Instruction to run
 
 - Run an instance of kvs.Master and flame.FlameMaster along with 5 kvs.Worker and 5 flame.FlameWorker
