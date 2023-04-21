@@ -51,7 +51,6 @@ class FlameWorker extends Worker {
 			}
 			br.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -83,7 +82,6 @@ class FlameWorker extends Worker {
 						if (it != null) {
 							int seq = 0;
 							for (String s : it) {
-								// System.out.println("put val is: " + s);
 								kvs.put(qParamsStrings[1], Hasher.hash(row.key() + String.valueOf(seq++)),
 										FlameWorker.VALUE_STRING, s.getBytes());
 							}
@@ -300,16 +298,9 @@ class FlameWorker extends Worker {
 						counter++;
 						kvs.put(qParamsStrings[1], row.key(), FlameWorker.VALUE_STRING, s.getBytes());
 					}
-					// clean garbage and print heart beat for every 100 lines
+					// print heart beat for every 100 rows processed
 					if (counter % 100 == 0) {
 						System.out.println("Indexed " + counter + " rows");
-//						try {
-//							kvs.clean("index_imm");
-//							System.out.println("collecting garbage...");
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
 					}
 				}
 			}
@@ -320,7 +311,7 @@ class FlameWorker extends Worker {
 		post("/rdd/consolidateFromTable", (req, res) -> {
 			String[] qParamsStrings = parseRequestQueryParams(req);
 			String inputTableName = qParamsStrings[0];
-			String outputTableName = inputTableName+"-output";
+			String outputTableName = "index";
 			String kvsMaster = qParamsStrings[2];
 			String startKey = qParamsStrings[3];
 			String toKeyExclusive = qParamsStrings[4];
@@ -341,7 +332,7 @@ class FlameWorker extends Worker {
 			while (iter.hasNext()) {
 				if (counter % 5000 == 0) {
 					System.out.println(counter + "processed");
-					
+
 				}
 				counter++;
 				Row row = iter.next();
@@ -368,7 +359,7 @@ class FlameWorker extends Worker {
 			Row row = new Row(lastRowKey);
 			row.put("value", sb.toString());
 			kvs.putRow(outputTableName, row);
-			
+
 			return FlameWorker.OK_STRING;
 		});
 
@@ -532,20 +523,6 @@ class FlameWorker extends Worker {
 		post("/rdd/fold", (req, res) -> {
 			String[] qParamsStrings = parseRequestQueryParams(req);
 			TwoStringsToString lambda = (TwoStringsToString) Serializer.byteArrayToObject(req.bodyAsBytes(), myJAR);
-//
-//			KVSClient kvs = new KVSClient(qParamsStrings[2]);
-//			String zeroElement = req.queryParams().contains("zeroElement") ? req.queryParams("zeroElement") : "";
-//			Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
-//			if (iter != null) {
-//				while (iter.hasNext()) {
-//					String sum = zeroElement;
-//					Row row = iter.next();
-//					for (String col : row.columns()) {
-//						sum = lambda.op(sum, row.get(col));
-//						kvs.put(qParamsStrings[1], row.key(), "Accumulator", sum.getBytes());
-//					}
-//				}
-//			}
 
 			KVSClient kvs = new KVSClient(qParamsStrings[2]);
 			String zeroElement = req.queryParams().contains("zeroElement") ? req.queryParams("zeroElement") : "";

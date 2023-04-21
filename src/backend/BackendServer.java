@@ -66,17 +66,13 @@ public class BackendServer {
 					data.put("content", preview);
 					list.add(data);
 				} catch (Exception e) {
-//					System.out.println("Exception: " + e);
+					e.printStackTrace();
 				}
 			}
 			results.put("results", list);
-			System.out.println("Returning " + outputURLs.size() + " results ...");
 			return results;
-//			return "OK";
 		});
 
-		// make it only supports single word search, and purely look at the position
-		// count?
 		get("/image-search", (req, res) -> {
 			// this header is needed to for CORS
 			res.header("Access-Control-Allow-Origin", "*");
@@ -119,7 +115,7 @@ public class BackendServer {
 						try {
 							altText = new String(kvs.get("images", hashURL, "altText"));
 						} catch (Exception e) {
-//							System.out.println("Sorry no alt text available");
+							e.printStackTrace();
 						}
 
 						data.put("URL", url);

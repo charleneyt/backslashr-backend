@@ -13,14 +13,10 @@ public class AddTable {
 			System.out.println("Please specify name of the table and column of the table you want to add.");
 		}
 		
-		if (FlameContext.getKVS() == null) {
-			FlameContext.setKVS("localhost:8000");
-		}
-		
 		KVSClient kvs = FlameContext.getKVS();
 		String tableName = args[0];
 		String colName = args[1];
-		
+
 		List<String> values = new ArrayList<>();
 		values.add("*twitter*");
 		values.add("*youtube*");
@@ -84,11 +80,11 @@ public class AddTable {
 		values.add("*sports.com*");
 		values.add("*/author/*");
 		values.add("*iberdrola.com*");
-		
+
 		for (String value : values) {
 			kvs.put(tableName, Hasher.hash(value), colName, value.getBytes());
 		}
-		
+
 		System.out.println("Saved table " + tableName);
 	}
 }

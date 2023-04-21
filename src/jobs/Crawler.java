@@ -62,26 +62,19 @@ public class Crawler {
 
 			String seedURL = parsedSeedUrl[0] + "://" + parsedSeedUrl[1] + ":" + parsedSeedUrl[2] + parsedSeedUrl[3];
 
-			// for (String something : normalizeUrl(findUrl("<A HREF=#abc></A> <a ref=lala
-			// hRef=\"blah.html#test\"></a><a HREF=\'../blubb/123.html\'> \n<a
-			// href=/one/two.html></a><a></a><h1></h1><a
-			// href=http://elsewhere.com/some.html></a><a href=/SL7sCi.html>felt</a> <a
-			// href=https://foo.com/bar/xyz.html"), "https://foo.com:8000/bar/xyz.html")){
-			// System.out.println(something);
-			// }
-
 			// if everything's OK, create an initial FlameRDD (perhaps called urlQueue) by
 			// parallelizing the seed URL
 			urlQueue = ctx.parallelize(Arrays.asList(seedURL));
-			// FlameRDD urlQueue = ctx.parallelize(Arrays.asList(args[0]));
 		} else {
 			urlQueue = ctx.fromTable(args[0], r -> r.get("value"));
 		}
 
-		FileWriter fw3 = new FileWriter("./crawler_log_outside_lambda", true);
-		fw3.write("Starting a round, time at: " + System.currentTimeMillis() + "\n");
-		fw3.write("Starting table name: " + urlQueue.getTableName() + "\n");
-		fw3.close();
+		if (debugMode) {
+			FileWriter fw3 = new FileWriter("./crawler_log_outside_lambda", true);
+			fw3.write("Starting a round, time at: " + System.currentTimeMillis() + "\n");
+			fw3.write("Starting table name: " + urlQueue.getTableName() + "\n");
+			fw3.close();
+		}
 
 		// and then set up a while loop that runs until urlQueue.count() is zero
 		while (urlQueue.count() > 0) {
@@ -107,7 +100,6 @@ public class Crawler {
 					FlameContext.setKVS("localhost:8000");
 				}
 				KVSClient kvs = FlameContext.getKVS();
-				// KVSClient kvs = new KVSClient("localhost:8000");
 
 				// process blacklist if given argument is not null
 				if (!parsedBlackList && args.length == 2) {
@@ -159,7 +151,6 @@ public class Crawler {
 
 					int robotsCode = con.getResponseCode();
 
-//          Response r = HTTP.doRequest("GET", robotsUrl, null);
 					kvs.put("hosts", hostHash, "robotsReq", String.valueOf(robotsCode).getBytes());
 					if (robotsCode == 200) {
 						byte[] robotsResponse = con.getInputStream().readAllBytes();
@@ -205,7 +196,6 @@ public class Crawler {
 					con.setRequestProperty("User-Agent", "cis5550-crawler");
 					con.setInstanceFollowRedirects(false); // must set redirects to false!
 					con.setConnectTimeout(5000);
-					// Update where to put timeout Cindy 12/02
 					try {
 						con.connect();
 					} catch (Exception e) {
@@ -219,13 +209,10 @@ public class Crawler {
 
 					if (url != null) {
 						kvs.put("crawl", urlHash, "url", url.getBytes());
-						// tempRow.put("url", url.getBytes());
 					}
 
 					if (code != 200) {
 						kvs.put("crawl", urlHash, "responseCode", String.valueOf(code));
-						// tempRow.put("responseCode", String.valueOf(code));
-
 						switch (code) {
 						case 301:
 						case 302:
@@ -242,15 +229,8 @@ public class Crawler {
 
 								if (redirect != null && redirect.length() != 0) {
 									kvs.put("crawl", urlHash, "redirectURL", redirect);
-									// tempRow.put("redirectURL", redirect);
-									// if (!kvs.existsRow("crawl", urlHash)) {
-									// kvs.putRow("crawl", tempRow);
-									// }
 									return Arrays.asList(redirect);
 								} else {
-									// if (!kvs.existsRow("crawl", urlHash)) {
-									// kvs.putRow("crawl", tempRow);
-									// }
 									return ret;
 								}
 							}
@@ -260,16 +240,10 @@ public class Crawler {
 
 					if (type != null) {
 						kvs.put("crawl", urlHash, "contentType", type);
-						// tempRow.put("contentType", type.getBytes());
 					}
 					if (length != -1) {
 						kvs.put("crawl", urlHash, "length", String.valueOf(length));
-						// tempRow.put("length", String.valueOf(length).getBytes());
 					}
-					// if (!kvs.existsRow("crawl", urlHash)) {
-					// kvs.putRow("crawl", tempRow);
-					// }
-
 					con.disconnect();
 
 					// only issue GET if the HEAD response is 200 and type is text/html
@@ -299,7 +273,6 @@ public class Crawler {
 						con.setRequestProperty("User-Agent", "cis5550-crawler");
 						con.setDoInput(true);
 						con.setConnectTimeout(5000);
-						// Update where to put timeout Cindy 12/02
 						try {
 							con.connect();
 						} catch (Exception e) {
@@ -307,7 +280,6 @@ public class Crawler {
 							return Arrays.asList(new String[] {});
 						}
 						code = con.getResponseCode();
-						// tempRow.put("responseCode", String.valueOf(code).getBytes());
 						kvs.put("crawl", urlHash, "responseCode", String.valueOf(code));
 
 						// increment the crawler count by the root domain
@@ -382,18 +354,17 @@ public class Crawler {
 				}
 				return ret;
 			});
-			// logging crawling round info
+
 			System.out.println("Finished a round");
 			System.out.println("New table name: " + urlQueue.getTableName());
 			System.out.println("New table count: " + urlQueue.count());
-
-			FileWriter fw2 = new FileWriter("./crawler_log_outside_lambda", true);
-			fw2.write("Finished a round, time at: " + System.currentTimeMillis() + "\n");
-			fw2.write("New table name: " + urlQueue.getTableName() + "\n");
-			fw2.write("New table count: " + urlQueue.count() + "\n");
-			fw2.close();
-
-//			Thread.sleep(1000);
+			if (debugMode) {
+				FileWriter fw2 = new FileWriter("./crawler_log_outside_lambda", true);
+				fw2.write("Finished a round, time at: " + System.currentTimeMillis() + "\n");
+				fw2.write("New table name: " + urlQueue.getTableName() + "\n");
+				fw2.write("New table count: " + urlQueue.count() + "\n");
+				fw2.close();
+			}
 		}
 
 		ctx.output("OK");
@@ -496,15 +467,6 @@ public class Crawler {
 			}
 		}
 
-		// Temporary exclude Cindy 12/02
-//		for (String url : seen.keySet()) {
-//			String key = Hasher.hash(url);
-//			if (!kvs.existsRow("anchorEC", key)) {
-//				kvs.put("anchorEC", key, "url", url.getBytes());
-//			}
-//			kvs.put("anchorEC", key, "anchor-" + originalUrl, seen.get(url).getBytes());
-//		}
-
 		// save the outdegrees of current url to outdegrees table (value is comma
 		// separated, to be used in pageranks)
 		sb.setLength(0);
@@ -536,7 +498,6 @@ public class Crawler {
 							} else if (crawlCount > 200) {
 								continue;
 							}
-							// else Arrays.asList(new String[] {});
 						}
 						// check if already crawled, if so, don't add to queue
 						urlToVisit.add(url);
@@ -624,7 +585,6 @@ public class Crawler {
 		else if (url.contains("//")) {
 			if (url.contains("?")) {
 				String[] splitURL = url.split("\\?");
-				// Lily 12/5/22
 				if (originalUrl != null && originalUrl.startsWith("http://")) {
 					sb.append(originalUrl.substring(0, 5));
 

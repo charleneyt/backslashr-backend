@@ -10,7 +10,6 @@ const ResultCard = ({ item }) => {
     let result = item.split("&&");
     let url = result[0]
     let content = result[1]
-    // console.log(url, " ", content)
     return (
         < body >
             <div className='ListGrid'>

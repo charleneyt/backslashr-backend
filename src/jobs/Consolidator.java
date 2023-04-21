@@ -9,7 +9,7 @@ import flame.FlameRDD;
 
 public class Consolidator {
 	public static void run(FlameContext ctx, String[] args) throws Exception {
-		System.out.println("Executing consolidator ...updated as of 12/9 at " + new Date());
+		System.out.println("Executing consolidator ... at" + new Date());
 		long startGetTime = System.currentTimeMillis();
 		
 		FlameRDD transform = ctx.consolidateFromTable(args[0], (r) -> {
@@ -17,7 +17,7 @@ public class Consolidator {
 		});
 		
 		long endGetTime = System.currentTimeMillis();
-		System.out.println("Finished reading from content table! Took " + (endGetTime - startGetTime) + " ms.");
+		System.out.println("Finished consolidating the table! Took " + (endGetTime - startGetTime) + " ms.");
 	}
 		
 }

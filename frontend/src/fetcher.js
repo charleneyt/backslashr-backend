@@ -7,7 +7,6 @@ const getSearchResults = async (query) => {
     })
         .then(resp => resp.json())
         .then(respJson => {
-            // console.log("From getSearchResults: ", respJson)
             return respJson["results"]
         })
 
@@ -21,7 +20,6 @@ const getImageResults = async (query) => {
     })
         .then(resp => resp.json())
         .then(respJson => {
-            // console.log("From getImageResults: ", respJson)
             return respJson["results"]
         })
 

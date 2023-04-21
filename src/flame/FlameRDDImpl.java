@@ -39,8 +39,6 @@ public class FlameRDDImpl implements FlameRDD {
 	public List<String> collect() throws Exception {
 		List<String> ret = new ArrayList<>();
 		Iterator<Row> iter = kvs.scan(tableName, null, null);
-		// int count = kvs.count(tableName);
-		// System.out.println(count);
 		while (iter.hasNext()) {
 			Row row = iter.next();
 			if (row == null) {
@@ -143,62 +141,16 @@ public class FlameRDDImpl implements FlameRDD {
 		String outputTable = context.invokeOperation(tableName, "/rdd/fold", Serializer.objectToByteArray(lambda),
 				zeroElement, null);
 
-//		Iterator<Row> rows = FlameContext.getKVS().scan(outputTable, null, null);
-//		System.out.println("TABLE NAME = " + outputTable);
-//		String sum = zeroElement;
-//		while (rows.hasNext()) {
-//			Row row = rows.next();
-//			String accumulator = row.get("Accumulator");
-//			sum = lambda.op(sum, accumulator);
-//			System.out.println("ROW = " + row + " SUM = " + sum);
-//		}
-//		return sum;
-
 		String accumulator = null;
 
 		for (Partition par : latestAssignment) {
 			String distinguisher = par.fromKey != null ? par.fromKey : "null";
 			distinguisher += par.toKeyExclusive != null ? par.toKeyExclusive : "null";
-//			int count = 0;
-//			while (!kvs.existsRow(outputTable, distinguisher)) {
-//				if (count == 0) {
-//					System.out.println("waiting on distinguisher " + distinguisher);
-//				}
-//				count++;
-//			}
 			accumulator = lambda.op(accumulator == null ? zeroElement : accumulator,
 					new String(kvs.get(outputTable, distinguisher, "value")));
 		}
 
 		return accumulator == null ? zeroElement : accumulator;
-
-//		Iterator<Row> iter = kvs.scan(qParamsStrings[0], qParamsStrings[3], qParamsStrings[4]);
-//		if (iter != null) {
-//			while (iter.hasNext()) {
-//				Row row = iter.next();
-//				if (row == null) {
-//					break;
-//				}
-//				if (row.columns().contains(FlameWorker.VALUE_STRING)) {
-//					String s = row.get(FlameWorker.VALUE_STRING);
-//					if (s != null) {
-//						accumulator = lambda.op(accumulator == null ? zeroElement : accumulator, s);
-//					}
-//				}
-//			}
-//		}
-
-//		Row row;
-//
-//		if (kvs.existsRow(outputTable, "htotal") && (row = kvs.getRow(outputTable, "htotal")) != null) {
-//			String accumulator = null;
-//			for (String colName : row.columns()) {
-//				accumulator = lambda.op(accumulator == null ? zeroElement : accumulator, row.get(colName));
-//			}
-//			return accumulator == null ? zeroElement : accumulator;
-//		} else {
-//			return zeroElement;
-//		}
 	}
 
 	@Override
